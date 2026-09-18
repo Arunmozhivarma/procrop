@@ -1,15 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, Panel } from "@/components/procrop/ui";
 import { DataRow, RangeBar, RiskBadge, ScoreRing } from "@/components/procrop/ui";
-import { alerts, fields, formatDateTime, platformScores, recommendations, riskFromScore } from "@/lib/procrop-data";
+import {
+  alerts,
+  fields,
+  formatDateTime,
+  platformScores,
+  recommendations,
+  riskFromScore,
+} from "@/lib/procrop-data";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — ProCrop" },
-      { name: "description", content: "Farm-wide health score, live risk signals and the actions that matter today." },
+      {
+        name: "description",
+        content: "Farm-wide health score, live risk signals and the actions that matter today.",
+      },
       { property: "og:title", content: "Dashboard — ProCrop" },
-      { property: "og:description", content: "Farm-wide health score, live risk signals and the actions that matter today." },
+      {
+        property: "og:description",
+        content: "Farm-wide health score, live risk signals and the actions that matter today.",
+      },
     ],
   }),
   component: DashboardPage,
@@ -18,11 +31,19 @@ export const Route = createFileRoute("/_app/dashboard")({
 function DashboardPage() {
   return (
     <div className="px-5 py-8 md:px-8">
-      <PageHeader eyebrow="Monitor" title="Dashboard" description="Farm-wide health score, live risk signals and the actions that matter today." />
+      <PageHeader
+        eyebrow="Monitor"
+        title="Dashboard"
+        description="Farm-wide health score, live risk signals and the actions that matter today."
+      />
       <div className="grid gap-4 lg:grid-cols-3">
         <Panel title="Platform health" icon="readiness_score">
           <div className="flex items-center gap-6">
-            <ScoreRing value={platformScores.overall} level={riskFromScore(platformScores.overall)} label="Health" />
+            <ScoreRing
+              value={platformScores.overall}
+              level={riskFromScore(platformScores.overall)}
+              label="Health"
+            />
             <div className="space-y-2 text-sm">
               <DataRow label="Soil" value={platformScores.soil} />
               <DataRow label="Environment" value={platformScores.environment} />
@@ -41,7 +62,9 @@ function DashboardPage() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {f.crop} · {f.growthStage} · {f.areaHa} ha
                 </p>
-                <div className="mt-3"><RangeBar value={f.healthScore} range={[0, 100]} ideal={[70, 100]} /></div>
+                <div className="mt-3">
+                  <RangeBar value={f.healthScore} range={[0, 100]} ideal={[70, 100]} />
+                </div>
               </div>
             ))}
           </div>

@@ -7,9 +7,15 @@ export const Route = createFileRoute("/_app/alerts")({
   head: () => ({
     meta: [
       { title: "Alerts — ProCrop" },
-      { name: "description", content: "Severity-ranked notifications across soil, environment, disease and devices." },
+      {
+        name: "description",
+        content: "Severity-ranked notifications across soil, environment, disease and devices.",
+      },
       { property: "og:title", content: "Alerts — ProCrop" },
-      { property: "og:description", content: "Severity-ranked notifications across soil, environment, disease and devices." },
+      {
+        property: "og:description",
+        content: "Severity-ranked notifications across soil, environment, disease and devices.",
+      },
     ],
   }),
   component: AlertsPage,
@@ -18,10 +24,19 @@ export const Route = createFileRoute("/_app/alerts")({
 function AlertsPage() {
   return (
     <div className="px-5 py-8 md:px-8">
-      <PageHeader eyebrow="Act" title="Alerts" description="Severity-ranked notifications across soil, environment, disease and devices." />
+      <PageHeader
+        eyebrow="Act"
+        title="Alerts"
+        description="Severity-ranked notifications across soil, environment, disease and devices."
+      />
       <div className="space-y-3">
         {alerts.map((a) => (
-          <Panel key={a.id} title={a.title} subtitle={formatDateTime(a.createdAt)} icon="notifications">
+          <Panel
+            key={a.id}
+            title={a.title}
+            subtitle={formatDateTime(a.createdAt)}
+            icon="notifications"
+          >
             <p className="text-sm text-foreground/70">{a.body}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <RiskBadge level={a.severity} />

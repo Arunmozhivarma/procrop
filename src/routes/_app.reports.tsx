@@ -9,7 +9,10 @@ export const Route = createFileRoute("/_app/reports")({
       { title: "Reports — ProCrop" },
       { name: "description", content: "Exportable season summaries for each farm and field." },
       { property: "og:title", content: "Reports — ProCrop" },
-      { property: "og:description", content: "Exportable season summaries for each farm and field." },
+      {
+        property: "og:description",
+        content: "Exportable season summaries for each farm and field.",
+      },
     ],
   }),
   component: ReportsPage,
@@ -18,11 +21,20 @@ export const Route = createFileRoute("/_app/reports")({
 function ReportsPage() {
   return (
     <div className="px-5 py-8 md:px-8">
-      <PageHeader eyebrow="Act" title="Reports" description="Exportable season summaries for each farm and field." />
+      <PageHeader
+        eyebrow="Act"
+        title="Reports"
+        description="Exportable season summaries for each farm and field."
+      />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {farms.flatMap((farm) =>
           fieldsOfFarm(farm.id).map((f) => (
-            <Panel key={f.id} title={`${f.name} report`} subtitle={`${farm.name} · ${f.crop}`} icon="description">
+            <Panel
+              key={f.id}
+              title={`${f.name} report`}
+              subtitle={`${farm.name} · ${f.crop}`}
+              icon="description"
+            >
               <div className="space-y-2 text-sm">
                 <DataRow label="Health score" value={f.healthScore} />
                 <DataRow label="Soil score" value={f.soilScore} />

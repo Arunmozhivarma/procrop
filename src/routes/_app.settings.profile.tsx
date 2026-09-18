@@ -7,9 +7,15 @@ export const Route = createFileRoute("/_app/settings/profile")({
   head: () => ({
     meta: [
       { title: "Settings — ProCrop" },
-      { name: "description", content: "Profile, farm defaults, alert thresholds and notification channels." },
+      {
+        name: "description",
+        content: "Profile, farm defaults, alert thresholds and notification channels.",
+      },
       { property: "og:title", content: "Settings — ProCrop" },
-      { property: "og:description", content: "Profile, farm defaults, alert thresholds and notification channels." },
+      {
+        property: "og:description",
+        content: "Profile, farm defaults, alert thresholds and notification channels.",
+      },
     ],
   }),
   component: SettingsProfilePage,
@@ -18,7 +24,11 @@ export const Route = createFileRoute("/_app/settings/profile")({
 function SettingsProfilePage() {
   return (
     <div className="px-5 py-8 md:px-8">
-      <PageHeader eyebrow="Manage" title="Settings" description="Profile, farm defaults, alert thresholds and notification channels." />
+      <PageHeader
+        eyebrow="Manage"
+        title="Settings"
+        description="Profile, farm defaults, alert thresholds and notification channels."
+      />
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Profile" icon="person">
           <div className="space-y-2 text-sm">

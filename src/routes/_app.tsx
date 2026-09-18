@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
-import { Sidebar } from "@/components/Sidebar";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { alerts, farms } from "@/lib/procrop-data";
 import { cn } from "@/lib/utils";
 

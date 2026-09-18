@@ -7,9 +7,15 @@ export const Route = createFileRoute("/_app/devices")({
   head: () => ({
     meta: [
       { title: "IoT devices — ProCrop" },
-      { name: "description", content: "ESP32 and ESP8266 sensor nodes streaming soil and environment readings." },
+      {
+        name: "description",
+        content: "ESP32 and ESP8266 sensor nodes streaming soil and environment readings.",
+      },
       { property: "og:title", content: "IoT devices — ProCrop" },
-      { property: "og:description", content: "ESP32 and ESP8266 sensor nodes streaming soil and environment readings." },
+      {
+        property: "og:description",
+        content: "ESP32 and ESP8266 sensor nodes streaming soil and environment readings.",
+      },
     ],
   }),
   component: DevicesPage,
@@ -18,7 +24,11 @@ export const Route = createFileRoute("/_app/devices")({
 function DevicesPage() {
   return (
     <div className="px-5 py-8 md:px-8">
-      <PageHeader eyebrow="Sense" title="IoT devices" description="ESP32 and ESP8266 sensor nodes streaming soil and environment readings." />
+      <PageHeader
+        eyebrow="Sense"
+        title="IoT devices"
+        description="ESP32 and ESP8266 sensor nodes streaming soil and environment readings."
+      />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {devices.map((d) => (
           <Panel key={d.id} title={d.name} subtitle={d.model} icon="sensors">

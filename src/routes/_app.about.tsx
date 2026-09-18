@@ -6,9 +6,15 @@ export const Route = createFileRoute("/_app/about")({
   head: () => ({
     meta: [
       { title: "About ProCrop — ProCrop" },
-      { name: "description", content: "The problem, the approach and the technology behind the platform." },
+      {
+        name: "description",
+        content: "The problem, the approach and the technology behind the platform.",
+      },
       { property: "og:title", content: "About ProCrop — ProCrop" },
-      { property: "og:description", content: "The problem, the approach and the technology behind the platform." },
+      {
+        property: "og:description",
+        content: "The problem, the approach and the technology behind the platform.",
+      },
     ],
   }),
   component: AboutPage,
@@ -17,7 +23,11 @@ export const Route = createFileRoute("/_app/about")({
 function AboutPage() {
   return (
     <div className="px-5 py-8 md:px-8">
-      <PageHeader eyebrow="Manage" title="About ProCrop" description="The problem, the approach and the technology behind the platform." />
+      <PageHeader
+        eyebrow="Manage"
+        title="About ProCrop"
+        description="The problem, the approach and the technology behind the platform."
+      />
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="The problem" icon="help_center">
           <p className="text-sm text-foreground/70">
