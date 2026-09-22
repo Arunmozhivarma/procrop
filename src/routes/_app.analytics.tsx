@@ -71,8 +71,8 @@ function AnalyticsPage() {
 
           <p className="mt-4 text-xs text-foreground/60 italic">
             Experiment B models consistently outperform Experiment A, demonstrating that historical
-            Jassid population data (lag features) improves next-week risk prediction beyond
-            weather inputs alone.
+            Jassid population data (lag features) improves next-week risk prediction beyond weather
+            inputs alone.
           </p>
         </Panel>
 

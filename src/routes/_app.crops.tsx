@@ -54,8 +54,7 @@ function CropsPage() {
                 >
                   <div>
                     <p className="text-sm font-medium">
-                      {s.name}{" "}
-                      <span className="text-xs text-muted-foreground">({s.days})</span>
+                      {s.name} <span className="text-xs text-muted-foreground">({s.days})</span>
                     </p>
                     <p className="text-xs text-foreground/70">
                       {s.risks.join(", ") || "No major risks"}
@@ -70,7 +69,11 @@ function CropsPage() {
                           : "upcoming"
                     }
                   >
-                    {s.done ? "Done" : s.risks.some((r) => r.toLowerCase().includes("peak")) ? "⚠ Peak" : "Upcoming"}
+                    {s.done
+                      ? "Done"
+                      : s.risks.some((r) => r.toLowerCase().includes("peak"))
+                        ? "⚠ Peak"
+                        : "Upcoming"}
                   </Tag>
                 </div>
               ))}

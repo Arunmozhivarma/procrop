@@ -104,7 +104,8 @@ export const recommendations: Recommendation[] = [
     effort: "30 min",
     impact: "Maintains data continuity",
     summary: "Walk two diagonals, count 3 leaves from 10 plants, record in AICRP format.",
-    reason: "Jassid count (1.5) was below the 1.95 experimental threshold. Routine scouting sufficient.",
+    reason:
+      "Jassid count (1.5) was below the 1.95 experimental threshold. Routine scouting sufficient.",
     status: "done",
     steps: [
       { id: "s1", label: "Count Jassids — 3 leaves, 10 plants", done: true },

@@ -48,9 +48,9 @@ function AboutPage() {
             predict next-week Jassid activity and classify cotton pest risk in Coimbatore?"
           </p>
           <p className="mt-3 text-sm text-foreground/70">
-            Two experiments compare weather-only inputs (Exp A) against weather combined with
-            Jassid lag features (Exp B), establishing whether past pest counts add predictive
-            value beyond weather alone.
+            Two experiments compare weather-only inputs (Exp A) against weather combined with Jassid
+            lag features (Exp B), establishing whether past pest counts add predictive value beyond
+            weather alone.
           </p>
         </Panel>
 
@@ -76,8 +76,8 @@ function AboutPage() {
           <p className="text-sm text-foreground/70">
             The HIGH / LOW risk classification uses a threshold of{" "}
             <strong>≥ 1.95 Jassids per 3 leaves</strong>. This is an{" "}
-            <strong>experimental, median-derived research rule</strong> applied to this dataset —
-            it is <strong>not an official ICAR Economic Threshold Level (ETL)</strong>.
+            <strong>experimental, median-derived research rule</strong> applied to this dataset — it
+            is <strong>not an official ICAR Economic Threshold Level (ETL)</strong>.
           </p>
           <p className="mt-3 text-sm text-foreground/70">
             When discussing results: "Since a verified ICAR threshold was not established for this

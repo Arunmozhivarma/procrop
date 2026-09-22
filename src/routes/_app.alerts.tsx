@@ -9,12 +9,14 @@ export const Route = createFileRoute("/_app/alerts")({
       { title: "Alerts — Jassid Risk — ProCrop" },
       {
         name: "description",
-        content: "Jassid threshold breach alerts, weather warnings and data pipeline notifications for Coimbatore cotton.",
+        content:
+          "Jassid threshold breach alerts, weather warnings and data pipeline notifications for Coimbatore cotton.",
       },
       { property: "og:title", content: "Alerts — Jassid Risk — ProCrop" },
       {
         property: "og:description",
-        content: "Jassid threshold breach alerts, weather warnings and data pipeline notifications for Coimbatore cotton.",
+        content:
+          "Jassid threshold breach alerts, weather warnings and data pipeline notifications for Coimbatore cotton.",
       },
     ],
   }),

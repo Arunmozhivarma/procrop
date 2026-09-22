@@ -22,12 +22,12 @@ export function Panel({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-border bg-surface shadow-soft transition-shadow hover:shadow-lg",
+        "flex flex-col rounded-2xl border border-border bg-surface shadow-soft transition-shadow hover:shadow-lg",
         className,
       )}
     >
       {title ? (
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-4">
+        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-4">
           <div className="flex items-center gap-3">
             {icon ? (
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -42,7 +42,7 @@ export function Panel({
           {action}
         </header>
       ) : null}
-      <div className={cn("p-5", bodyClassName)}>{children}</div>
+      <div className={cn("flex flex-1 flex-col p-5", bodyClassName)}>{children}</div>
     </section>
   );
 }

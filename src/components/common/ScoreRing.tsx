@@ -22,7 +22,7 @@ export function ScoreRing({
   const dash = (Math.min(100, Math.max(0, value)) / 100) * c;
   return (
     <div
-      className="relative inline-flex items-center justify-center"
+      className="relative inline-flex shrink-0 items-center justify-center"
       style={{ width: size, height: size }}
     >
       <svg width={size} height={size} className="-rotate-90">

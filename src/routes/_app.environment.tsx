@@ -54,10 +54,9 @@ function EnvironmentPage() {
         <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-foreground/70">
           <span className="font-semibold text-foreground">Derived features: </span>
           <span className="font-mono">mean_temp_c</span> = (max_temp + min_temp) / 2 ={" "}
-          <strong>29.2 °C</strong>.{" "}
-          <span className="font-mono">mean_rh_pct</span> = (RH morning + RH evening) / 2 ={" "}
-          <strong>70%</strong>. These computed columns are passed to the model alongside the raw
-          weather inputs.
+          <strong>29.2 °C</strong>. <span className="font-mono">mean_rh_pct</span> = (RH morning +
+          RH evening) / 2 = <strong>70%</strong>. These computed columns are passed to the model
+          alongside the raw weather inputs.
         </div>
 
         {/* SMW outlook */}
@@ -85,8 +84,8 @@ function EnvironmentPage() {
             ))}
           </div>
           <p className="mt-4 text-xs text-foreground/60 italic">
-            Risk outlook based on modelled weather inputs. Actual Jassid counts will update the
-            lag features each SMW.
+            Risk outlook based on modelled weather inputs. Actual Jassid counts will update the lag
+            features each SMW.
           </p>
         </Panel>
       </div>

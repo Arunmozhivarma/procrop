@@ -8,12 +8,14 @@ export const Route = createFileRoute("/_app/recommendations")({
       { title: "Jassid Management Recommendations — ProCrop" },
       {
         name: "description",
-        content: "Prioritised Jassid spray, scouting and data entry actions for Coimbatore cotton — driven by next-week ML risk predictions.",
+        content:
+          "Prioritised Jassid spray, scouting and data entry actions for Coimbatore cotton — driven by next-week ML risk predictions.",
       },
       { property: "og:title", content: "Jassid Management Recommendations — ProCrop" },
       {
         property: "og:description",
-        content: "Prioritised Jassid spray, scouting and data entry actions for Coimbatore cotton — driven by next-week ML risk predictions.",
+        content:
+          "Prioritised Jassid spray, scouting and data entry actions for Coimbatore cotton — driven by next-week ML risk predictions.",
       },
     ],
   }),
