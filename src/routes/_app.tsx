@@ -48,7 +48,7 @@ function AppLayout() {
             />
             <input
               type="search"
-              placeholder="Search fields, crops, alerts…"
+              placeholder="Search SMW weeks, features, predictions…"
               className="w-full max-w-md rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-sm outline-none transition-colors focus:border-primary"
             />
           </label>
@@ -81,11 +81,11 @@ function AppLayout() {
             </Link>
 
             <Link
-              to="/images"
+              to="/recommendations"
               className="hidden items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:inline-flex"
             >
-              <Icon name="add_a_photo" className="text-[18px]" />
-              Upload scan
+              <Icon name="edit_note" className="text-[18px]" />
+              Log scouting data
             </Link>
           </div>
         </header>

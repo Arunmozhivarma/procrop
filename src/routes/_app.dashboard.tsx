@@ -13,15 +13,17 @@ import {
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — ProCrop" },
+      { title: "Jassid Risk Dashboard — ProCrop" },
       {
         name: "description",
-        content: "Farm-wide health score, live risk signals and the actions that matter today.",
+        content:
+          "Next-week Jassid risk prediction for Coimbatore cotton. Current pest score, field health and priority actions.",
       },
-      { property: "og:title", content: "Dashboard — ProCrop" },
+      { property: "og:title", content: "Jassid Risk Dashboard — ProCrop" },
       {
         property: "og:description",
-        content: "Farm-wide health score, live risk signals and the actions that matter today.",
+        content:
+          "Next-week Jassid risk prediction for Coimbatore cotton. Current pest score, field health and priority actions.",
       },
     ],
   }),
@@ -33,26 +35,27 @@ function DashboardPage() {
     <div className="px-5 py-8 md:px-8">
       <PageHeader
         eyebrow="Monitor"
-        title="Dashboard"
-        description="Farm-wide health score, live risk signals and the actions that matter today."
+        title="Jassid Risk Dashboard"
+        description="Next-week Jassid risk prediction for Coimbatore cotton — current pest score, field health and priority scouting actions."
       />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Panel title="Platform health" icon="readiness_score">
+        <Panel title="Jassid pest risk score" icon="readiness_score">
           <div className="flex items-center gap-6">
             <ScoreRing
-              value={platformScores.overall}
-              level={riskFromScore(platformScores.overall)}
-              label="Health"
+              value={platformScores.pest}
+              level={riskFromScore(100 - platformScores.pest)}
+              label="Jassid risk"
             />
             <div className="space-y-2 text-sm">
-              <DataRow label="Soil" value={platformScores.soil} />
-              <DataRow label="Environment" value={platformScores.environment} />
-              <DataRow label="Fields monitored" value={fields.length} />
+              <DataRow label="Current count" value="2.1 / 3 leaves" />
+              <DataRow label="Threshold" value="≥ 1.95 (experimental)" />
+              <DataRow label="Next-week forecast" value="HIGH risk" />
+              <DataRow label="Model confidence" value="88%" />
             </div>
           </div>
         </Panel>
-        <Panel title="Field scores" icon="agriculture" className="lg:col-span-2">
-          <div className="grid gap-3 sm:grid-cols-2">
+        <Panel title="Cotton field health" icon="agriculture" className="lg:col-span-2">
+          <div className="grid gap-3">
             {fields.map((f) => (
               <div key={f.id} className="rounded-xl border border-border p-4">
                 <div className="flex items-center justify-between gap-2">
@@ -60,16 +63,17 @@ function DashboardPage() {
                   <RiskBadge level={riskFromScore(f.healthScore)} />
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {f.crop} · {f.growthStage} · {f.areaHa} ha
+                  {f.crop} · {f.growthStage} · {f.areaHa} ha · Coimbatore
                 </p>
                 <div className="mt-3">
                   <RangeBar value={f.healthScore} range={[0, 100]} ideal={[70, 100]} />
                 </div>
+                <p className="mt-2 text-xs text-foreground/70">{f.notes}</p>
               </div>
             ))}
           </div>
         </Panel>
-        <Panel title="Priority actions" icon="checklist" className="lg:col-span-2">
+        <Panel title="Priority scouting actions" icon="checklist" className="lg:col-span-2">
           <ul className="space-y-3">
             {recommendations.slice(0, 4).map((r) => (
               <li key={r.id} className="rounded-xl border border-border p-4">

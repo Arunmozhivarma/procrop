@@ -25,7 +25,7 @@ export function Sidebar({
           <div className="flex flex-col">
             <span className="font-display text-xl font-semibold leading-tight">ProCrop</span>
             <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
-              Agri Intelligence
+              Cotton Jassid Intelligence
             </span>
           </div>
         </Link>
@@ -61,11 +61,11 @@ export function Sidebar({
         className="m-4 flex items-center gap-3 rounded-2xl border border-border px-3 py-3 transition-colors hover:bg-muted"
       >
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-vitality/20 font-display text-sm font-semibold text-primary">
-          UV
+          RE
         </span>
         <span className="flex flex-col">
-          <span className="text-sm font-medium">Uma Vardhan</span>
-          <span className="text-xs text-muted-foreground">Farm manager</span>
+          <span className="text-sm font-medium">Research User</span>
+          <span className="text-xs text-muted-foreground">TNAU Coimbatore</span>
         </span>
       </Link>
     </aside>

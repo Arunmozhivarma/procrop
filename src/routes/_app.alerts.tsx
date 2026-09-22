@@ -6,15 +6,15 @@ import { alerts, formatDateTime } from "@/lib/procrop-data";
 export const Route = createFileRoute("/_app/alerts")({
   head: () => ({
     meta: [
-      { title: "Alerts — ProCrop" },
+      { title: "Alerts — Jassid Risk — ProCrop" },
       {
         name: "description",
-        content: "Severity-ranked notifications across soil, environment, disease and devices.",
+        content: "Jassid threshold breach alerts, weather warnings and data pipeline notifications for Coimbatore cotton.",
       },
-      { property: "og:title", content: "Alerts — ProCrop" },
+      { property: "og:title", content: "Alerts — Jassid Risk — ProCrop" },
       {
         property: "og:description",
-        content: "Severity-ranked notifications across soil, environment, disease and devices.",
+        content: "Jassid threshold breach alerts, weather warnings and data pipeline notifications for Coimbatore cotton.",
       },
     ],
   }),
@@ -27,7 +27,7 @@ function AlertsPage() {
       <PageHeader
         eyebrow="Act"
         title="Alerts"
-        description="Severity-ranked notifications across soil, environment, disease and devices."
+        description="Jassid threshold breach alerts, weather warnings and data pipeline notifications for Coimbatore cotton."
       />
       <div className="space-y-3">
         {alerts.map((a) => (
