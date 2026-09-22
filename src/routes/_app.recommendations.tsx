@@ -5,15 +5,15 @@ import { recommendations } from "@/lib/procrop-data";
 export const Route = createFileRoute("/_app/recommendations")({
   head: () => ({
     meta: [
-      { title: "Recommendations — ProCrop" },
+      { title: "Jassid Management Recommendations — ProCrop" },
       {
         name: "description",
-        content: "Prioritised irrigation, nutrient, spray and scouting actions per field.",
+        content: "Prioritised Jassid spray, scouting and data entry actions for Coimbatore cotton — driven by next-week ML risk predictions.",
       },
-      { property: "og:title", content: "Recommendations — ProCrop" },
+      { property: "og:title", content: "Jassid Management Recommendations — ProCrop" },
       {
         property: "og:description",
-        content: "Prioritised irrigation, nutrient, spray and scouting actions per field.",
+        content: "Prioritised Jassid spray, scouting and data entry actions for Coimbatore cotton — driven by next-week ML risk predictions.",
       },
     ],
   }),
@@ -25,8 +25,8 @@ function RecommendationsPage() {
     <div className="px-5 py-8 md:px-8">
       <PageHeader
         eyebrow="Act"
-        title="Recommendations"
-        description="Prioritised irrigation, nutrient, spray and scouting actions per field."
+        title="Jassid Recommendations"
+        description="Prioritised Jassid spray, scouting and data entry actions for Coimbatore cotton — driven by next-week ML risk predictions."
       />
       <div className="space-y-4">
         {recommendations.map((r) => (

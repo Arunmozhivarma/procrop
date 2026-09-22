@@ -14,59 +14,45 @@ function seedRandom(seed: number) {
 }
 
 export const platformScores = {
-  overall: 78,
+  overall: 68,
   soil: 74,
-  environment: 66,
-  disease: 100 - 78,
-  pest: 100 - 54,
-  imageHealth: 82,
+  environment: 61,
+  disease: 18,
+  pest: 82,      // Jassid pest risk (high this week)
+  imageHealth: 72,
 };
 
-export const seasonTrend: SeriesPoint[] = Array.from({ length: 24 }, (_, i) => {
-  const rnd = seedRandom(i * 17 + 3);
+// SMW-based Jassid population trend for the season (SMW 25–45)
+const jassidSeason = [
+  0.4, 0.6, 0.8, 1.0, 1.2, 1.3, 0.9, 1.5, 2.4, 1.5,
+  1.3, 1.7, 2.1, 2.6, 2.2, 1.8, 1.4, 1.1, 0.8, 0.5, 0.3,
+];
+
+export const seasonTrend: SeriesPoint[] = jassidSeason.map((count, i) => {
+  const rnd = seedRandom(i * 13 + 5);
   return {
-    date: `W${i + 1}`,
-    health: round(72 + Math.sin(i / 3) * 9 + (rnd() - 0.5) * 6),
-    disease: round(30 + Math.sin(i / 4 + 2) * 18 + (rnd() - 0.5) * 8),
-    pest: round(26 + Math.sin(i / 5 + 1) * 14 + (rnd() - 0.5) * 8),
+    date: `SMW ${25 + i}`,
+    jassid: round(count, 1),
+    pest: round(Math.min(100, (count / 3.5) * 100)),
+    weather: round(55 + Math.sin(i / 4) * 18 + (rnd() - 0.5) * 8),
   };
 });
 
+// ─── Actual Project Datasets ──────────────────────────────────────────────────
+
 export const datasets = [
   {
-    name: "Soil Dataset",
-    source: "Kaggle",
-    purpose: "Soil parameters for soil condition analysis",
-    rows: "12.4k",
+    name: "01_Final_Jassid_Core.xlsx",
+    source: "AICRP Cotton + IMD Weather, Coimbatore",
+    purpose:
+      "Broader extracted dataset — raw Jassid counts per 3 leaves (Table 102), current + lagged weather features, SMW alignment. 50 SMW rows.",
+    rows: "50",
   },
   {
-    name: "Crop Recommendation (LightGBM)",
-    source: "Kaggle",
-    purpose: "Soil nutrients and climatic conditions",
-    rows: "2.2k",
-  },
-  {
-    name: "Crop Analysis and Prediction",
-    source: "Kaggle",
-    purpose: "Crop and environmental parameters",
-    rows: "8.6k",
-  },
-  {
-    name: "Plant Health Prediction",
-    source: "Kaggle",
-    purpose: "Plant health and agricultural condition features",
-    rows: "5.1k",
-  },
-  {
-    name: "Leaf Diseases Detection",
-    source: "Kaggle",
-    purpose: "Leaf imagery for image-based disease identification",
-    rows: "27k images",
-  },
-  {
-    name: "What Crop to Grow",
-    source: "Kaggle",
-    purpose: "Soil and environmental parameters for crop selection",
-    rows: "2.2k",
+    name: "02_Jassid_Model_Ready.xlsx",
+    source: "Derived from 01_Final_Jassid_Core.xlsx",
+    purpose:
+      "Model-ready dataset after lag creation (jassid_lag_1, jassid_lag_2, weather lags), target variable (target_next_week_jassid), and experimental HIGH/LOW risk classification (≥ 1.95 median rule). 40 rows used for ML.",
+    rows: "40",
   },
 ];
