@@ -81,8 +81,7 @@ function ExplainPage() {
                   className="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
                 >
                   <span>
-                    {c.feature} —{" "}
-                    <span className="text-muted-foreground">{c.value}</span>
+                    {c.feature} — <span className="text-muted-foreground">{c.value}</span>
                   </span>
                   <Tag>
                     {c.impact >= 0 ? "+" : ""}

@@ -29,30 +29,30 @@ export const Route = createFileRoute("/_app/images")({
 const sampleDemos = [
   {
     id: "sample-heavy",
-    title: "Heavy Jassid Infestation (Hopper Burn)",
-    subtitle: "26 pests on sample (~5.8 / 3 leaves)",
+    title: "Cotton Leaf — Field Sample A",
+    subtitle: "Canopy underside scan · Coimbatore Block 1",
     src: "/sample-leaves/jassid_heavy_sample.jpg",
     fileName: "jassid_heavy_sample.jpg",
-    badge: "26 PESTS · HIGH RISK",
-    tone: "border-risk-high/40 bg-risk-high/5",
+    badge: "SAMPLE LEAF A",
+    tone: "border-border bg-surface hover:border-primary/50",
   },
   {
     id: "sample-moderate",
-    title: "Moderate Jassid Pressure",
-    subtitle: "15 pests on sample (~3.2 / 3 leaves)",
+    title: "Cotton Leaf — Field Sample B",
+    subtitle: "Canopy underside scan · Coimbatore Block 2",
     src: "/sample-leaves/jassid_moderate_sample.jpg",
     fileName: "jassid_moderate_sample.jpg",
-    badge: "15 PESTS · HIGH RISK",
-    tone: "border-risk-moderate/40 bg-risk-moderate/5",
+    badge: "SAMPLE LEAF B",
+    tone: "border-border bg-surface hover:border-primary/50",
   },
   {
     id: "sample-mild",
-    title: "Mild / Trace Jassid Count",
-    subtitle: "1 pest on sample (~0.4 / 3 leaves)",
+    title: "Cotton Leaf — Field Sample C",
+    subtitle: "Canopy underside scan · Coimbatore Block 3",
     src: "/sample-leaves/jassid_mild_sample.jpg",
     fileName: "jassid_mild_sample.jpg",
-    badge: "1 PEST · LOW RISK",
-    tone: "border-risk-low/40 bg-risk-low/5",
+    badge: "SAMPLE LEAF C",
+    tone: "border-border bg-surface hover:border-primary/50",
   },
 ];
 
@@ -119,13 +119,13 @@ function ImagesPage() {
       <PageHeader
         eyebrow="Predict"
         title="Leaf Photo Pest Detection & Live Weather Integration"
-        description="Farmers upload a cotton leaf photo or click an actual Jassid pest sample photo below — computer vision automatically counts Jassid pests, retrieves real-time Coimbatore weather, and runs XGBoost for next-week risk prediction."
+        description="Farmers upload a cotton leaf photo or select a field sample below — computer vision automatically counts Jassid pests, retrieves real-time Coimbatore weather, and runs XGBoost for next-week risk prediction."
       />
 
-      {/* Actual Jassid Pest Sample Photo Gallery */}
+      {/* Field Sample Photo Gallery (Count-neutral before prediction) */}
       <div className="mb-8">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Click any actual Jassid pest sample photo below to test pest detection &amp; live weather prediction:
+          Select any cotton leaf field photo below to test pest detection &amp; live weather prediction:
         </p>
         <div className="grid gap-4 sm:grid-cols-3">
           {sampleDemos.map((demo) => (
@@ -149,7 +149,7 @@ function ImagesPage() {
               <p className="font-semibold text-sm text-foreground">{demo.title}</p>
               <p className="text-xs text-muted-foreground mt-0.5">{demo.subtitle}</p>
               <span className="mt-3 text-xs font-semibold text-primary underline">
-                ⚡ Click to load photo &amp; predict →
+                ⚡ Click to test prediction →
               </span>
             </button>
           ))}
@@ -271,7 +271,7 @@ function ImagesPage() {
 
             <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Pest Symptoms &amp; Canopy Damage
+                Pest Symptoms &amp; Canopy Damage (Derived from Severity)
               </p>
               <div className="grid gap-3 sm:grid-cols-2 text-xs">
                 {autoResult.vision_analysis.symptoms.map((s) => (

@@ -55,19 +55,21 @@ export function Sidebar({
         ))}
       </nav>
 
-      <Link
-        to="/settings/profile"
-        onClick={onNavigate}
-        className="m-4 flex items-center gap-3 rounded-2xl border border-border px-3 py-3 transition-colors hover:bg-muted"
-      >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-vitality/20 font-display text-sm font-semibold text-primary">
-          RE
-        </span>
-        <span className="flex flex-col">
-          <span className="text-sm font-medium">Research User</span>
-          <span className="text-xs text-muted-foreground">TNAU Coimbatore</span>
-        </span>
-      </Link>
+      <div className="shrink-0 border-t border-border/60 p-4">
+        <Link
+          to="/settings/profile"
+          onClick={onNavigate}
+          className="flex items-center gap-3 rounded-2xl border border-border/80 bg-background/50 px-3 py-2.5 transition-colors hover:bg-muted"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vitality/20 font-display text-sm font-semibold text-primary">
+            RE
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-medium">Research User</span>
+            <span className="truncate text-xs text-muted-foreground">TNAU Coimbatore</span>
+          </span>
+        </Link>
+      </div>
     </aside>
   );
 }

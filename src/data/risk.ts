@@ -78,9 +78,7 @@ export const predictions: Prediction[] = [
       { feature: "Max temperature", value: "32.8 °C", impact: 0.09 },
       { feature: "Jassid lag 2 (SMW 32)", value: "1.3 / 3 leaves", impact: -0.07 },
     ],
-    suspectedIssues: [
-      { name: "Jassid — LOW risk (below 1.95 threshold)", probability: 0.31 },
-    ],
+    suspectedIssues: [{ name: "Jassid — LOW risk (below 1.95 threshold)", probability: 0.31 }],
   },
   {
     id: "pred-j029",
@@ -116,8 +114,8 @@ export const predictions: Prediction[] = [
 
 // Actual-inspired Jassid counts per 3 leaves, Coimbatore pattern
 const jassidCounts = [
-  0.4, 0.6, 0.8, 1.0, 1.2, 1.3, 0.9, 1.5, 2.4, 1.5,
-  1.3, 1.7, 2.1, 2.6, 2.2, 1.8, 1.4, 1.1, 0.8, 0.5, 0.3,
+  0.4, 0.6, 0.8, 1.0, 1.2, 1.3, 0.9, 1.5, 2.4, 1.5, 1.3, 1.7, 2.1, 2.6, 2.2, 1.8, 1.4, 1.1, 0.8,
+  0.5, 0.3,
 ];
 
 export const riskTimeline: SeriesPoint[] = jassidCounts.map((count, i) => ({

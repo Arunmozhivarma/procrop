@@ -3,7 +3,7 @@ import type { RiskLevel } from "./common";
 export type Recommendation = {
   id: string;
   title: string;
-  category: "Irrigation" | "Nutrients" | "Monitoring" | "Pest control" | "Disease control";
+  category: "Irrigation" | "Nutrients" | "Monitoring" | "Pest control" | "Disease control" | "Data entry";
   icon: string;
   fieldId: string;
   fieldName: string;
@@ -23,7 +23,16 @@ export type Alert = {
   title: string;
   body: string;
   severity: RiskLevel;
-  source: "Soil sensor" | "Weather" | "AI risk model" | "Image analysis" | "Device";
+  source:
+    | "Soil sensor"
+    | "Weather"
+    | "AI risk model"
+    | "Image analysis"
+    | "Device"
+    | "AI risk model (RF + XGBoost)"
+    | "Scouting data entry"
+    | "Weather sensor"
+    | "Data pipeline check";
   fieldId: string;
   fieldName: string;
   createdAt: string;

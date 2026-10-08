@@ -18,14 +18,14 @@ export const platformScores = {
   soil: 74,
   environment: 61,
   disease: 18,
-  pest: 82,      // Jassid pest risk (high this week)
+  pest: 82, // Jassid pest risk (high this week)
   imageHealth: 72,
 };
 
 // SMW-based Jassid population trend for the season (SMW 25–45)
 const jassidSeason = [
-  0.4, 0.6, 0.8, 1.0, 1.2, 1.3, 0.9, 1.5, 2.4, 1.5,
-  1.3, 1.7, 2.1, 2.6, 2.2, 1.8, 1.4, 1.1, 0.8, 0.5, 0.3,
+  0.4, 0.6, 0.8, 1.0, 1.2, 1.3, 0.9, 1.5, 2.4, 1.5, 1.3, 1.7, 2.1, 2.6, 2.2, 1.8, 1.4, 1.1, 0.8,
+  0.5, 0.3,
 ];
 
 export const seasonTrend: SeriesPoint[] = jassidSeason.map((count, i) => {
