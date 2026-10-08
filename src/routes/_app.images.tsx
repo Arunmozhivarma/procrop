@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel } from "@/components/procrop/ui";
 import {
@@ -121,6 +121,22 @@ function ImagesPage() {
         title="Leaf Photo Pest Detection & Live Weather Integration"
         description="Farmers upload a cotton leaf photo or select a field sample below — computer vision automatically counts Jassid pests, retrieves real-time Coimbatore weather, and runs XGBoost for next-week risk prediction."
       />
+
+      {/* Unified Predictor Notice Banner */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-xs">
+        <div>
+          <span className="font-bold text-primary">⚡ Unified Pipeline Available: </span>
+          <span className="text-foreground/80">
+            Image pest counting, live Open-Meteo weather API, and historical Excel lags are now completely unified in one single command center with persistent database logging.
+          </span>
+        </div>
+        <Link
+          to="/risk"
+          className="rounded-xl bg-primary px-3.5 py-1.5 font-bold text-primary-foreground hover:bg-primary/90"
+        >
+          Open Unified Predictor →
+        </Link>
+      </div>
 
       {/* Field Sample Photo Gallery (Count-neutral before prediction) */}
       <div className="mb-8">

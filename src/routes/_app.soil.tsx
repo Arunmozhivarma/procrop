@@ -120,7 +120,7 @@ const coimbatoreSoils: SoilType[] = [
   },
 ];
 
-export default function SoilPage() {
+function SoilPage() {
   const [selectedSoil, setSelectedSoil] = useState<string>("vertisol");
   const current: SoilType = coimbatoreSoils.find((s) => s.id === selectedSoil) ?? coimbatoreSoils[0]!;
 

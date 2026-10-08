@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_app/settings/profile")({
   component: SettingsProfilePage,
 });
 
-export default function SettingsProfilePage() {
+function SettingsProfilePage() {
   const [name, setName] = useState("Dr. K. Ramesh");
   const [email, setEmail] = useState("farmer@procrop.in");
   const [phone, setPhone] = useState("+91 94432 10890");
