@@ -30,11 +30,14 @@ def fetch_coimbatore_weather():
             max_temp = float(daily["temperature_2m_max"][0]) if daily.get("temperature_2m_max") else 33.5
             min_temp = float(daily["temperature_2m_min"][0]) if daily.get("temperature_2m_min") else 24.0
             rainfall = float(daily["precipitation_sum"][0]) if daily.get("precipitation_sum") else 12.0
-            wind_speed = float(daily["windspeed_10m_max"][0]) if daily.get("windspeed_10m_max") else 10.0
+            raw_wind = float(daily["windspeed_10m_max"][0]) if daily.get("windspeed_10m_max") else 10.0
             
+            # Scale wind speed (km/h) to average weekly wind speed range in dataset (5.0 to 11.0)
+            wind_speed = min(11.0, max(5.0, round(raw_wind * 0.55, 1)))
+
             # Sunshine duration in seconds -> hours
             sun_sec = daily.get("sunshine_duration", [21600])[0] or 21600
-            sunshine_hours = round(sun_sec / 3600.0, 1)
+            sunshine_hours = round(min(10.0, max(4.0, sun_sec / 3600.0)), 1)
             
             # Hourly relative humidity at 08:00 AM (idx 8) and 05:00 PM (idx 17)
             rh_morning = 82.0
@@ -80,7 +83,7 @@ def fetch_coimbatore_weather():
         "rh_evening_pct": 58.0,
         "rainfall_mm": 18.0,
         "rainy_days": 3,
-        "wind_speed_kmh": 9.0,
+        "wind_speed_kmh": 8.5,
         "sunshine_hours": 6.4,
         "mean_temp_c": 29.2,
         "mean_rh_pct": 70.0,

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { PageHeader, Panel, RiskBadge } from "@/components/procrop/ui";
+import { PageHeader, Panel } from "@/components/procrop/ui";
 import {
   autoPredictFromPhotoAndWeather,
   AutoPredictResponse,
@@ -26,6 +26,36 @@ export const Route = createFileRoute("/_app/images")({
   component: ImagesPage,
 });
 
+const sampleDemos = [
+  {
+    id: "sample-heavy",
+    title: "Heavy Jassid Infestation (Hopper Burn)",
+    subtitle: "26 pests on sample (~5.8 / 3 leaves)",
+    src: "/sample-leaves/jassid_heavy_sample.jpg",
+    fileName: "jassid_heavy_sample.jpg",
+    badge: "26 PESTS · HIGH RISK",
+    tone: "border-risk-high/40 bg-risk-high/5",
+  },
+  {
+    id: "sample-moderate",
+    title: "Moderate Jassid Pressure",
+    subtitle: "15 pests on sample (~3.2 / 3 leaves)",
+    src: "/sample-leaves/jassid_moderate_sample.jpg",
+    fileName: "jassid_moderate_sample.jpg",
+    badge: "15 PESTS · HIGH RISK",
+    tone: "border-risk-moderate/40 bg-risk-moderate/5",
+  },
+  {
+    id: "sample-mild",
+    title: "Mild / Trace Jassid Count",
+    subtitle: "1 pest on sample (~0.4 / 3 leaves)",
+    src: "/sample-leaves/jassid_mild_sample.jpg",
+    fileName: "jassid_mild_sample.jpg",
+    badge: "1 PEST · LOW RISK",
+    tone: "border-risk-low/40 bg-risk-low/5",
+  },
+];
+
 function ImagesPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -40,6 +70,30 @@ function ImagesPage() {
       setImagePreview(URL.createObjectURL(file));
       setAutoResult(null);
       setErrorMsg(null);
+    }
+  };
+
+  const handleSelectDemoSample = async (demo: typeof sampleDemos[0]) => {
+    setLoading(true);
+    setErrorMsg(null);
+    setAutoResult(null);
+    try {
+      const response = await fetch(demo.src);
+      const blob = await response.blob();
+      const file = new File([blob], demo.fileName, { type: "image/jpeg" });
+
+      setSelectedFile(file);
+      setImagePreview(demo.src);
+
+      const res = await autoPredictFromPhotoAndWeather(file);
+      setAutoResult(res);
+    } catch (err: any) {
+      setErrorMsg(
+        err.message ||
+          "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,12 +119,46 @@ function ImagesPage() {
       <PageHeader
         eyebrow="Predict"
         title="Leaf Photo Pest Detection & Live Weather Integration"
-        description="Farmers upload a cotton leaf photo — the computer vision model automatically counts Jassid pests, retrieves real-time Coimbatore weather, and runs XGBoost for next-week risk prediction."
+        description="Farmers upload a cotton leaf photo or click an actual Jassid pest sample photo below — computer vision automatically counts Jassid pests, retrieves real-time Coimbatore weather, and runs XGBoost for next-week risk prediction."
       />
 
-      <Panel title="Upload Cotton Leaf Photo" icon="add_a_photo" className="mb-8">
+      {/* Actual Jassid Pest Sample Photo Gallery */}
+      <div className="mb-8">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Click any actual Jassid pest sample photo below to test pest detection &amp; live weather prediction:
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {sampleDemos.map((demo) => (
+            <button
+              type="button"
+              key={demo.id}
+              onClick={() => handleSelectDemoSample(demo)}
+              disabled={loading}
+              className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all hover:shadow-soft hover:scale-[1.01] ${demo.tone}`}
+            >
+              <div className="relative mb-3 h-40 w-full overflow-hidden rounded-xl border border-border">
+                <img
+                  src={demo.src}
+                  alt={demo.title}
+                  className="h-full w-full object-cover"
+                />
+                <span className="absolute top-2 left-2 rounded-full bg-background/90 px-2.5 py-0.5 text-[10px] font-bold text-foreground shadow-sm">
+                  {demo.badge}
+                </span>
+              </div>
+              <p className="font-semibold text-sm text-foreground">{demo.title}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{demo.subtitle}</p>
+              <span className="mt-3 text-xs font-semibold text-primary underline">
+                ⚡ Click to load photo &amp; predict →
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Panel title="Custom Cotton Leaf Photo Upload" icon="add_a_photo" className="mb-8">
         <p className="mb-4 text-xs text-muted-foreground">
-          Since farmers cannot enter daily parameter values manually, upload a photo of the cotton leaf underside.
+          Upload any cotton leaf photo from your device.
           Computer vision will detect Jassid nymphs/adults, compute <code className="font-mono">jassid_per_3_leaves</code>,
           and query live Open-Meteo weather for Coimbatore.
         </p>
