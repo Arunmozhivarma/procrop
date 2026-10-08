@@ -11,15 +11,35 @@ export function AuthView() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
+  const [savedName, setSavedName] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("procrop.name") || "";
+    }
+    return "";
+  });
+  const [savedEmail, setSavedEmail] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("procrop.email") || "";
+    }
+    return "";
+  });
+
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     const data = new FormData(e.currentTarget);
-    const email = String(data.get("email") ?? "");
+    const email = String(data.get("email") ?? "").trim();
+    const name = String(data.get("name") ?? "").trim();
+
     if (!email.includes("@")) {
       setError("Enter a valid email address.");
       return;
     }
+    if (mode !== "forgot" && !name) {
+      setError("Please enter your name.");
+      return;
+    }
+
     setBusy(true);
     setTimeout(() => {
       setBusy(false);
@@ -29,6 +49,8 @@ export function AuthView() {
       }
       if (typeof window !== "undefined") {
         window.localStorage.setItem("procrop.session", email);
+        window.localStorage.setItem("procrop.name", name || "Dr. K. Ramesh");
+        window.localStorage.setItem("procrop.email", email);
       }
       navigate({ to: "/dashboard" });
     }, 900);
@@ -94,13 +116,25 @@ export function AuthView() {
           ) : null}
 
           <form onSubmit={submit} className="mt-8 space-y-4">
-            {mode === "register" ? (
-              <>
-                <Field label="Full name" name="name" placeholder="Uma Vardhan" />
-                <Field label="Farm name" name="farm" placeholder="Northfield Estate" />
-              </>
+            {mode !== "forgot" ? (
+              <Field
+                label="Full name"
+                name="name"
+                defaultValue={savedName}
+                placeholder="e.g. Dr. K. Ramesh"
+                required={true}
+              />
             ) : null}
-            <Field label="Email" name="email" type="email" placeholder="farmer@procrop.in" />
+            {mode === "register" ? (
+              <Field label="Farm / Station name" name="farm" placeholder="TNAU Cotton Research Station" />
+            ) : null}
+            <Field
+              label="Email (Mail ID)"
+              name="email"
+              type="email"
+              defaultValue={savedEmail}
+              placeholder="farmer@procrop.in"
+            />
             {mode !== "forgot" ? (
               <Field label="Password" name="password" type="password" placeholder="••••••••" />
             ) : null}
@@ -171,12 +205,14 @@ function Field({
   type = "text",
   placeholder,
   required = true,
+  defaultValue,
 }: {
   label: string;
   name: string;
   type?: string;
   placeholder?: string;
   required?: boolean;
+  defaultValue?: string;
 }) {
   return (
     <label className="block">
@@ -185,6 +221,7 @@ function Field({
         name={name}
         type={type}
         required={required}
+        defaultValue={defaultValue}
         placeholder={placeholder}
         className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm outline-none transition-colors focus:border-primary"
       />

@@ -31,63 +31,23 @@ function AppLayout() {
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-surface/95 px-4 backdrop-blur md:px-6">
+        {/* Mobile Header (Menu toggle on small screens; top bar removed on desktop) */}
+        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur lg:hidden">
           <button
             type="button"
-            className="rounded-xl p-2 hover:bg-muted lg:hidden"
+            className="rounded-xl p-2 hover:bg-muted"
             onClick={() => setMobileNav(true)}
             aria-label="Open navigation"
           >
             <Icon name="menu" />
           </button>
-
-          <label className="relative hidden min-w-0 flex-1 items-center md:flex">
-            <Icon
-              name="search"
-              className="pointer-events-none absolute left-3 text-[18px] text-muted-foreground"
-            />
-            <input
-              type="search"
-              placeholder="Search SMW weeks, features, predictions…"
-              className="w-full max-w-md rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-sm outline-none transition-colors focus:border-primary"
-            />
-          </label>
-
-          <div className="ml-auto flex items-center gap-2">
-            <select
-              value={farmId}
-              onChange={(e) => setFarmId(e.target.value)}
-              className="hidden rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium outline-none focus:border-primary sm:block"
-              aria-label="Select farm"
-            >
-              {farms.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </select>
-
-            <Link
-              to="/alerts"
-              className="relative rounded-xl p-2 transition-colors hover:bg-muted"
-              aria-label="Alerts"
-            >
-              <Icon name="notifications" />
-              {unread > 0 ? (
-                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-critical px-1 text-[10px] font-bold text-primary-foreground">
-                  {unread}
-                </span>
-              ) : null}
-            </Link>
-
-            <Link
-              to="/recommendations"
-              className="hidden items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:inline-flex"
-            >
-              <Icon name="edit_note" className="text-[18px]" />
-              Log scouting data
-            </Link>
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-soft">
+              <Icon name="eco" filled className="text-sm" />
+            </span>
+            <span className="font-display font-semibold text-sm">ProCrop</span>
           </div>
+          <div className="w-8" />
         </header>
 
         <div className={cn("min-w-0 flex-1")}>

@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { navGroups } from "@/config/navigation";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,25 @@ export function Sidebar({
   onNavigate?: () => void;
   className?: string;
 }) {
+  const [userName, setUserName] = useState("Dr. K. Ramesh");
+  const [userEmail, setUserEmail] = useState("farmer@procrop.in");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedName = window.localStorage.getItem("procrop.name");
+      const storedEmail = window.localStorage.getItem("procrop.email");
+      if (storedName) setUserName(storedName);
+      if (storedEmail) setUserEmail(storedEmail);
+    }
+  }, []);
+
+  const initials =
+    userName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((s) => s[0]?.toUpperCase())
+      .join("") || "KR";
   return (
     <aside
       className={cn(
@@ -61,12 +81,12 @@ export function Sidebar({
           onClick={onNavigate}
           className="flex items-center gap-3 rounded-2xl border border-border/80 bg-background/50 px-3 py-2.5 transition-colors hover:bg-muted"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vitality/20 font-display text-sm font-semibold text-primary">
-            RE
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-semibold text-primary">
+            {initials}
           </span>
           <span className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-medium">Research User</span>
-            <span className="truncate text-xs text-muted-foreground">TNAU Coimbatore</span>
+            <span className="truncate text-sm font-medium">{userName}</span>
+            <span className="truncate text-xs text-muted-foreground">{userEmail}</span>
           </span>
         </Link>
       </div>
