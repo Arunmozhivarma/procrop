@@ -26,36 +26,6 @@ export const Route = createFileRoute("/_app/images")({
   component: ImagesPage,
 });
 
-const sampleDemos = [
-  {
-    id: "sample-heavy",
-    title: "Cotton Leaf — Field Sample A",
-    subtitle: "Canopy underside scan · Coimbatore Block 1",
-    src: "/sample-leaves/jassid_heavy_sample.jpg",
-    fileName: "jassid_heavy_sample.jpg",
-    badge: "SAMPLE LEAF A",
-    tone: "border-border bg-surface hover:border-primary/50",
-  },
-  {
-    id: "sample-moderate",
-    title: "Cotton Leaf — Field Sample B",
-    subtitle: "Canopy underside scan · Coimbatore Block 2",
-    src: "/sample-leaves/jassid_moderate_sample.jpg",
-    fileName: "jassid_moderate_sample.jpg",
-    badge: "SAMPLE LEAF B",
-    tone: "border-border bg-surface hover:border-primary/50",
-  },
-  {
-    id: "sample-mild",
-    title: "Cotton Leaf — Field Sample C",
-    subtitle: "Canopy underside scan · Coimbatore Block 3",
-    src: "/sample-leaves/jassid_mild_sample.jpg",
-    fileName: "jassid_mild_sample.jpg",
-    badge: "SAMPLE LEAF C",
-    tone: "border-border bg-surface hover:border-primary/50",
-  },
-];
-
 function ImagesPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -70,30 +40,6 @@ function ImagesPage() {
       setImagePreview(URL.createObjectURL(file));
       setAutoResult(null);
       setErrorMsg(null);
-    }
-  };
-
-  const handleSelectDemoSample = async (demo: typeof sampleDemos[0]) => {
-    setLoading(true);
-    setErrorMsg(null);
-    setAutoResult(null);
-    try {
-      const response = await fetch(demo.src);
-      const blob = await response.blob();
-      const file = new File([blob], demo.fileName, { type: "image/jpeg" });
-
-      setSelectedFile(file);
-      setImagePreview(demo.src);
-
-      const res = await autoPredictFromPhotoAndWeather(file);
-      setAutoResult(res);
-    } catch (err: any) {
-      setErrorMsg(
-        err.message ||
-          "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running."
-      );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -119,7 +65,7 @@ function ImagesPage() {
       <PageHeader
         eyebrow="Predict"
         title="Leaf Photo Pest Detection & Live Weather Integration"
-        description="Farmers upload a cotton leaf photo or select a field sample below — computer vision automatically counts Jassid pests, retrieves real-time Coimbatore weather, and runs XGBoost for next-week risk prediction."
+        description="Upload a cotton leaf photo for pest detection, or use the latest database observation in the Risk Engine."
       />
 
       {/* Unified Predictor Notice Banner */}
@@ -136,40 +82,6 @@ function ImagesPage() {
         >
           Open Unified Predictor →
         </Link>
-      </div>
-
-      {/* Field Sample Photo Gallery (Count-neutral before prediction) */}
-      <div className="mb-8">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Select any cotton leaf field photo below to test pest detection &amp; live weather prediction:
-        </p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {sampleDemos.map((demo) => (
-            <button
-              type="button"
-              key={demo.id}
-              onClick={() => handleSelectDemoSample(demo)}
-              disabled={loading}
-              className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all hover:shadow-soft hover:scale-[1.01] ${demo.tone}`}
-            >
-              <div className="relative mb-3 h-40 w-full overflow-hidden rounded-xl border border-border">
-                <img
-                  src={demo.src}
-                  alt={demo.title}
-                  className="h-full w-full object-cover"
-                />
-                <span className="absolute top-2 left-2 rounded-full bg-background/90 px-2.5 py-0.5 text-[10px] font-bold text-foreground shadow-sm">
-                  {demo.badge}
-                </span>
-              </div>
-              <p className="font-semibold text-sm text-foreground">{demo.title}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{demo.subtitle}</p>
-              <span className="mt-3 text-xs font-semibold text-primary underline">
-                ⚡ Click to test prediction →
-              </span>
-            </button>
-          ))}
-        </div>
       </div>
 
       <Panel title="Custom Cotton Leaf Photo Upload" icon="add_a_photo" className="mb-8">

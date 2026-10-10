@@ -184,73 +184,7 @@ function SettingsProfilePage() {
           )}
         </Panel>
 
-        {/* Regional & Agronomic Preferences (Dummy Settings) */}
-        <Panel title="Regional Agronomic Defaults" icon="agriculture">
-          <div className="space-y-2 text-sm">
-            <DataRow label="Target District" value="Coimbatore, Tamil Nadu" />
-            <DataRow label="Agro-Climatic Zone" value="Western Agro-Climatic Zone (Zone III)" />
-            <DataRow label="Cotton Cultivar" value="Bt Hybrid Cotton (RCH-2 / Bunny)" />
-            <DataRow label="Dominant Soil Type" value="Deep Black Vertisols (Karisal Mann)" />
-            <DataRow label="Standard Sowing Window" value="SMW 32 – 34 (Late August Kharif)" />
-            <DataRow label="Measurement System" value="Metric (ha, mm rain, °C temp, km/h)" />
-            <DataRow label="Language Preference" value="English (தமிழ் 지원 예정)" />
-          </div>
-        </Panel>
-
-        {/* Telemetry & Model Automation (Dummy Settings) */}
-        <Panel title="AI Model & Telemetry Preferences" icon="psychology">
-          <div className="space-y-2 text-sm">
-            <DataRow label="Active Risk Engine" value="XGBoost Model B (Weather + Pest History)" />
-            <DataRow
-              label="Classification Standard"
-              value="1.95 Jassids / 3 leaves (TNAU / AICRP Standard)"
-            />
-            <DataRow label="Weather Telemetry Source" value="Open-Meteo Automated API (Coimbatore)" />
-            <DataRow label="Telemetry Sync Interval" value="Every 1 Hour (Automated polling)" />
-            <DataRow label="Offline Feature Cache" value="Enabled (Local browser storage)" />
-            <DataRow label="Default Export Format" value="Excel (.xlsx) / CSV tabular" />
-          </div>
-        </Panel>
-
-        {/* Research Station & Infrastructure (Dummy Settings) */}
-        <Panel title="Research Station & Trial Plots" icon="domain">
-          <div className="space-y-2 text-sm">
-            <DataRow label="Station Name" value="TNAU Cotton Research Station" />
-            <DataRow label="Coimbatore Coordinates" value="11.0168° N, 76.9558° E · 411m ASL" />
-            <DataRow label="Trial Block 102" value="Rainfed Kharif Vertisol · 5.4 ha" />
-            <DataRow label="Trial Block 103" value="Irrigated Drip Hybrid Block · 7.0 ha" />
-            <DataRow label="Scouting Methodology" value="3 Leaves / Plant (Top, Mid, Bottom)" />
-            <DataRow label="Trap Deployment" value="12 Yellow Sticky Traps / Acre" />
-          </div>
-        </Panel>
-
-        {/* Security & System Info (Dummy Settings) */}
-        <Panel title="System & Session Information" icon="security" className="lg:col-span-2">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-xs">
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="font-semibold text-muted-foreground uppercase">Software Release</p>
-              <p className="mt-1 font-mono font-bold text-foreground">ProCrop v2.4.0</p>
-              <p className="text-muted-foreground mt-0.5">Coimbatore Research Edition</p>
-            </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="font-semibold text-muted-foreground uppercase">Authentication</p>
-              <p className="mt-1 font-semibold text-emerald-600 dark:text-emerald-400">
-                Verified Session
-              </p>
-              <p className="text-muted-foreground mt-0.5">Local Token Validated</p>
-            </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="font-semibold text-muted-foreground uppercase">Model Weight Cache</p>
-              <p className="mt-1 font-semibold text-foreground">xgb_regressor.pkl</p>
-              <p className="text-muted-foreground mt-0.5">FastAPI Backend Connected</p>
-            </div>
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="font-semibold text-muted-foreground uppercase">Dataset Status</p>
-              <p className="mt-1 font-semibold text-foreground">50 SMW Rows Loaded</p>
-              <p className="text-muted-foreground mt-0.5">02_Jassid_Model_Ready.xlsx</p>
-            </div>
-          </div>
-        </Panel>
+        <Panel title="Additional settings" icon="settings"><p className="text-sm text-muted-foreground">Regional preferences, farm infrastructure, and telemetry settings are not stored in the current database schema.</p></Panel>
       </div>
     </div>
   );

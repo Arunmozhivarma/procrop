@@ -34,41 +34,13 @@ export const Route = createFileRoute("/_app/risk")({
   component: RiskPage,
 });
 
-const sampleLeaves = [
-  {
-    id: "sample-heavy",
-    title: "Field Sample A — Heavy Infestation",
-    subtitle: "Canopy underside scan · Coimbatore Block 1",
-    src: "/sample-leaves/jassid_heavy_sample.jpg",
-    fileName: "jassid_heavy_sample.jpg",
-    badge: "SAMPLE LEAF A",
-    expectedTag: "High pest pressure",
-  },
-  {
-    id: "sample-moderate",
-    title: "Field Sample B — Moderate Activity",
-    subtitle: "Canopy underside scan · Coimbatore Block 2",
-    src: "/sample-leaves/jassid_moderate_sample.jpg",
-    fileName: "jassid_moderate_sample.jpg",
-    badge: "SAMPLE LEAF B",
-    expectedTag: "Economic threshold window",
-  },
-  {
-    id: "sample-mild",
-    title: "Field Sample C — Mild / Healthy Canopy",
-    subtitle: "Canopy underside scan · Coimbatore Block 3",
-    src: "/sample-leaves/jassid_mild_sample.jpg",
-    fileName: "jassid_mild_sample.jpg",
-    badge: "SAMPLE LEAF C",
-    expectedTag: "Sub-threshold / Clean",
-  },
-];
+const sampleLeaves: Array<{ id: string; title: string; subtitle: string; src: string; fileName: string; badge: string; expectedTag: string }> = [];
 
 function RiskPage() {
   // Selection & Image State
-  const [selectedSampleId, setSelectedSampleId] = useState<string>("sample-moderate");
+  const [selectedSampleId, setSelectedSampleId] = useState<string>("");
   const [customFile, setCustomFile] = useState<File | null>(null);
-  const [previewSrc, setPreviewSrc] = useState<string>("/sample-leaves/jassid_moderate_sample.jpg");
+  const [previewSrc, setPreviewSrc] = useState<string>("");
 
   // Pipeline Data Sources State
   const [liveWeather, setLiveWeather] = useState<LiveWeatherResponse | null>(null);
@@ -168,8 +140,10 @@ function RiskPage() {
       const params: Parameters<typeof runUnifiedPrediction>[0] = {};
       if (customFile) {
         params.file = customFile;
+      } else if (prevWeekData) {
+        params.overrideJassid = manualJassid ?? prevWeekData.jassid_per_3_leaves;
       } else {
-        params.sampleId = selectedSampleId || "sample-moderate";
+        throw new Error("No database observation is available. Upload a leaf image or load database records first.");
       }
 
       if (manualJassid !== null) params.overrideJassid = manualJassid;
@@ -221,7 +195,7 @@ function RiskPage() {
       <PageHeader
         eyebrow="Predict · Unified AI Pipeline"
         title="Cotton Jassid Risk Engine & Vision Intelligence"
-        description="Single-page unified workflow: Computer vision extracts pest counts from leaf photos (or 3 field samples), combines real-time Open-Meteo Coimbatore weather with historical Excel/DB lags, runs XGBoost risk prediction, and logs every prediction to the database."
+        description="Uses a leaf photo or the latest database Jassid count, combines live weather and stored historical features, runs XGBoost, and saves predictions to SQLite."
       />
 
       {/* Pipeline Status Indicator Strip */}
@@ -293,9 +267,9 @@ function RiskPage() {
       ) : null}
 
       {/* STEP 1: LEAF PHOTO PEST COUNT (3 SAMPLES OR INSERT PIC) */}
-      <Panel title="Step 1: Leaf Photo Pest Count (3 Field Samples or Insert Photo)" icon="document_scanner" className="mb-8">
+      <Panel title="Step 1: Pest Count (Photo or Database)" icon="document_scanner" className="mb-8">
         <p className="mb-4 text-xs text-muted-foreground">
-          Select one of the 3 standardized Coimbatore field samples below, or upload your own leaf picture. Computer vision analyzes pest spots and calculates <code className="font-mono">jassid_per_3_leaves</code> automatically.
+          Upload a leaf picture for image analysis, or run the prediction with the latest Jassid count stored in SQLite.
         </p>
 
         {/* 3 Preset Samples Grid */}
@@ -359,18 +333,18 @@ function RiskPage() {
           {/* Active Image Inspection Card */}
           <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4">
             <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-border">
-              <img
+              {previewSrc ? <img
                 src={previewSrc}
                 alt="Selected Leaf Sample"
                 className="h-full w-full object-cover"
-              />
+              /> : <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No photo selected. Database observation will be used for prediction.</div>}
             </div>
             <div className="flex-1">
               <p className="text-xs font-semibold text-foreground">
-                {customFile ? `Custom: ${customFile.name}` : sampleLeaves.find((s) => s.id === selectedSampleId)?.title || "Field Sample"}
+                {customFile ? `Custom: ${customFile.name}` : "Latest database observation"}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Target leaf inspection sample for automated nymph & adult count.
+                The latest stored observation is used when no photo is uploaded.
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
@@ -558,11 +532,11 @@ function RiskPage() {
               <div className="rounded-xl border border-border bg-surface p-3.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vision Detected Leaf Count</p>
                 <p className="text-2xl font-bold mt-1 text-primary">
-                  {unifiedResult.vision_analysis.jassid_per_3_leaves}{" "}
+                  {unifiedResult.vision_analysis?.jassid_per_3_leaves ?? unifiedResult.previous_week_data.jassid_per_3_leaves}{" "}
                   <span className="text-xs font-normal text-muted-foreground">/ 3 leaves</span>
                 </p>
                 <p className="text-[11px] text-foreground/70 mt-1">
-                  {unifiedResult.vision_analysis.detected_spots_on_leaf} pest spots detected ({Math.round(unifiedResult.vision_analysis.confidence * 100)}% conf)
+                  {unifiedResult.vision_analysis ? `${unifiedResult.vision_analysis.detected_spots_on_leaf} pest spots detected (${Math.round(unifiedResult.vision_analysis.confidence * 100)}% conf)` : "Count read from weekly_observations in SQLite"}
                 </p>
               </div>
 
@@ -590,10 +564,10 @@ function RiskPage() {
             </div>
 
             {/* Canopy Symptoms Derived from Pest Count */}
-            {unifiedResult.vision_analysis.symptoms && unifiedResult.vision_analysis.symptoms.length > 0 ? (
+            {unifiedResult.vision_analysis?.symptoms && unifiedResult.vision_analysis.symptoms.length > 0 ? (
               <div className="mb-5 rounded-xl border border-border bg-muted/30 p-4">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  Canopy Diagnostic & Symptoms ({unifiedResult.vision_analysis.severity} Severity)
+                  Canopy Diagnostic & Symptoms ({unifiedResult.vision_analysis?.severity} Severity)
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2 text-xs">
                   {unifiedResult.vision_analysis.symptoms.map((sym) => (

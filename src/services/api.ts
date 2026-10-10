@@ -121,7 +121,7 @@ export interface SavedPredictionRecord {
 }
 
 export interface UnifiedPredictionResponse {
-  vision_analysis: VisionDetectionResult;
+  vision_analysis: VisionDetectionResult | null;
   live_weather: LiveWeatherResponse;
   previous_week_data: PreviousWeekData;
   prediction: PredictionResponse;
@@ -130,6 +130,28 @@ export interface UnifiedPredictionResponse {
     created_at: string;
     status: string;
   };
+}
+
+export interface DatasetSummary {
+  total_rows: number;
+  columns_count: number;
+  columns: string[];
+  years_covered: string[];
+  first_smw: number | null;
+  last_smw: number | null;
+  sample_records: Record<string, unknown>[];
+}
+
+export async function fetchDatasetSummary(): Promise<DatasetSummary> {
+  const res = await fetch(`${API_BASE_URL}/dataset/summary`);
+  if (!res.ok) throw new Error(`Dataset API Error (${res.status}): ${await res.text()}`);
+  return res.json();
+}
+
+export async function fetchDatasetObservations(limit = 5000): Promise<Record<string, unknown>[]> {
+  const res = await fetch(`${API_BASE_URL}/dataset/observations?limit=${limit}`);
+  if (!res.ok) throw new Error(`Observations API Error (${res.status}): ${await res.text()}`);
+  return res.json();
 }
 
 export interface AutoPredictResponse {
@@ -183,7 +205,6 @@ export async function analyzeLeafPhoto(file: File): Promise<VisionDetectionResul
 
 export async function runUnifiedPrediction(params: {
   file?: File;
-  sampleId?: string;
   overrideJassid?: number;
   overrideLag1?: number;
   overrideLag2?: number;
@@ -195,9 +216,6 @@ export async function runUnifiedPrediction(params: {
   const formData = new FormData();
   if (params.file) {
     formData.append("file", params.file);
-  }
-  if (params.sampleId) {
-    formData.append("sample_id", params.sampleId);
   }
   if (params.overrideJassid !== undefined) {
     formData.append("override_jassid", params.overrideJassid.toString());

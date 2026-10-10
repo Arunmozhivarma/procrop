@@ -164,9 +164,9 @@ export function LandingView() {
 
               <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6">
                 {[
-                  ["SMW 1–50", "AICRP Coimbatore data"],
-                  ["90.0%", "Exp B XGBoost accuracy"],
-                  ["≥ 1.95", "Threshold (High Risk)"],
+                  ["SQLite", "Application database"],
+                  ["Live", "Database-backed readings"],
+                  ["≥ 1.95", "Research threshold"],
                 ].map(([v, l]) => (
                   <div key={l}>
                     <dt className="font-display text-2xl font-semibold text-primary">{v}</dt>
@@ -176,53 +176,12 @@ export function LandingView() {
               </dl>
             </div>
 
-            {/* Quick Live Preview Card */}
+            {/* Database-backed dashboard entry */}
             <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  Current Jassid Risk (SMW 37)
-                </p>
-                <span className="rounded-full bg-risk-high/15 px-3 py-1 text-xs font-semibold text-risk-high border border-risk-high/30">
-                  HIGH RISK (SMW 38)
-                </span>
-              </div>
-              <p className="mt-4 font-display text-5xl font-semibold">2.1</p>
-              <p className="text-sm text-muted-foreground">
-                Jassids / 3 leaves (Classification threshold: ≥ 1.95)
-              </p>
-              <div className="mt-6 space-y-3">
-                {[
-                  ["Jassid Lag 1 (SMW 37)", 78, "bg-risk-high", "2.1 / 3 leaves"],
-                  ["Mean Relative Humidity", 70, "bg-risk-moderate", "70% (82% morning RH)"],
-                  ["Max Temperature", 68, "bg-risk-high", "34.2 °C"],
-                  ["Jassid Lag 2 (SMW 36)", 60, "bg-risk-moderate", "1.8 / 3 leaves"],
-                ].map(([label, v, tone, detail]) => (
-                  <div key={label as string}>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-foreground/70">{label}</span>
-                      <span className="font-semibold">{detail}</span>
-                    </div>
-                    <div className="mt-1 h-2 rounded-full bg-muted">
-                      <div
-                        className={`h-2 rounded-full ${tone as string}`}
-                        style={{ width: `${v as number}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 rounded-2xl bg-primary/5 p-4 border border-primary/20">
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                  Top predictive insight
-                </p>
-                <p className="mt-1 text-sm font-medium">
-                  HIGH Jassid risk predicted for SMW 38 (≥ 1.95 threshold).
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Driven by Jassid Lag 1 (2.1 count), 82% morning RH, and 34.2 °C max temperature.
-                  Recommended action: 3% Neem oil spray or Flonicamid within 48 hours.
-                </p>
-              </div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Live database view</p>
+              <h2 className="mt-4 font-display text-2xl font-semibold">Your records drive every reading</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Historical observations, weather features, lag columns, and saved predictions are read from SQLite. The dashboard reports when records are unavailable.</p>
+              <Link to="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">Open database dashboard <Icon name="arrow_forward" /></Link>
             </div>
           </div>
         </section>

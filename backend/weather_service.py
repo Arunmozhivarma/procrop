@@ -27,24 +27,30 @@ def fetch_coimbatore_weather():
             hourly = data.get("hourly", {})
             
             # Extract daily max/min temp, rainfall, wind, sunshine
-            max_temp = float(daily["temperature_2m_max"][0]) if daily.get("temperature_2m_max") else 33.5
-            min_temp = float(daily["temperature_2m_min"][0]) if daily.get("temperature_2m_min") else 24.0
-            rainfall = float(daily["precipitation_sum"][0]) if daily.get("precipitation_sum") else 12.0
-            raw_wind = float(daily["windspeed_10m_max"][0]) if daily.get("windspeed_10m_max") else 10.0
+            required_daily = ("temperature_2m_max", "temperature_2m_min", "precipitation_sum", "windspeed_10m_max")
+            if any(not daily.get(key) or daily[key][0] is None for key in required_daily):
+                raise ValueError("Open-Meteo response is missing required daily weather columns")
+            max_temp = float(daily["temperature_2m_max"][0])
+            min_temp = float(daily["temperature_2m_min"][0])
+            rainfall = float(daily["precipitation_sum"][0])
+            raw_wind = float(daily["windspeed_10m_max"][0])
             
             # Scale wind speed (km/h) to average weekly wind speed range in dataset (5.0 to 11.0)
             wind_speed = min(11.0, max(5.0, round(raw_wind * 0.55, 1)))
 
             # Sunshine duration in seconds -> hours
-            sun_sec = daily.get("sunshine_duration", [21600])[0] or 21600
+            sun_values = daily.get("sunshine_duration")
+            if not sun_values or sun_values[0] is None:
+                raise ValueError("Open-Meteo response is missing sunshine_duration")
+            sun_sec = sun_values[0]
             sunshine_hours = round(min(10.0, max(4.0, sun_sec / 3600.0)), 1)
             
             # Hourly relative humidity at 08:00 AM (idx 8) and 05:00 PM (idx 17)
-            rh_morning = 82.0
-            rh_evening = 58.0
-            if "relative_humidity_2m" in hourly and len(hourly["relative_humidity_2m"]) >= 18:
-                rh_morning = float(hourly["relative_humidity_2m"][8] or 82.0)
-                rh_evening = float(hourly["relative_humidity_2m"][17] or 58.0)
+            humidity = hourly.get("relative_humidity_2m")
+            if not humidity or len(humidity) < 18 or humidity[8] is None or humidity[17] is None:
+                raise ValueError("Open-Meteo response is missing hourly humidity values")
+            rh_morning = float(humidity[8])
+            rh_evening = float(humidity[17])
             
             # Rainy days in recent week forecast
             precip_list = daily.get("precipitation_sum", [rainfall])
@@ -73,19 +79,4 @@ def fetch_coimbatore_weather():
     except Exception as e:
         print(f"Weather API fallback triggered: {e}")
         
-    # Fallback default values for Coimbatore if offline
-    return {
-        "source": "Coimbatore Climate Baseline (Fallback)",
-        "location": "Coimbatore, Tamil Nadu",
-        "max_temp_c": 34.2,
-        "min_temp_c": 24.1,
-        "rh_morning_pct": 82.0,
-        "rh_evening_pct": 58.0,
-        "rainfall_mm": 18.0,
-        "rainy_days": 3,
-        "wind_speed_kmh": 8.5,
-        "sunshine_hours": 6.4,
-        "mean_temp_c": 29.2,
-        "mean_rh_pct": 70.0,
-        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
+    raise RuntimeError("Live Open-Meteo weather is unavailable; no fallback measurements are used")

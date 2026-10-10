@@ -18,8 +18,10 @@ from backend.database import (
     get_latest_previous_week_data,
     save_prediction_record,
     get_recent_predictions,
+    get_observations,
+    get_dataset_summary as read_dataset_summary,
 )
-from src.preprocessing import MODEL_B_FEATURES, load_dataset
+from src.preprocessing import MODEL_B_FEATURES
 from src.shap_analysis import get_shap_explanation
 
 app = FastAPI(
@@ -38,8 +40,6 @@ app.add_middleware(
 )
 
 MODELS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "models"))
-DATA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "02_Jassid_Model_Ready.xlsx"))
-PUBLIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "sample-leaves"))
 
 regressor = None
 classifier = None
@@ -89,7 +89,11 @@ def get_previous_week_historical():
     """
     try:
         data = get_latest_previous_week_data()
+        if data is None:
+            raise HTTPException(status_code=404, detail="No observations are stored in weekly_observations.")
         return data
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch previous week data: {str(e)}")
 
@@ -110,7 +114,6 @@ async def analyze_leaf_image(file: UploadFile = File(...)):
 @app.post("/predict-unified")
 async def predict_unified(
     file: Optional[UploadFile] = File(None),
-    sample_id: Optional[str] = Form(None),
     override_jassid: Optional[float] = Form(None),
     override_lag_1: Optional[float] = Form(None),
     override_lag_2: Optional[float] = Form(None),
@@ -142,35 +145,17 @@ async def predict_unified(
         image_bytes = await file.read()
         image_name = file.filename
         vision_result = analyze_cotton_leaf_image(image_bytes, filename=image_name)
-    elif sample_id:
-        sample_map = {
-            "sample-heavy": "jassid_heavy_sample.jpg",
-            "sample-moderate": "jassid_moderate_sample.jpg",
-            "sample-mild": "jassid_mild_sample.jpg",
-        }
-        target_fn = sample_map.get(sample_id, "jassid_moderate_sample.jpg")
-        image_name = target_fn
-        sample_path = os.path.join(PUBLIC_DIR, target_fn)
-        if os.path.exists(sample_path):
-            with open(sample_path, "rb") as f:
-                sample_bytes = f.read()
-            vision_result = analyze_cotton_leaf_image(sample_bytes, filename=target_fn)
-        else:
-            vision_result = analyze_cotton_leaf_image(b"", filename=target_fn)
+    elif override_jassid is not None:
+        image_name = "Database_Observation"
     else:
-        # Default fallback to moderate sample
-        sample_path = os.path.join(PUBLIC_DIR, "jassid_moderate_sample.jpg")
-        if os.path.exists(sample_path):
-            with open(sample_path, "rb") as f:
-                sample_bytes = f.read()
-            vision_result = analyze_cotton_leaf_image(sample_bytes, filename="jassid_moderate_sample.jpg")
-        else:
-            vision_result = analyze_cotton_leaf_image(b"", filename="jassid_moderate_sample.jpg")
+        raise HTTPException(status_code=400, detail="Upload a leaf photo or provide a Jassid count from the database.")
 
     detected_jassid = float(override_jassid) if override_jassid is not None else float(vision_result["jassid_per_3_leaves"])
 
     # 2. Previous Week Data from Excel / DB
     prev_week = get_latest_previous_week_data()
+    if prev_week is None:
+        raise HTTPException(status_code=404, detail="No observations are stored in weekly_observations.")
     final_lag_1 = float(override_lag_1) if override_lag_1 is not None else float(prev_week["jassid_per_3_leaves"])
     final_lag_2 = float(override_lag_2) if override_lag_2 is not None else float(prev_week["jassid_lag_1"])
 
@@ -294,26 +279,20 @@ async def auto_predict_from_image_and_live_weather(
 
 @app.get("/dataset/summary")
 def get_dataset_summary():
-    """Reads dataset directly from local 02_Jassid_Model_Ready.xlsx in project folder."""
+    """Returns summaries calculated from the SQLite observations table."""
     try:
-        df = load_dataset(DATA_PATH)
-        df_clean = df.replace({np.nan: None})
-        return {
-            "file_name": "02_Jassid_Model_Ready.xlsx",
-            "total_rows": len(df),
-            "columns_count": len(df.columns),
-            "years_covered": [int(x) for x in df["report_year"].dropna().unique().tolist()] if "report_year" in df.columns else [],
-            "smw_range": [int(df["smw"].min()), int(df["smw"].max())] if "smw" in df.columns else [],
-            "sample_records": df_clean.tail(5).to_dict(orient="records")
-        }
+        return read_dataset_summary()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read dataset: {str(e)}")
+
+@app.get("/dataset/observations")
+def list_observations(limit: int = 5000):
+    return get_observations(limit=max(1, min(limit, 10000)))
 
 @app.get("/dataset/predict-latest", response_model=PredictionResponse)
 def predict_latest_from_excel():
     """
-    Reads the latest week's observation directly from local 02_Jassid_Model_Ready.xlsx and runs XGBoost.
-    Gracefully fills missing values with dataset medians to avoid KeyError.
+    Reads the latest weekly observation from SQLite and runs XGBoost.
     Saves prediction to database predictions table.
     """
     global regressor, classifier
@@ -323,16 +302,17 @@ def predict_latest_from_excel():
             raise HTTPException(status_code=500, detail="Models not loaded. Train models first.")
     
     try:
-        df = load_dataset(DATA_PATH)
-        medians = df[MODEL_B_FEATURES].median().to_dict()
-        latest_row = df.iloc[-1]
+        observations = get_observations(10000)
+        if not observations:
+            raise HTTPException(status_code=404, detail="No observations are stored in weekly_observations.")
+        latest_row = observations[-1]
         
         row_dict = {}
         for col in MODEL_B_FEATURES:
             if col in latest_row and pd.notnull(latest_row[col]):
                 row_dict[col] = float(latest_row[col])
             else:
-                row_dict[col] = float(medians.get(col, 0.0))
+                raise HTTPException(status_code=422, detail=f"Latest database observation is missing required model column: {col}")
                 
         X_df = pd.DataFrame([row_dict])[MODEL_B_FEATURES].astype(float)
         
@@ -346,12 +326,12 @@ def predict_latest_from_excel():
 
         # Save to DB
         save_prediction_record({
-            "image_name": "Excel_Latest_Week",
+            "image_name": "Database_Latest_Week",
             "detected_jassid": float(latest_row.get("jassid_per_3_leaves", 1.95)),
             "prev_week_smw": int(latest_row.get("smw", 0)),
             "prev_week_jassid_lag_1": float(latest_row.get("jassid_lag_1", 2.0)),
             "prev_week_jassid_lag_2": float(latest_row.get("jassid_lag_2", 2.0)) if pd.notnull(latest_row.get("jassid_lag_2")) else 2.0,
-            "weather_source": "Excel Historical Dataset",
+            "weather_source": "SQLite weekly_observations",
             "max_temp_c": float(row_dict.get("max_temp_c", 30.0)),
             "min_temp_c": float(row_dict.get("min_temp_c", 22.0)),
             "rh_morning_pct": float(row_dict.get("rh_morning_pct", 80.0)),
@@ -375,6 +355,8 @@ def predict_latest_from_excel():
             explanation=explanations[:5]
         )
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 @app.post("/predict", response_model=PredictionResponse)

@@ -158,90 +158,38 @@ def get_latest_previous_week_data():
     row = cursor.fetchone()
     conn.close()
 
-    if row:
-        data = dict(row)
-        return {
-            "source": f"Database (Weekly Observation #{data.get('id')})",
-            "report_year": str(data.get("report_year", "2024")),
-            "smw": int(data.get("smw", 45)),
-            "location": str(data.get("location", "Coimbatore")),
-            "jassid_per_3_leaves": float(data.get("jassid_per_3_leaves", 1.10)),
-            "jassid_lag_1": float(data.get("jassid_lag_1", 3.90)),
-            "jassid_lag_2": float(data.get("jassid_lag_2", 1.90)) if data.get("jassid_lag_2") is not None else 1.90,
-            "max_temp_c": float(data.get("max_temp_c", 31.8)),
-            "min_temp_c": float(data.get("min_temp_c", 22.1)),
-            "rh_morning_pct": float(data.get("rh_morning_pct", 84.0)),
-            "rh_evening_pct": float(data.get("rh_evening_pct", 56.0)),
-            "rainfall_mm": float(data.get("rainfall_mm", 12.0)),
-            "rainy_days": int(data.get("rainy_days", 1)) if data.get("rainy_days") is not None else 1,
-            "wind_speed_kmh": float(data.get("wind_speed_kmh", 6.2)) if data.get("wind_speed_kmh") is not None else 6.2,
-            "sunshine_hours": float(data.get("sunshine_hours", 6.8)) if data.get("sunshine_hours") is not None else 6.8,
-            "max_temp_c_lag_1": float(data.get("max_temp_c_lag_1", 31.5)) if data.get("max_temp_c_lag_1") is not None else 31.5,
-            "min_temp_c_lag_1": float(data.get("min_temp_c_lag_1", 22.4)) if data.get("min_temp_c_lag_1") is not None else 22.4,
-            "rh_morning_pct_lag_1": float(data.get("rh_morning_pct_lag_1", 82.0)) if data.get("rh_morning_pct_lag_1") is not None else 82.0,
-            "rh_evening_pct_lag_1": float(data.get("rh_evening_pct_lag_1", 58.0)) if data.get("rh_evening_pct_lag_1") is not None else 58.0,
-            "rainfall_mm_lag_1": float(data.get("rainfall_mm_lag_1", 10.0)) if data.get("rainfall_mm_lag_1") is not None else 10.0,
-            "rainy_days_lag_1": int(data.get("rainy_days_lag_1", 1)) if data.get("rainy_days_lag_1") is not None else 1,
-            "wind_speed_kmh_lag_1": float(data.get("wind_speed_kmh_lag_1", 6.0)) if data.get("wind_speed_kmh_lag_1") is not None else 6.0,
-            "sunshine_hours_lag_1": float(data.get("sunshine_hours_lag_1", 6.5)) if data.get("sunshine_hours_lag_1") is not None else 6.5,
-        }
+    if not row:
+        return None
+    data = dict(row)
+    data["source"] = f"Database (weekly_observations #{data['id']})"
+    return data
 
-    # Fallback to direct Excel read if DB empty
-    excel_file = EXCEL_PATH if os.path.exists(EXCEL_PATH) else FALLBACK_EXCEL
-    if os.path.exists(excel_file):
-        df = pd.read_excel(excel_file)
-        last_row = df.iloc[-1]
-        return {
-            "source": f"Excel (02_Jassid_Model_Ready.xlsx row {len(df)})",
-            "report_year": str(last_row.get("report_year", "2024")),
-            "smw": int(last_row.get("smw", 45)),
-            "location": str(last_row.get("location", "Coimbatore")),
-            "jassid_per_3_leaves": float(last_row.get("jassid_per_3_leaves", 1.10)),
-            "jassid_lag_1": float(last_row.get("jassid_lag_1", 3.90)),
-            "jassid_lag_2": 1.90,
-            "max_temp_c": float(last_row.get("max_temp_c", 31.8)),
-            "min_temp_c": float(last_row.get("min_temp_c", 22.1)),
-            "rh_morning_pct": float(last_row.get("rh_morning_pct", 84.0)),
-            "rh_evening_pct": float(last_row.get("rh_evening_pct", 56.0)),
-            "rainfall_mm": float(last_row.get("rainfall_mm", 12.0)),
-            "rainy_days": 1,
-            "wind_speed_kmh": 6.2,
-            "sunshine_hours": 6.8,
-            "max_temp_c_lag_1": float(last_row.get("max_temp_c_lag_1", 31.5)),
-            "min_temp_c_lag_1": float(last_row.get("min_temp_c_lag_1", 22.4)),
-            "rh_morning_pct_lag_1": float(last_row.get("rh_morning_pct_lag_1", 82.0)),
-            "rh_evening_pct_lag_1": float(last_row.get("rh_evening_pct_lag_1", 58.0)),
-            "rainfall_mm_lag_1": float(last_row.get("rainfall_mm_lag_1", 10.0)),
-            "rainy_days_lag_1": 1,
-            "wind_speed_kmh_lag_1": 6.0,
-            "sunshine_hours_lag_1": 6.5,
-        }
+def get_observations(limit: int = 5000):
+    conn = get_connection()
+    rows = [dict(r) for r in conn.execute(
+        "SELECT * FROM weekly_observations ORDER BY report_year DESC, smw DESC, id DESC LIMIT ?", (limit,)
+    ).fetchall()]
+    conn.close()
+    return list(reversed(rows))
 
-    return {
-        "source": "Default Coimbatore Baseline",
-        "report_year": "2024",
-        "smw": 45,
-        "location": "Coimbatore",
-        "jassid_per_3_leaves": 1.10,
-        "jassid_lag_1": 3.90,
-        "jassid_lag_2": 1.90,
-        "max_temp_c": 31.8,
-        "min_temp_c": 22.1,
-        "rh_morning_pct": 84.0,
-        "rh_evening_pct": 56.0,
-        "rainfall_mm": 12.0,
-        "rainy_days": 1,
-        "wind_speed_kmh": 6.2,
-        "sunshine_hours": 6.8,
-        "max_temp_c_lag_1": 31.5,
-        "min_temp_c_lag_1": 22.4,
-        "rh_morning_pct_lag_1": 82.0,
-        "rh_evening_pct_lag_1": 58.0,
-        "rainfall_mm_lag_1": 10.0,
-        "rainy_days_lag_1": 1,
-        "wind_speed_kmh_lag_1": 6.0,
-        "sunshine_hours_lag_1": 6.5,
-    }
+def get_dataset_summary():
+    conn = get_connection()
+    cursor = conn.cursor()
+    summary = dict(cursor.execute("""
+        SELECT COUNT(*) AS total_rows, COUNT(DISTINCT report_year) AS year_count,
+               MIN(smw) AS first_smw, MAX(smw) AS last_smw
+        FROM weekly_observations
+    """).fetchone())
+    years = [r[0] for r in cursor.execute(
+        "SELECT DISTINCT report_year FROM weekly_observations WHERE report_year IS NOT NULL ORDER BY report_year"
+    ).fetchall()]
+    columns = [r[1] for r in cursor.execute("PRAGMA table_info(weekly_observations)").fetchall()]
+    summary.update(years_covered=years, columns=columns, columns_count=len(columns))
+    summary["sample_records"] = [dict(r) for r in cursor.execute(
+        "SELECT * FROM weekly_observations ORDER BY id DESC LIMIT 5"
+    ).fetchall()]
+    conn.close()
+    return summary
 
 def save_prediction_record(data: dict) -> dict:
     """

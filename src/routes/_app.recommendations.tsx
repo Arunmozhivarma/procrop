@@ -53,13 +53,7 @@ export default function RecommendationsPage() {
       setError(null);
       const [wData, pData] = await Promise.all([
         fetchLiveCoimbatoreWeather(),
-        fetchLatestDatasetPrediction().catch(() => ({
-          predicted_next_week_jassid: 2.15,
-          risk: "HIGH" as const,
-          risk_threshold: 1.95,
-          model_used: "XGBoost Model B (Latest Week Record)",
-          explanation: [],
-        })),
+        fetchLatestDatasetPrediction().catch(() => null),
       ]);
       setWeather(wData);
       setPrediction(pData);
@@ -77,10 +71,10 @@ export default function RecommendationsPage() {
   }, [loadData]);
 
   // Generate dynamic recommendations based on predicted risk and rainfall
-  const isHighRisk = prediction ? prediction.risk === "HIGH" || prediction.predicted_next_week_jassid >= 1.95 : true;
-  const rainfall = weather?.rainfall_mm ?? 0;
+  const isHighRisk = prediction ? prediction.risk === "HIGH" || prediction.predicted_next_week_jassid >= prediction.risk_threshold : false;
+  const rainfall = weather?.rainfall_mm ?? null;
   const isRainyDay = rainfall >= 5.0;
-  const windSpeed = weather?.wind_speed_kmh ?? 6.0;
+  const windSpeed = weather?.wind_speed_kmh ?? null;
 
   const getDynamicRecommendations = (): ActionRecommendation[] => {
     const list: ActionRecommendation[] = [];
@@ -100,7 +94,7 @@ export default function RecommendationsPage() {
           status: "Conditional / On Hold",
           icon: "hourglass_top",
         });
-      } else if (windSpeed > 12) {
+      } else if (windSpeed !== null && windSpeed > 12) {
         list.push({
           id: "chem-wind-delay",
           category: "Chemical Control",
@@ -120,7 +114,7 @@ export default function RecommendationsPage() {
           title: "Targeted ETL Chemical Spray Application",
           prescription:
             "Spray Flonicamid 50 WG @ 0.3 g/litre (60 g/acre) or Clothianidin 50 WDG @ 0.05 g/litre.",
-          rationale: `Predicted Jassid count (${prediction?.predicted_next_week_jassid ?? 2.1} / 3 leaves) breaches the critical economic threshold (1.95). Dry weather (${rainfall} mm rain) ensures optimal residue uptake on leaf undersides.`,
+          rationale: `Predicted Jassid count (${prediction?.predicted_next_week_jassid ?? "—"} / 3 leaves) breaches the research threshold (1.95). Dry weather (${rainfall ?? "—"} mm rain) allows residue uptake on leaf undersides.`,
           timing: "Within next 24 to 36 hours during calm hours.",
           priority: "High",
           status: "Immediate Action",
@@ -133,7 +127,7 @@ export default function RecommendationsPage() {
         category: "Chemical Control",
         title: "No Chemical Insecticide Required (Below ETL)",
         prescription: "Withhold synthetic chemical sprays. Conserve natural predators and parasitoids.",
-        rationale: `Model predicts safe Jassid levels (${prediction?.predicted_next_week_jassid ?? 1.1} / 3 leaves). Preserving predatory Ladybird beetles (Coccinella) and Chrysoperla lacewings provides natural biological suppression.`,
+        rationale: `Model predicts Jassid levels of ${prediction?.predicted_next_week_jassid ?? "—"} / 3 leaves. Preserve predatory Ladybird beetles (Coccinella) and Chrysoperla lacewings for natural suppression.`,
         timing: "Re-evaluate next scheduled SMW forecast.",
         priority: "Low",
         status: "Standard Maintenance",
@@ -252,7 +246,7 @@ export default function RecommendationsPage() {
     return list;
   };
 
-  const recs = getDynamicRecommendations();
+  const recs = prediction && weather ? getDynamicRecommendations() : [];
 
   return (
     <div className="px-5 py-8 md:px-8">
@@ -301,7 +295,7 @@ export default function RecommendationsPage() {
               <div className="flex items-center gap-2 mt-0.5">
                 <RiskBadge level={isHighRisk ? "high" : "low"} />
                 <span className="text-xs font-mono font-semibold text-foreground">
-                  {prediction?.predicted_next_week_jassid ?? 2.15} / 3 leaves
+                  {prediction ? `${prediction.predicted_next_week_jassid} / 3 leaves` : "No database prediction"}
                 </span>
               </div>
             </div>
@@ -313,7 +307,7 @@ export default function RecommendationsPage() {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="material-symbols-outlined text-primary text-base">rainy</span>
-                <span className="text-xs font-bold text-foreground">{rainfall} mm</span>
+                <span className="text-xs font-bold text-foreground">{rainfall ?? "—"} mm</span>
                 <span className="text-[11px] text-muted-foreground">
                   ({isRainyDay ? "Wash-off Risk Active" : "Dry Foliage"})
                 </span>
@@ -326,7 +320,7 @@ export default function RecommendationsPage() {
                 Surface Wind & Morning RH
               </p>
               <p className="text-xs font-semibold text-foreground mt-0.5">
-                {windSpeed} km/h · {weather?.rh_morning_pct ?? 78}% RH
+                {windSpeed ?? "—"} km/h · {weather?.rh_morning_pct ?? "—"}% RH
               </p>
             </div>
           </div>
