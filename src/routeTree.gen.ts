@@ -14,21 +14,13 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppAboutRouteImport } from './routes/_app.about'
 import { Route as AppAlertsRouteImport } from './routes/_app.alerts'
-import { Route as AppAnalysisRouteImport } from './routes/_app.analysis'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
-import { Route as AppCarePathRouteImport } from './routes/_app.care-path'
-import { Route as AppCropsRouteImport } from './routes/_app.crops'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
-import { Route as AppDevicesRouteImport } from './routes/_app.devices'
-import { Route as AppDiagnosticRouteImport } from './routes/_app.diagnostic'
 import { Route as AppEnvironmentRouteImport } from './routes/_app.environment'
 import { Route as AppExplainRouteImport } from './routes/_app.explain'
-import { Route as AppFarmsRouteImport } from './routes/_app.farms'
 import { Route as AppHelpRouteImport } from './routes/_app.help'
 import { Route as AppImagesRouteImport } from './routes/_app.images'
-import { Route as AppOverviewRouteImport } from './routes/_app.overview'
 import { Route as AppRecommendationsRouteImport } from './routes/_app.recommendations'
-import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppRiskRouteImport } from './routes/_app.risk'
 import { Route as AppSoilRouteImport } from './routes/_app.soil'
 import { Route as AppSettingsProfileRouteImport } from './routes/_app.settings.profile'
@@ -57,39 +49,14 @@ const AppAlertsRoute = AppAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAnalysisRoute = AppAnalysisRouteImport.update({
-  id: '/analysis',
-  path: '/analysis',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCarePathRoute = AppCarePathRouteImport.update({
-  id: '/care-path',
-  path: '/care-path',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCropsRoute = AppCropsRouteImport.update({
-  id: '/crops',
-  path: '/crops',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDevicesRoute = AppDevicesRouteImport.update({
-  id: '/devices',
-  path: '/devices',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDiagnosticRoute = AppDiagnosticRouteImport.update({
-  id: '/diagnostic',
-  path: '/diagnostic',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEnvironmentRoute = AppEnvironmentRouteImport.update({
@@ -102,11 +69,6 @@ const AppExplainRoute = AppExplainRouteImport.update({
   path: '/explain',
   getParentRoute: () => AppRoute,
 } as any)
-const AppFarmsRoute = AppFarmsRouteImport.update({
-  id: '/farms',
-  path: '/farms',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppHelpRoute = AppHelpRouteImport.update({
   id: '/help',
   path: '/help',
@@ -117,19 +79,9 @@ const AppImagesRoute = AppImagesRouteImport.update({
   path: '/images',
   getParentRoute: () => AppRoute,
 } as any)
-const AppOverviewRoute = AppOverviewRouteImport.update({
-  id: '/overview',
-  path: '/overview',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppRecommendationsRoute = AppRecommendationsRouteImport.update({
   id: '/recommendations',
   path: '/recommendations',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppReportsRoute = AppReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRiskRoute = AppRiskRouteImport.update({
@@ -153,21 +105,13 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/about': typeof AppAboutRoute
   '/alerts': typeof AppAlertsRoute
-  '/analysis': typeof AppAnalysisRoute
   '/analytics': typeof AppAnalyticsRoute
-  '/care-path': typeof AppCarePathRoute
-  '/crops': typeof AppCropsRoute
   '/dashboard': typeof AppDashboardRoute
-  '/devices': typeof AppDevicesRoute
-  '/diagnostic': typeof AppDiagnosticRoute
   '/environment': typeof AppEnvironmentRoute
   '/explain': typeof AppExplainRoute
-  '/farms': typeof AppFarmsRoute
   '/help': typeof AppHelpRoute
   '/images': typeof AppImagesRoute
-  '/overview': typeof AppOverviewRoute
   '/recommendations': typeof AppRecommendationsRoute
-  '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
   '/soil': typeof AppSoilRoute
   '/settings/profile': typeof AppSettingsProfileRoute
@@ -177,21 +121,13 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/about': typeof AppAboutRoute
   '/alerts': typeof AppAlertsRoute
-  '/analysis': typeof AppAnalysisRoute
   '/analytics': typeof AppAnalyticsRoute
-  '/care-path': typeof AppCarePathRoute
-  '/crops': typeof AppCropsRoute
   '/dashboard': typeof AppDashboardRoute
-  '/devices': typeof AppDevicesRoute
-  '/diagnostic': typeof AppDiagnosticRoute
   '/environment': typeof AppEnvironmentRoute
   '/explain': typeof AppExplainRoute
-  '/farms': typeof AppFarmsRoute
   '/help': typeof AppHelpRoute
   '/images': typeof AppImagesRoute
-  '/overview': typeof AppOverviewRoute
   '/recommendations': typeof AppRecommendationsRoute
-  '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
   '/soil': typeof AppSoilRoute
   '/settings/profile': typeof AppSettingsProfileRoute
@@ -203,21 +139,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/about': typeof AppAboutRoute
   '/_app/alerts': typeof AppAlertsRoute
-  '/_app/analysis': typeof AppAnalysisRoute
   '/_app/analytics': typeof AppAnalyticsRoute
-  '/_app/care-path': typeof AppCarePathRoute
-  '/_app/crops': typeof AppCropsRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/devices': typeof AppDevicesRoute
-  '/_app/diagnostic': typeof AppDiagnosticRoute
   '/_app/environment': typeof AppEnvironmentRoute
   '/_app/explain': typeof AppExplainRoute
-  '/_app/farms': typeof AppFarmsRoute
   '/_app/help': typeof AppHelpRoute
   '/_app/images': typeof AppImagesRoute
-  '/_app/overview': typeof AppOverviewRoute
   '/_app/recommendations': typeof AppRecommendationsRoute
-  '/_app/reports': typeof AppReportsRoute
   '/_app/risk': typeof AppRiskRoute
   '/_app/soil': typeof AppSoilRoute
   '/_app/settings/profile': typeof AppSettingsProfileRoute
@@ -229,21 +157,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/about'
     | '/alerts'
-    | '/analysis'
     | '/analytics'
-    | '/care-path'
-    | '/crops'
     | '/dashboard'
-    | '/devices'
-    | '/diagnostic'
     | '/environment'
     | '/explain'
-    | '/farms'
     | '/help'
     | '/images'
-    | '/overview'
     | '/recommendations'
-    | '/reports'
     | '/risk'
     | '/soil'
     | '/settings/profile'
@@ -253,21 +173,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/about'
     | '/alerts'
-    | '/analysis'
     | '/analytics'
-    | '/care-path'
-    | '/crops'
     | '/dashboard'
-    | '/devices'
-    | '/diagnostic'
     | '/environment'
     | '/explain'
-    | '/farms'
     | '/help'
     | '/images'
-    | '/overview'
     | '/recommendations'
-    | '/reports'
     | '/risk'
     | '/soil'
     | '/settings/profile'
@@ -278,21 +190,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/about'
     | '/_app/alerts'
-    | '/_app/analysis'
     | '/_app/analytics'
-    | '/_app/care-path'
-    | '/_app/crops'
     | '/_app/dashboard'
-    | '/_app/devices'
-    | '/_app/diagnostic'
     | '/_app/environment'
     | '/_app/explain'
-    | '/_app/farms'
     | '/_app/help'
     | '/_app/images'
-    | '/_app/overview'
     | '/_app/recommendations'
-    | '/_app/reports'
     | '/_app/risk'
     | '/_app/soil'
     | '/_app/settings/profile'
@@ -341,13 +245,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/analysis': {
-      id: '/_app/analysis'
-      path: '/analysis'
-      fullPath: '/analysis'
-      preLoaderRoute: typeof AppAnalysisRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/analytics': {
       id: '/_app/analytics'
       path: '/analytics'
@@ -355,39 +252,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/care-path': {
-      id: '/_app/care-path'
-      path: '/care-path'
-      fullPath: '/care-path'
-      preLoaderRoute: typeof AppCarePathRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/crops': {
-      id: '/_app/crops'
-      path: '/crops'
-      fullPath: '/crops'
-      preLoaderRoute: typeof AppCropsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/devices': {
-      id: '/_app/devices'
-      path: '/devices'
-      fullPath: '/devices'
-      preLoaderRoute: typeof AppDevicesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/diagnostic': {
-      id: '/_app/diagnostic'
-      path: '/diagnostic'
-      fullPath: '/diagnostic'
-      preLoaderRoute: typeof AppDiagnosticRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/environment': {
@@ -404,13 +273,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExplainRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/farms': {
-      id: '/_app/farms'
-      path: '/farms'
-      fullPath: '/farms'
-      preLoaderRoute: typeof AppFarmsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/help': {
       id: '/_app/help'
       path: '/help'
@@ -425,25 +287,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppImagesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/overview': {
-      id: '/_app/overview'
-      path: '/overview'
-      fullPath: '/overview'
-      preLoaderRoute: typeof AppOverviewRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/recommendations': {
       id: '/_app/recommendations'
       path: '/recommendations'
       fullPath: '/recommendations'
       preLoaderRoute: typeof AppRecommendationsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/reports': {
-      id: '/_app/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof AppReportsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/risk': {
@@ -473,21 +321,13 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAboutRoute: typeof AppAboutRoute
   AppAlertsRoute: typeof AppAlertsRoute
-  AppAnalysisRoute: typeof AppAnalysisRoute
   AppAnalyticsRoute: typeof AppAnalyticsRoute
-  AppCarePathRoute: typeof AppCarePathRoute
-  AppCropsRoute: typeof AppCropsRoute
   AppDashboardRoute: typeof AppDashboardRoute
-  AppDevicesRoute: typeof AppDevicesRoute
-  AppDiagnosticRoute: typeof AppDiagnosticRoute
   AppEnvironmentRoute: typeof AppEnvironmentRoute
   AppExplainRoute: typeof AppExplainRoute
-  AppFarmsRoute: typeof AppFarmsRoute
   AppHelpRoute: typeof AppHelpRoute
   AppImagesRoute: typeof AppImagesRoute
-  AppOverviewRoute: typeof AppOverviewRoute
   AppRecommendationsRoute: typeof AppRecommendationsRoute
-  AppReportsRoute: typeof AppReportsRoute
   AppRiskRoute: typeof AppRiskRoute
   AppSoilRoute: typeof AppSoilRoute
   AppSettingsProfileRoute: typeof AppSettingsProfileRoute
@@ -496,21 +336,13 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAboutRoute: AppAboutRoute,
   AppAlertsRoute: AppAlertsRoute,
-  AppAnalysisRoute: AppAnalysisRoute,
   AppAnalyticsRoute: AppAnalyticsRoute,
-  AppCarePathRoute: AppCarePathRoute,
-  AppCropsRoute: AppCropsRoute,
   AppDashboardRoute: AppDashboardRoute,
-  AppDevicesRoute: AppDevicesRoute,
-  AppDiagnosticRoute: AppDiagnosticRoute,
   AppEnvironmentRoute: AppEnvironmentRoute,
   AppExplainRoute: AppExplainRoute,
-  AppFarmsRoute: AppFarmsRoute,
   AppHelpRoute: AppHelpRoute,
   AppImagesRoute: AppImagesRoute,
-  AppOverviewRoute: AppOverviewRoute,
   AppRecommendationsRoute: AppRecommendationsRoute,
-  AppReportsRoute: AppReportsRoute,
   AppRiskRoute: AppRiskRoute,
   AppSoilRoute: AppSoilRoute,
   AppSettingsProfileRoute: AppSettingsProfileRoute,

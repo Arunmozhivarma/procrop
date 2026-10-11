@@ -1,12 +1,88 @@
 import { Link } from "@tanstack/react-router";
 import { Icon } from "@/components/Icon";
 
+const workflow = [
+  {
+    icon: "database",
+    title: "AICRP Data Collection",
+    body: "Weekly Jassid observations per 3 leaves & IMD meteorological data for Coimbatore.",
+  },
+  {
+    icon: "calendar_month",
+    title: "SMW Alignment",
+    body: "Aligning weather parameters and pest counts into Standard Meteorological Weeks (SMW 1–50).",
+  },
+  {
+    icon: "tune",
+    title: "Lag Feature Engineering",
+    body: "Constructing jassid_lag_1, jassid_lag_2 and lagged weather features for temporal context.",
+  },
+  {
+    icon: "timeline",
+    title: "Chronological Split",
+    body: "Time-series validation split preserving week sequence (no random data leakage).",
+  },
+  {
+    icon: "memory",
+    title: "ML Model Training",
+    body: "Random Forest & XGBoost trained for regression and HIGH/LOW risk classification.",
+  },
+  {
+    icon: "psychology",
+    title: "SHAP Explainability",
+    body: "Computing global feature rankings and local feature attributions for every prediction.",
+  },
+  {
+    icon: "pest_control",
+    title: "Next-Week Risk Forecast",
+    body: "Predicting next-week Jassid count and flagging risk against the 1.95 experimental threshold.",
+  },
+  {
+    icon: "checklist",
+    title: "Targeted Action",
+    body: "Recommending timely neem oil spray or scouting entries before canopy damage builds up.",
+  },
+];
+
+const features = [
+  {
+    icon: "biotech",
+    title: "Exp A vs Exp B Comparison",
+    body: "Evaluating weather-only features against weather + historical pest lags to prove history value.",
+  },
+  {
+    icon: "dataset",
+    title: "AICRP & IMD Records",
+    body: "Weekly Jassid counts and weather features for Coimbatore Kharif cotton, stored in the SQLite weekly_observations table.",
+  },
+  {
+    icon: "monitoring",
+    title: "Random Forest & XGBoost",
+    body: "Dual tree-based models evaluated for regression (MAE, RMSE, R²) and classification (Accuracy, F1).",
+  },
+  {
+    icon: "search",
+    title: "SHAP Feature Attribution",
+    body: "Explaining how temperature, humidity, rainfall and Jassid lags push risk higher or lower.",
+  },
+  {
+    icon: "report_problem",
+    title: "1.95 Median Threshold",
+    body: "Data-derived research classification threshold (≥ 1.95 Jassids/3 leaves) for HIGH risk tagging.",
+  },
+  {
+    icon: "location_on",
+    title: "Coimbatore Regional Focus",
+    body: "Restricted strictly to Kharif cotton in Vertisol soils for defensible research accuracy.",
+  },
+];
+
 export function LandingView() {
   return (
     <div className="min-h-screen bg-background flex flex-col justify-between">
       {/* Navigation */}
       <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
               <Icon name="eco" filled />
@@ -19,7 +95,22 @@ export function LandingView() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <nav className="ml-auto hidden items-center gap-6 text-sm font-medium text-foreground/70 md:flex">
+            <a href="#how" className="hover:text-primary transition-colors">
+              How it works
+            </a>
+            <a href="#features" className="hover:text-primary transition-colors">
+              ML Platform
+            </a>
+            <Link to="/about" className="hover:text-primary transition-colors">
+              About project
+            </Link>
+            <Link to="/help" className="hover:text-primary transition-colors">
+              Help
+            </Link>
+          </nav>
+
+          <div className="ml-6 flex items-center gap-3">
             <Link
               to="/auth"
               className="rounded-xl px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted"
@@ -39,72 +130,134 @@ export function LandingView() {
 
       {/* Main Hero Section */}
       <main className="flex-1">
-        <section className="relative overflow-hidden py-16 sm:py-24">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-              <Icon name="auto_awesome" className="text-[15px]" />
-              AI-Driven Pest Forecasting
-            </span>
+        <section className="relative overflow-hidden border-b border-border py-16 sm:py-24">
+          <div className="relative mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                <Icon name="auto_awesome" className="text-[15px]" />
+                TIME-SERIES ML &amp; SHAP EXPLAINABILITY
+              </span>
+              <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+                Prediction of Next-Week Cotton Jassid Risk
+              </h1>
+              <p className="mt-5 max-w-xl text-base text-foreground/75 sm:text-lg">
+                Predicting next-week Jassid activity per 3 leaves for Coimbatore cotton using weather
+                and historical pest records. Powered by XGBoost, Open-Meteo live telemetry, and SHAP explainability.
+              </p>
 
-            <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl">
-              Predict cotton pest risks <br className="hidden sm:inline" />
-              before damage occurs.
-            </h1>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary/90 hover:shadow-lg"
+                >
+                  Explore Jassid Dashboard
+                  <Icon name="arrow_forward" className="text-[18px]" />
+                </Link>
+                <Link
+                  to="/risk"
+                  className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-6 py-3 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+                >
+                  <Icon name="analytics" className="text-[18px] text-primary" />
+                  View Risk Models
+                </Link>
+              </div>
 
-            <p className="mx-auto mt-5 max-w-xl text-base text-foreground/75 sm:text-lg">
-              ProCrop combines weather feeds, field scouting history, and machine learning models to
-              forecast next-week Jassid pressure and recommend timely interventions.
+              <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6">
+                {[
+                  ["SQLite", "Application database"],
+                  ["Live", "Database-backed readings"],
+                  ["≥ 1.95", "Research threshold"],
+                ].map(([v, l]) => (
+                  <div key={l}>
+                    <dt className="font-display text-2xl font-semibold text-primary">{v}</dt>
+                    <dd className="text-xs text-muted-foreground">{l}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            {/* Database-backed dashboard entry */}
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-soft">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Live database view</p>
+              <h2 className="mt-4 font-display text-2xl font-semibold">Your records drive every reading</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Historical observations, weather features, lag columns, and saved predictions are read from SQLite. The dashboard reports when records are unavailable.</p>
+              <Link to="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">Open database dashboard <Icon name="arrow_forward" /></Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Workflow Section */}
+        <section id="how" className="border-b border-border py-20">
+          <div className="mx-auto max-w-6xl px-6">
+            <h2 className="font-display text-3xl font-semibold">How the Jassid ML pipeline works</h2>
+            <p className="mt-3 max-w-2xl text-foreground/70">
+              A time-series ML workflow: weather parameters and historical pest counts are aligned into
+              Standard Meteorological Weeks, evaluated with Random Forest and XGBoost, and explained
+              using SHAP attributions.
             </p>
+            <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {workflow.map((s, i) => (
+                <li
+                  key={s.title}
+                  className="rounded-2xl border border-border bg-surface p-5 shadow-soft"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Icon name={s.icon} />
+                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Stage {i + 1}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-display text-base font-semibold">{s.title}</h3>
+                  <p className="mt-1 text-xs text-foreground/70">{s.body}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        {/* Features Section */}
+        <section id="features" className="border-b border-border bg-surface/50 py-20">
+          <div className="mx-auto max-w-6xl px-6">
+            <h2 className="font-display text-3xl font-semibold">Research &amp; ML Capabilities</h2>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((f) => (
+                <div key={f.title} className="rounded-2xl border border-border bg-surface p-5">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon name={f.icon} />
+                  </span>
+                  <h3 className="mt-4 font-display text-lg font-semibold">{f.title}</h3>
+                  <p className="mt-1 text-sm text-foreground/70">{f.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Call to action */}
+        <section className="py-20">
+          <div className="mx-auto max-w-4xl px-6 text-center">
+            <h2 className="font-display text-4xl font-semibold">
+              Predict next-week pest risk before crop damage occurs.
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-foreground/70">
+              Open the ProCrop dashboard to inspect live Jassid predictions, compare Experiment A vs B
+              performance metrics, and analyze SHAP feature attributions.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
                 to="/dashboard"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary/90 hover:shadow-lg"
+                className="rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90"
               >
-                Go to Dashboard
-                <Icon name="arrow_forward" className="text-[18px]" />
+                Open dashboard
               </Link>
               <Link
                 to="/risk"
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-6 py-3 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+                className="rounded-xl border border-border bg-surface px-6 py-3 font-semibold hover:bg-muted"
               >
-                <Icon name="analytics" className="text-[18px] text-primary" />
-                View Risk Models
+                View Jassid Risk Engine
               </Link>
-            </div>
-
-            {/* Quick 3-card highlights */}
-            <div className="mt-16 grid grid-cols-1 gap-4 text-left sm:grid-cols-3">
-              <div className="rounded-2xl border border-border bg-surface p-5 shadow-soft">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon name="readiness_score" className="text-[20px]" />
-                </span>
-                <h2 className="mt-3 font-display text-base font-semibold">Next-Week Forecast</h2>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  SMW-based classification models predict High / Low risk a week ahead.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-surface p-5 shadow-soft">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon name="psychology" className="text-[20px]" />
-                </span>
-                <h2 className="mt-3 font-display text-base font-semibold">Explainable AI</h2>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  SHAP feature attributions show exact weather and lag factors driving each risk
-                  score.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-surface p-5 shadow-soft">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon name="checklist" className="text-[20px]" />
-                </span>
-                <h2 className="mt-3 font-display text-base font-semibold">Scouting Actions</h2>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  Targeted field advisories and spray windows based on experimental thresholds.
-                </p>
-              </div>
             </div>
           </div>
         </section>
@@ -112,8 +265,8 @@ export function LandingView() {
 
       {/* Clean Minimalist Footer */}
       <footer className="border-t border-border bg-surface py-6">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 text-xs text-muted-foreground">
-          <p>© 2026 ProCrop · TNAU Coimbatore Cotton Research Station</p>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 text-xs text-muted-foreground">
+          <p>© 2026 ProCrop — Machine Learning Cotton Jassid Prediction (Coimbatore, Tamil Nadu).</p>
           <div className="flex items-center gap-5">
             <Link to="/about" className="transition-colors hover:text-foreground">
               About

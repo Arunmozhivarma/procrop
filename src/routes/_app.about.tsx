@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, Panel } from "@/components/procrop/ui";
 import { DataRow } from "@/components/procrop/ui";
+import { useDatasetSummary } from "@/services/queries";
 
 export const Route = createFileRoute("/_app/about")({
   head: () => ({
@@ -23,6 +24,12 @@ export const Route = createFileRoute("/_app/about")({
 });
 
 function AboutPage() {
+  const summary = useDatasetSummary();
+  const storedRows = summary.isPending
+    ? "Loading row count…"
+    : summary.isError
+      ? "row count unavailable"
+      : `${summary.data.total_rows} rows across ${summary.data.years_covered.length} seasons`;
   return (
     <div className="px-5 py-8 md:px-8">
       <PageHeader
@@ -65,9 +72,10 @@ function AboutPage() {
               weather summaries aligned to Standard Meteorological Weeks (SMW).
             </p>
             <p>
-              <span className="font-semibold text-foreground">Datasets:</span>{" "}
-              <code>01_Final_Jassid_Core.xlsx</code> (50 rows) →{" "}
-              <code>02_Jassid_Model_Ready.xlsx</code> (40 rows after lag and target preparation).
+              <span className="font-semibold text-foreground">Storage:</span> model-ready weekly
+              observations (with lag and target columns) live in the{" "}
+              <code>weekly_observations</code> table of the SQLite database — {storedRows}. Saved
+              predictions are in <code>predictions</code> and accounts in <code>users</code>.
             </p>
           </div>
         </Panel>
@@ -110,7 +118,7 @@ function AboutPage() {
 
         <Panel title="Technology" icon="memory" className="lg:col-span-2">
           <div className="grid gap-2 text-sm sm:grid-cols-2">
-            <DataRow label="Backend" value="FastAPI + PostgreSQL" />
+            <DataRow label="Backend" value="FastAPI + SQLite" />
             <DataRow label="Frontend" value="React + TanStack Router" />
             <DataRow label="Tabular models" value="Scikit-learn Random Forest, XGBoost" />
             <DataRow label="Explainability" value="SHAP (feature attributions)" />

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Icon } from "@/components/Icon";
 import { navGroups } from "@/config/navigation";
 import { cn } from "@/lib/utils";
+import { useCurrentUser } from "@/services/queries";
 
 export function Sidebar({
   onNavigate,
@@ -10,6 +11,15 @@ export function Sidebar({
   onNavigate?: () => void;
   className?: string;
 }) {
+  // The account chip shows the signed-in row of the users table, or a sign-in link.
+  const { user, isSignedIn, isLoading } = useCurrentUser();
+
+  const initials = (user?.name ?? "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0]?.toUpperCase())
+    .join("");
   return (
     <aside
       className={cn(
@@ -57,16 +67,26 @@ export function Sidebar({
 
       <div className="shrink-0 border-t border-border/60 p-4">
         <Link
-          to="/settings/profile"
+          to={isSignedIn ? "/settings/profile" : "/auth"}
           onClick={onNavigate}
           className="flex items-center gap-3 rounded-2xl border border-border/80 bg-background/50 px-3 py-2.5 transition-colors hover:bg-muted"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-vitality/20 font-display text-sm font-semibold text-primary">
-            RE
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-semibold text-primary">
+            {initials || <Icon name="person" className="text-[20px]" />}
           </span>
           <span className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-medium">Research User</span>
-            <span className="truncate text-xs text-muted-foreground">TNAU Coimbatore</span>
+            <span className="truncate text-sm font-medium">
+              {user
+                ? user.name
+                : isLoading
+                  ? "Loading account…"
+                  : isSignedIn
+                    ? "Account unavailable"
+                    : "Sign in"}
+            </span>
+            <span className="truncate text-xs text-muted-foreground">
+              {user ? user.email : isSignedIn ? "" : "Not signed in"}
+            </span>
           </span>
         </Link>
       </div>
