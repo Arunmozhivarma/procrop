@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { PageHeader, Panel, StatTile } from "@/components/procrop/ui";
 import { fetchLiveCoimbatoreWeather, type LiveWeatherResponse } from "@/services/api";
+import { toDisplayName } from "@/utils/columnNames";
 
 export const Route = createFileRoute("/_app/environment")({
   head: () => ({
@@ -80,7 +81,6 @@ export default function EnvironmentPage() {
     <div className="px-5 py-8 md:px-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <PageHeader
-          eyebrow="Sense · Atmospheric Inputs"
           title="Daily Weather — Coimbatore"
           description="Real-time agronomic weather parameters retrieved via Open-Meteo API for Coimbatore, Tamil Nadu (11.0168° N, 76.9558° E). Auto-refreshes once every hour."
         />
@@ -192,11 +192,11 @@ export default function EnvironmentPage() {
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-base">functions</span>
-              Model Derived Synthetic Features (Fed to XGBoost)
+              Derived Metrics
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border border-border/70 bg-muted/30 p-3.5">
-                <p className="text-xs text-muted-foreground font-mono">mean_temp_c</p>
+                <p className="text-xs text-muted-foreground font-mono">{toDisplayName("mean_temp_c")}</p>
                 <p className="mt-1 text-xl font-bold text-foreground">
                   {weather.mean_temp_c} °C
                 </p>
@@ -205,7 +205,7 @@ export default function EnvironmentPage() {
                 </p>
               </div>
               <div className="rounded-lg border border-border/70 bg-muted/30 p-3.5">
-                <p className="text-xs text-muted-foreground font-mono">mean_rh_pct</p>
+                <p className="text-xs text-muted-foreground font-mono">{toDisplayName("mean_rh_pct")}</p>
                 <p className="mt-1 text-xl font-bold text-foreground">
                   {weather.mean_rh_pct} %
                 </p>
@@ -216,56 +216,6 @@ export default function EnvironmentPage() {
               </div>
             </div>
           </div>
-
-          {/* Agronomic Meteorological Impact for Cotton Jassid */}
-          <Panel title="Meteorological Jassid Risk Context (Coimbatore Agro-climatic Zone)" icon="biotech">
-            <div className="space-y-4 text-sm text-foreground/80">
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
-                  wb_twilight
-                </span>
-                <div>
-                  <h4 className="font-semibold text-foreground">Temperature & Egg Incubation</h4>
-                  <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
-                    Cotton Jassids (<em>Amrasca biguttula biguttula</em>) flourish optimally when mean
-                    temperatures hover between 26°C and 33°C. Current mean of {weather.mean_temp_c}°C
-                    {weather.mean_temp_c >= 26 && weather.mean_temp_c <= 33
-                      ? " falls directly into the high-risk proliferation bracket."
-                      : " is outside the peak multiplication window."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
-                  water_drop
-                </span>
-                <div>
-                  <h4 className="font-semibold text-foreground">Relative Humidity & Nymph Longevity</h4>
-                  <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
-                    Morning humidity of {weather.rh_morning_pct}%{" "}
-                    {weather.rh_morning_pct > 80
-                      ? "exceeds 80%, providing damp microclimate under broad leaves that prevents early-instar desiccation."
-                      : "remains below critical dampness thresholds, limiting fast multiplication."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
-                  thunderstorm
-                </span>
-                <div>
-                  <h4 className="font-semibold text-foreground">Precipitation Wash-off Effect</h4>
-                  <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
-                    {weather.rainfall_mm > 10
-                      ? `Significant rain (${weather.rainfall_mm} mm) dislodges nymphs from the leaf undersides and knocks adults off canopy.`
-                      : `Low rainfall (${weather.rainfall_mm} mm) creates dry or light moisture conditions where Jassid colonies remain undisturbed on lower leaf surfaces.`}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Panel>
         </div>
       )}
     </div>

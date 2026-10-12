@@ -13,7 +13,10 @@ import {
   useLiveWeather,
   useRecentPredictions,
   useUnifiedPrediction,
+  useDeletePrediction,
 } from "@/services/queries";
+import { formatDateTime } from "@/utils/formatters";
+import { toDisplayName } from "@/utils/columnNames";
 
 export const Route = createFileRoute("/_app/risk")({
   head: () => ({
@@ -41,15 +44,23 @@ function RiskPage() {
   const [previewSrc, setPreviewSrc] = useState<string>("");
 
   // Pipeline Data Sources (live weather API + SQLite tables)
-  const weatherQuery = useLiveWeather();
   const lagsQuery = useLatestObservation();
-  const predictionsQuery = useRecentPredictions(10);
+  const weatherQuery = useLiveWeather();
+  const predictionsQuery = useRecentPredictions(500);
+  const unifiedPrediction = useUnifiedPrediction();
+  const deletePredictionMutation = useDeletePrediction();
+
+  const handleDeletePrediction = (id: number) => {
+    if (confirm("Are you sure you want to delete this prediction?")) {
+      deletePredictionMutation.mutate(id);
+    }
+  };
+
   const liveWeather = weatherQuery.data ?? null;
   const prevWeekData = lagsQuery.data ?? null;
   const recentPredictions = predictionsQuery.data ?? [];
 
   // Status & Output State
-  const unifiedPrediction = useUnifiedPrediction();
   const latestObservationPrediction = useLatestObservationPrediction();
   const loading = unifiedPrediction.isPending || latestObservationPrediction.isPending;
   const fetchingWeather = weatherQuery.isFetching;
@@ -110,7 +121,7 @@ function RiskPage() {
       const res = await unifiedPrediction.mutateAsync(params);
       setUnifiedResult(res);
       setSuccessNotice(
-        `Prediction complete! Risk assessed as ${res.prediction.risk}. Recorded to database table (#ID ${res.db_record.id}).`
+        `Prediction complete! Risk assessed as ${res.prediction.risk}.`
       );
     } catch (err: unknown) {
       setErrorMsg(errorMessage(err));
@@ -134,72 +145,12 @@ function RiskPage() {
   return (
     <div className="px-5 py-8 md:px-8">
       <PageHeader
-        eyebrow="Predict · Unified AI Pipeline"
         title="Cotton Jassid Risk Engine & Vision Intelligence"
-        description="Uses a leaf photo or the latest database Jassid count, combines live weather and stored historical features, runs XGBoost, and saves predictions to SQLite."
+        description="Uses a leaf photo or the latest database Jassid count, combines live weather and stored historical features to predict risk."
       />
 
       {/* Pipeline Status Indicator Strip */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface p-3 text-xs">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold">
-            📷
-          </span>
-          <div>
-            <p className="font-semibold text-foreground">Leaf Vision</p>
-            <p className="text-[11px] text-muted-foreground">Photo upload or DB count</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface p-3 text-xs">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold">
-            🌤️
-          </span>
-          <div>
-            <p className="font-semibold text-foreground">Weather API</p>
-            <p className="text-[11px] text-muted-foreground">
-              {liveWeather ? `${liveWeather.max_temp_c}°C / ${liveWeather.rh_morning_pct}% RH` : "Open-Meteo Live"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface p-3 text-xs">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold">
-            📊
-          </span>
-          <div>
-            <p className="font-semibold text-foreground">Database Lags</p>
-            <p className="text-[11px] text-muted-foreground">
-              {prevWeekData
-                ? `SMW ${prevWeekData.smw ?? "—"} (${prevWeekData.jassid_per_3_leaves}/3l)`
-                : lagsQuery.isPending
-                  ? "Loading..."
-                  : "No observation available"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface p-3 text-xs">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold">
-            💾
-          </span>
-          <div>
-            <p className="font-semibold text-foreground">Prediction DB</p>
-            <p className="text-[11px] text-muted-foreground">
-              {predictionsQuery.isPending
-                ? "Loading..."
-                : predictionsQuery.isError
-                  ? "Unavailable"
-                  : `${recentPredictions.length} recent records`}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Threshold disclaimer */}
-      <div className="mb-6 rounded-xl border border-border bg-muted/40 p-3.5 text-xs text-foreground/75">
-        <span className="font-semibold text-foreground">Classification note: </span>
-        The HIGH / LOW risk threshold of <span className="font-semibold">≥ 1.95 Jassids per 3 leaves</span> is an experimental median-derived rule applied to the Coimbatore dataset. It is <span className="font-semibold">not an official ICAR economic threshold level (ETL)</span>.
       </div>
 
       {/* Feedback Messages */}
@@ -216,9 +167,9 @@ function RiskPage() {
       ) : null}
 
       {/* STEP 1: PEST COUNT (LEAF PHOTO OR LATEST DATABASE OBSERVATION) */}
-      <Panel title="Step 1: Pest Count (Photo or Database)" icon="document_scanner" className="mb-8">
+      <Panel title="Upload Image" icon="document_scanner" className="mb-8">
         <p className="mb-4 text-xs text-muted-foreground">
-          Upload a leaf picture for image analysis, or run the prediction with the latest Jassid count stored in SQLite.
+          Upload a leaf picture for image analysis.
         </p>
 
         {/* Custom Upload Dropzone */}
@@ -226,7 +177,7 @@ function RiskPage() {
           <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-background/40 p-5 text-center">
             <span className="mb-2 text-2xl">📷</span>
             <p className="text-xs font-semibold text-foreground">
-              Or insert custom cotton leaf picture
+              Insert cotton leaf picture
             </p>
             <p className="text-[11px] text-muted-foreground mt-0.5 mb-3">
               Upload underleaf photo (JPG / PNG)
@@ -246,23 +197,12 @@ function RiskPage() {
                 src={previewSrc}
                 alt="Selected Leaf Sample"
                 className="h-full w-full object-cover"
-              /> : <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No photo selected. Database observation will be used for prediction.</div>}
+              /> : <div className="flex h-48 items-center justify-center text-sm text-muted-foreground"></div>}
             </div>
             <div className="flex-1">
               <p className="text-xs font-semibold text-foreground">
-                {customFile ? `Custom: ${customFile.name}` : "Latest database observation"}
+                {customFile ? `Custom: ${customFile.name}` : "No Photo selected."}
               </p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                The latest stored observation is used when no photo is uploaded.
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                  Metric: Jassids / 3 leaves
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  Ready to stream into Model B
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -271,7 +211,7 @@ function RiskPage() {
       {/* STEP 2: PIPELINE INPUTS (WEATHER API + PREVIOUS WEEK DATABASE ROW) */}
       <div className="mb-8 grid gap-6 md:grid-cols-2">
         {/* Live Weather API */}
-        <Panel title="Step 2A: Live Coimbatore Weather (Open-Meteo API)" icon="cloud">
+        <Panel title="Live Coimbatore Weather" icon="cloud">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] text-muted-foreground">
               Real-time atmospheric parameters for Coimbatore Station (11.0168° N, 76.9558° E).
@@ -325,7 +265,7 @@ function RiskPage() {
         </Panel>
 
         {/* Previous Week Data from the database */}
-        <Panel title="Step 2B: Previous Week Lags (SQLite Database)" icon="dataset">
+        <Panel title="Previous Week Lags" icon="dataset">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] text-muted-foreground">
               Lag features (<code className="font-mono">jassid_lag_1</code>, <code className="font-mono">jassid_lag_2</code>) are read from the <code className="font-mono">weekly_observations</code> table.
@@ -350,29 +290,22 @@ function RiskPage() {
               <div className="rounded-xl border border-border bg-background p-2.5">
                 <span className="text-muted-foreground text-[10px] uppercase font-semibold">2 Weeks Ago (Lag 2)</span>
                 <p className="text-sm font-semibold mt-0.5">{prevWeekData.jassid_lag_1 ?? "—"} / 3 leaves</p>
-                <span className="text-[10px] text-muted-foreground">jassid_lag_1</span>
+                <span className="text-[10px] text-muted-foreground">{toDisplayName("jassid_lag_1")}</span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
                 <span className="text-muted-foreground text-[10px] uppercase font-semibold">Prev Max Temp</span>
                 <p className="text-sm font-semibold mt-0.5">{prevWeekData.max_temp_c ?? "—"}°C</p>
-                <span className="text-[10px] text-muted-foreground">max_temp_c_lag_1</span>
+                <span className="text-[10px] text-muted-foreground">{toDisplayName("max_temp_c_lag_1")}</span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
                 <span className="text-muted-foreground text-[10px] uppercase font-semibold">Prev Morning RH</span>
                 <p className="text-sm font-semibold mt-0.5">{prevWeekData.rh_morning_pct ?? "—"}%</p>
-                <span className="text-[10px] text-muted-foreground">rh_morning_lag_1</span>
+                <span className="text-[10px] text-muted-foreground">{toDisplayName("rh_morning_pct_lag_1")}</span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
                 <span className="text-muted-foreground text-[10px] uppercase font-semibold">Prev Rainfall</span>
                 <p className="text-sm font-semibold mt-0.5">{prevWeekData.rainfall_mm ?? "—"} mm</p>
-                <span className="text-[10px] text-muted-foreground">rainfall_lag_1</span>
-              </div>
-              <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Data Source</span>
-                <p className="truncate text-xs font-semibold mt-0.5" title={prevWeekData.source}>
-                  {prevWeekData.source.split("(")[0]}
-                </p>
-                <span className="text-[10px] text-primary">weekly_observations</span>
+                <span className="text-[10px] text-muted-foreground">{toDisplayName("rainfall_mm_lag_1")}</span>
               </div>
             </div>
           ) : lagsQuery.isPending ? (
@@ -399,16 +332,7 @@ function RiskPage() {
           disabled={loading}
           className="rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-soft transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-50"
         >
-          {loading ? "Analyzing Image & Forecasting Risk..." : "⚡ Predict Next-Week Risk (Image Count + Weather API + Database Lags)"}
-        </button>
-
-        <button
-          type="button"
-          onClick={handlePredictLatestObservation}
-          disabled={loading}
-          className="rounded-2xl border border-border bg-surface px-5 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-50"
-        >
-          {loading ? "Computing..." : "📊 Predict on Latest Database Observation"}
+          {loading ? "Analyzing Image & Forecasting Risk..." : "⚡ Predict Next-Week Risk"}
         </button>
       </div>
 
@@ -419,9 +343,6 @@ function RiskPage() {
             {/* Header Result Card */}
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
               <div>
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary uppercase">
-                  {unifiedResult.prediction.model_used}
-                </span>
                 <div className="mt-2 flex items-baseline gap-3">
                   <span className="font-display text-5xl font-extrabold text-foreground">
                     {unifiedResult.prediction.predicted_next_week_jassid}
@@ -442,9 +363,6 @@ function RiskPage() {
                 >
                   {unifiedResult.prediction.risk} RISK (Threshold ≥ {unifiedResult.prediction.risk_threshold})
                 </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Recorded in DB: Table <code className="font-mono">predictions</code> (#ID {unifiedResult.db_record.id})
-                </span>
               </div>
             </div>
 
@@ -462,7 +380,7 @@ function RiskPage() {
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-3.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Previous Week History (Database)</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Previous Week History</p>
                 <p className="text-2xl font-bold mt-1">
                   {unifiedResult.previous_week_data.jassid_per_3_leaves}{" "}
                   <span className="text-xs font-normal text-muted-foreground">/ 3 leaves (Lag 1)</span>
@@ -483,60 +401,6 @@ function RiskPage() {
                 </p>
               </div>
             </div>
-
-            {/* Canopy Symptoms Derived from Pest Count */}
-            {unifiedResult.vision_analysis?.symptoms && unifiedResult.vision_analysis.symptoms.length > 0 ? (
-              <div className="mb-5 rounded-xl border border-border bg-muted/30 p-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                  Canopy Diagnostic & Symptoms ({unifiedResult.vision_analysis?.severity} Severity)
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2 text-xs">
-                  {unifiedResult.vision_analysis.symptoms.map((sym) => (
-                    <div key={sym.title}>
-                      <p className="font-semibold text-foreground">• {sym.title}</p>
-                      <p className="text-muted-foreground mt-0.5">{sym.body}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {/* Dynamic SHAP Explanations */}
-            {unifiedResult.prediction.explanation && unifiedResult.prediction.explanation.length > 0 ? (
-              <div>
-                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Dynamic SHAP Feature Attributions (Factors Driving Next-Week Population)
-                </p>
-                <div className="space-y-2">
-                  {unifiedResult.prediction.explanation.map((item) => (
-                    <div key={item.feature} className="flex items-center gap-3 text-xs">
-                      <span className="w-52 shrink-0 font-medium text-foreground/80">{item.feature}</span>
-                      <span className="w-16 shrink-0 text-muted-foreground">
-                        {item.value ?? "-"}
-                      </span>
-                      <div className="h-2.5 flex-1 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${
-                            item.contribution >= 0 ? "bg-risk-high" : "bg-risk-low"
-                          }`}
-                          style={{
-                            width: `${Math.min(100, Math.max(10, Math.abs(item.contribution) * 60))}%`,
-                          }}
-                        />
-                      </div>
-                      <span
-                        className={`w-16 shrink-0 text-right font-bold ${
-                          item.contribution >= 0 ? "text-risk-high" : "text-risk-low"
-                        }`}
-                      >
-                        {item.contribution >= 0 ? "+" : ""}
-                        {item.contribution.toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </Panel>
         </div>
       ) : null}
@@ -545,7 +409,7 @@ function RiskPage() {
       {latestObservationResult ? (
         <div className="mb-8 rounded-2xl border border-primary/30 bg-surface p-5">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Latest Database Observation Output ({latestObservationResult.model_used})
+            Latest Database Observation Output
           </p>
           <div className="mt-2 flex items-baseline justify-between">
             <div className="flex items-baseline gap-3">
@@ -564,9 +428,9 @@ function RiskPage() {
       ) : null}
 
       {/* STEP 5: PREDICTIONS DATABASE TABLE (PERSISTENCE LOG) */}
-      <Panel title="Step 4: Predictions Database Table (SQLite Persistent History)" icon="database">
+      <Panel title="Predictions Table" icon="database">
         <p className="mb-4 text-xs text-muted-foreground">
-          Every prediction triggered from leaf photo analysis, live weather, and database lags is logged directly into the <code className="font-mono">predictions</code> database table.
+          Every prediction triggered from leaf photo analysis, live weather, and database lags is logged directly into the table.
         </p>
 
         {predictionsQuery.isPending ? (
@@ -582,7 +446,7 @@ function RiskPage() {
             <table className="w-full text-left text-xs">
               <thead className="border-b border-border bg-muted/50 text-[10px] uppercase font-bold text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2.5">ID</th>
+                  <th className="px-3 py-2.5">#</th>
                   <th className="px-3 py-2.5">Timestamp</th>
                   <th className="px-3 py-2.5">Leaf Sample / Source</th>
                   <th className="px-3 py-2.5">Detected Jassid</th>
@@ -590,13 +454,21 @@ function RiskPage() {
                   <th className="px-3 py-2.5">Weather (Max T / RH)</th>
                   <th className="px-3 py-2.5">Predicted Next Week</th>
                   <th className="px-3 py-2.5">Risk Level</th>
+                  <th className="px-3 py-2.5">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60 bg-surface">
-                {recentPredictions.map((row) => (
+                {recentPredictions.map((row, index) => (
                   <tr key={row.id} className="hover:bg-muted/30">
-                    <td className="px-3 py-2 font-mono font-semibold text-primary">#{row.id}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{row.created_at}</td>
+                    <td className="px-3 py-2 font-mono font-semibold text-primary" title={`Prediction ID: #${row.id}`}>
+                      {recentPredictions.length - index}
+                    </td>
+                    <td
+                      className="px-3 py-2 whitespace-nowrap text-muted-foreground"
+                      title={row.created_at ? `${row.created_at} UTC` : undefined}
+                    >
+                      {formatDateTime(row.created_at)}
+                    </td>
                     <td className="px-3 py-2 font-medium">{row.image_name}</td>
                     <td className="px-3 py-2 font-semibold text-foreground">
                       {row.detected_jassid} / 3l
@@ -618,6 +490,15 @@ function RiskPage() {
                       >
                         {row.risk}
                       </span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <button
+                        onClick={() => handleDeletePrediction(row.id)}
+                        disabled={deletePredictionMutation.isPending}
+                        className="rounded-lg border border-destructive/30 bg-destructive/10 px-2 py-1 text-[10px] font-semibold text-destructive hover:bg-destructive/20 disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}

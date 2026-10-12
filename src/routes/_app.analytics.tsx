@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ErrorState, LoadingBlock, PageHeader, Panel } from "@/components/procrop/ui";
 import { errorMessage } from "@/services/api";
 import { useDatasetSummary } from "@/services/queries";
+import { toDisplayName } from "@/utils/columnNames";
 
 export const Route = createFileRoute("/_app/analytics")({ component: AnalyticsPage });
 
@@ -17,9 +18,9 @@ function AnalyticsPage() {
           <Metric label="Years covered" value={data.years_covered.join(", ") || "—"} />
         </div>
         <h3 className="mt-6 font-semibold">Database columns</h3>
-        <div className="mt-2 flex flex-wrap gap-2">{data.columns.map((c) => <code key={c} className="rounded bg-muted px-2 py-1 text-xs">{c}</code>)}</div>
+        <div className="mt-2 flex flex-wrap gap-2">{data.columns.map((c) => <code key={c} className="rounded bg-muted px-2 py-1 text-xs" title={c}>{toDisplayName(c)}</code>)}</div>
         <h3 className="mt-6 font-semibold">Latest observations</h3>
-        {!data.sample_records.length ? <p className="mt-2 text-sm text-muted-foreground">No rows are stored in weekly_observations.</p> : <div className="mt-2 overflow-auto"><table className="min-w-full text-left text-xs"><thead><tr>{data.columns.map((c) => <th key={c} className="px-2 py-2">{c}</th>)}</tr></thead><tbody>{data.sample_records.map((row, i) => <tr key={String(row["id"] ?? i)} className="border-t">{data.columns.map((c) => <td key={c} className="whitespace-nowrap px-2 py-2">{String(row[c] ?? "—")}</td>)}</tr>)}</tbody></table></div>}
+        {!data.sample_records.length ? <p className="mt-2 text-sm text-muted-foreground">No rows are stored in weekly_observations.</p> : <div className="mt-2 overflow-auto"><table className="min-w-full text-left text-xs"><thead><tr>{data.columns.map((c) => <th key={c} className="px-2 py-2">{toDisplayName(c)}</th>)}</tr></thead><tbody>{data.sample_records.map((row, i) => <tr key={String(row["id"] ?? i)} className="border-t">{data.columns.map((c) => <td key={c} className="whitespace-nowrap px-2 py-2">{String(row[c] ?? "—")}</td>)}</tr>)}</tbody></table></div>}
       </>}
     </Panel>
   </div>;

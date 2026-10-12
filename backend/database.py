@@ -117,7 +117,7 @@ def get_latest_previous_week_data():
         row = conn.execute("""
             SELECT * FROM weekly_observations
             WHERE jassid_per_3_leaves IS NOT NULL
-            ORDER BY report_year DESC, smw DESC, id DESC LIMIT 1
+            ORDER BY created_at DESC LIMIT 1
         """).fetchone()
 
     if not row:
@@ -233,6 +233,17 @@ def get_latest_prediction():
     """Returns the most recently saved prediction, or None when the table is empty."""
     rows = get_recent_predictions(limit=1)
     return rows[0] if rows else None
+
+def delete_prediction(prediction_id: int) -> bool:
+    """
+    Deletes a prediction by ID from the predictions table.
+    Returns True if a row was deleted, False if not found.
+    """
+    with closing(get_connection()) as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM predictions WHERE id = ?", (prediction_id,))
+        conn.commit()
+        return cursor.rowcount > 0
 
 def normalize_email(email: str) -> str:
     return email.strip().lower()

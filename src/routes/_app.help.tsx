@@ -23,7 +23,6 @@ function HelpPage() {
   return (
     <div className="px-5 py-8 md:px-8">
       <PageHeader
-        eyebrow="Manage"
         title="Help & guidance"
         description="How the ProCrop workflow behaves and answers to common questions."
       />

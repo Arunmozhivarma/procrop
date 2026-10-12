@@ -81,9 +81,8 @@ function SettingsProfilePage() {
   return (
     <div className="px-5 py-8 md:px-8">
       <PageHeader
-        eyebrow="Manage"
-        title="Settings & Workspace Preferences"
-        description="User identity, agro-climatic parameters, telemetry automation, and research station configurations."
+        title="Settings"
+        description=" About User."
       />
 
       {savedSuccess && (
@@ -210,13 +209,6 @@ function SettingsProfilePage() {
               </div>
             </form>
           )}
-        </Panel>
-
-        <Panel title="Additional settings" icon="settings">
-          <p className="text-sm text-muted-foreground">
-            Regional preferences, farm infrastructure, and telemetry settings are not stored in the
-            current database schema.
-          </p>
         </Panel>
       </div>
     </div>

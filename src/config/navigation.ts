@@ -27,7 +27,6 @@ export const navGroups = [
     label: "Predict & explain",
     items: [
       { to: "/risk", label: "Risk engine", icon: "readiness_score" },
-      { to: "/images", label: "Image analysis", icon: "document_scanner" },
       { to: "/explain", label: "Explainability", icon: "psychology" },
     ],
   },

@@ -260,6 +260,11 @@ export function fetchLatestPrediction(): Promise<SavedPredictionRecord | null> {
   return requestOrNull("/predictions/latest");
 }
 
+/** Delete a prediction by ID */
+export function deletePrediction(id: number): Promise<void> {
+  return request(`/predictions/${id}`, { method: "DELETE" });
+}
+
 export function analyzeLeafPhoto(file: File): Promise<VisionDetectionResult> {
   const formData = new FormData();
   formData.append("file", file);

@@ -127,7 +127,6 @@ function SoilPage() {
   return (
     <div className="px-5 py-8 md:px-8">
       <PageHeader
-        eyebrow="Sense · Pedology & Soil Science"
         title="Coimbatore Cotton Soils & Agronomic Benefits"
         description="Soil characteristics, regional distribution, and crop benefits for cotton cultivation across Coimbatore district — explaining their direct role in plant vigor and Jassid tolerance."
       />

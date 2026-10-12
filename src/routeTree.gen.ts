@@ -19,7 +19,6 @@ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppEnvironmentRouteImport } from './routes/_app.environment'
 import { Route as AppExplainRouteImport } from './routes/_app.explain'
 import { Route as AppHelpRouteImport } from './routes/_app.help'
-import { Route as AppImagesRouteImport } from './routes/_app.images'
 import { Route as AppRecommendationsRouteImport } from './routes/_app.recommendations'
 import { Route as AppRiskRouteImport } from './routes/_app.risk'
 import { Route as AppSoilRouteImport } from './routes/_app.soil'
@@ -74,11 +73,6 @@ const AppHelpRoute = AppHelpRouteImport.update({
   path: '/help',
   getParentRoute: () => AppRoute,
 } as any)
-const AppImagesRoute = AppImagesRouteImport.update({
-  id: '/images',
-  path: '/images',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppRecommendationsRoute = AppRecommendationsRouteImport.update({
   id: '/recommendations',
   path: '/recommendations',
@@ -110,7 +104,6 @@ export interface FileRoutesByFullPath {
   '/environment': typeof AppEnvironmentRoute
   '/explain': typeof AppExplainRoute
   '/help': typeof AppHelpRoute
-  '/images': typeof AppImagesRoute
   '/recommendations': typeof AppRecommendationsRoute
   '/risk': typeof AppRiskRoute
   '/soil': typeof AppSoilRoute
@@ -126,7 +119,6 @@ export interface FileRoutesByTo {
   '/environment': typeof AppEnvironmentRoute
   '/explain': typeof AppExplainRoute
   '/help': typeof AppHelpRoute
-  '/images': typeof AppImagesRoute
   '/recommendations': typeof AppRecommendationsRoute
   '/risk': typeof AppRiskRoute
   '/soil': typeof AppSoilRoute
@@ -144,7 +136,6 @@ export interface FileRoutesById {
   '/_app/environment': typeof AppEnvironmentRoute
   '/_app/explain': typeof AppExplainRoute
   '/_app/help': typeof AppHelpRoute
-  '/_app/images': typeof AppImagesRoute
   '/_app/recommendations': typeof AppRecommendationsRoute
   '/_app/risk': typeof AppRiskRoute
   '/_app/soil': typeof AppSoilRoute
@@ -162,7 +153,6 @@ export interface FileRouteTypes {
     | '/environment'
     | '/explain'
     | '/help'
-    | '/images'
     | '/recommendations'
     | '/risk'
     | '/soil'
@@ -178,7 +168,6 @@ export interface FileRouteTypes {
     | '/environment'
     | '/explain'
     | '/help'
-    | '/images'
     | '/recommendations'
     | '/risk'
     | '/soil'
@@ -195,7 +184,6 @@ export interface FileRouteTypes {
     | '/_app/environment'
     | '/_app/explain'
     | '/_app/help'
-    | '/_app/images'
     | '/_app/recommendations'
     | '/_app/risk'
     | '/_app/soil'
@@ -280,13 +268,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHelpRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/images': {
-      id: '/_app/images'
-      path: '/images'
-      fullPath: '/images'
-      preLoaderRoute: typeof AppImagesRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/recommendations': {
       id: '/_app/recommendations'
       path: '/recommendations'
@@ -326,7 +307,6 @@ interface AppRouteChildren {
   AppEnvironmentRoute: typeof AppEnvironmentRoute
   AppExplainRoute: typeof AppExplainRoute
   AppHelpRoute: typeof AppHelpRoute
-  AppImagesRoute: typeof AppImagesRoute
   AppRecommendationsRoute: typeof AppRecommendationsRoute
   AppRiskRoute: typeof AppRiskRoute
   AppSoilRoute: typeof AppSoilRoute
@@ -341,7 +321,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppEnvironmentRoute: AppEnvironmentRoute,
   AppExplainRoute: AppExplainRoute,
   AppHelpRoute: AppHelpRoute,
-  AppImagesRoute: AppImagesRoute,
   AppRecommendationsRoute: AppRecommendationsRoute,
   AppRiskRoute: AppRiskRoute,
   AppSoilRoute: AppSoilRoute,

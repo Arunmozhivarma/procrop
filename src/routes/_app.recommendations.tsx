@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  ButtonLink,
   EmptyState,
   LoadingBlock,
   PageHeader,
@@ -8,22 +7,23 @@ import {
   RiskBadge,
 } from "@/components/procrop/ui";
 import { errorMessage } from "@/services/api";
-import { useLatestPrediction, useLiveWeather } from "@/services/queries";
+import { useRecentPredictions, useLiveWeather } from "@/services/queries";
+import { formatDateTime } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/recommendations")({
   head: () => ({
     meta: [
-      { title: "Dynamic Jassid Recommendations — ProCrop" },
+      { title: "Jassid Management Recommendations — ProCrop" },
       {
         name: "description",
         content:
-          "Daily dynamic spray and management recommendations for Coimbatore cotton based on previous records' ML pest predictions and live rainfall data.",
+          "Actionable recommendations for Coimbatore cotton based on ML pest predictions and live weather data.",
       },
-      { property: "og:title", content: "Dynamic Jassid Recommendations — ProCrop" },
+      { property: "og:title", content: "Jassid Management Recommendations — ProCrop" },
       {
         property: "og:description",
         content:
-          "Daily dynamic spray and management recommendations for Coimbatore cotton based on previous records' ML pest predictions and live rainfall data.",
+          "Actionable recommendations for Coimbatore cotton based on ML pest predictions and live weather data.",
       },
     ],
   }),
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_app/recommendations")({
 
 interface ActionRecommendation {
   id: string;
-  category: "Chemical Control" | "Bio-Pesticide & Botanicals" | "Cultural & Traps" | "Water & Canopy" | "Field Scouting";
+  category: "Chemical Control" | "Botanical Control" | "Cultural Control" | "Field Scouting";
   title: string;
   prescription: string;
   rationale: string;
@@ -43,360 +43,276 @@ interface ActionRecommendation {
 }
 
 export default function RecommendationsPage() {
-  // The latest prediction saved in the predictions table drives the plan; this page never creates one.
-  const predictionQuery = useLatestPrediction();
+  const predictionsQuery = useRecentPredictions(5);
   const weatherQuery = useLiveWeather();
-  const prediction = predictionQuery.data ?? null;
+  const predictions = predictionsQuery.data ?? [];
   const weather = weatherQuery.data ?? null;
-  const loading = predictionQuery.isFetching || weatherQuery.isFetching;
-  const initialLoading = predictionQuery.isPending || weatherQuery.isPending;
-  const failedQuery = [weatherQuery, predictionQuery].find((q) => q.isError);
+  const loading = predictionsQuery.isFetching || weatherQuery.isFetching;
+  const initialLoading = predictionsQuery.isPending || weatherQuery.isPending;
+  const failedQuery = [weatherQuery, predictionsQuery].find((q) => q.isError);
   const error = failedQuery ? errorMessage(failedQuery.error) : null;
-  const lastRefreshed = weatherQuery.dataUpdatedAt ? new Date(weatherQuery.dataUpdatedAt) : null;
 
   const loadData = () => {
-    predictionQuery.refetch();
+    predictionsQuery.refetch();
     weatherQuery.refetch();
   };
 
-  // Generate dynamic recommendations based on predicted risk and rainfall
-  const isHighRisk = prediction ? prediction.risk === "HIGH" || prediction.predicted_next_week_jassid >= prediction.risk_threshold : false;
-  const rainfall = weather?.rainfall_mm ?? null;
-  const isRainyDay = rainfall !== null && rainfall >= 5.0;
-  const windSpeed = weather?.wind_speed_kmh ?? null;
-
-  const getDynamicRecommendations = (): ActionRecommendation[] => {
+  // Generate recommendations for a specific prediction based on its risk and current weather
+  const getRecommendationsForPrediction = (prediction: any): { recommendations: ActionRecommendation[], basis: string } => {
     const list: ActionRecommendation[] = [];
+    const predictedCount = prediction.predicted_next_week_jassid;
+    const threshold = prediction.risk_threshold || 1.95;
+    const riskLevel = prediction.risk;
+    const rainfall = weather?.rainfall_mm ?? null;
+    const isRainyDay = rainfall !== null && rainfall >= 5.0;
+    const isHeavyRain = rainfall !== null && rainfall >= 15.0;
+    const windSpeed = weather?.wind_speed_kmh ?? null;
+    const isWindy = windSpeed !== null && windSpeed > 12;
+    const rhMorning = weather?.rh_morning_pct ?? null;
+    const isHighHumidity = rhMorning !== null && rhMorning > 80;
 
-    // 1. Chemical Management
-    if (isHighRisk) {
-      if (isRainyDay) {
+    // Determine risk severity based on predicted count
+    let riskSeverity: "CRITICAL" | "HIGH" | "MODERATE" | "LOW";
+    if (predictedCount >= threshold * 1.5) {
+      riskSeverity = "CRITICAL";
+    } else if (predictedCount >= threshold) {
+      riskSeverity = "HIGH";
+    } else if (predictedCount >= threshold * 0.7) {
+      riskSeverity = "MODERATE";
+    } else {
+      riskSeverity = "LOW";
+    }
+
+    // Build basis explanation
+    const basisParts = [
+      `Predicted Jassid count: ${predictedCount} / 3 leaves (threshold: ${threshold})`,
+      `Risk severity: ${riskSeverity}`,
+      rainfall !== null ? `Current rainfall: ${rainfall} mm${isRainyDay ? " (rainy day)" : ""}` : null,
+      windSpeed !== null ? `Wind speed: ${windSpeed} km/h${isWindy ? " (high wind)" : ""}` : null,
+      rhMorning !== null ? `Morning humidity: ${rhMorning}%${isHighHumidity ? " (high humidity)" : ""}` : null,
+    ].filter(Boolean);
+
+    const basis = basisParts.join(" · ");
+
+    // 1. Chemical Management - Indian context with locally available pesticides
+    if (riskSeverity === "CRITICAL" || riskSeverity === "HIGH") {
+      if (isHeavyRain) {
         list.push({
-          id: "chem-rain-delay",
+          id: `chem-heavy-rain-${prediction.id}`,
           category: "Chemical Control",
-          title: "Hold Chemical Foliar Spray (Rain Wash-off Risk)",
-          prescription:
-            "POSTPONE any synthetic systemic insecticide spray (Flonicamid 50 WG / Dinotefuran 20 SG).",
-          rationale: `Live precipitation is ${rainfall} mm. Downpours wash off foliar residues before translaminar absorption can occur. Rainfall itself provides mechanical knockdown of young Jassid nymphs.`,
-          timing: "Wait 24–48 hours until rainfall ceases and foliage dries completely.",
+          title: "Hold All Sprays - Heavy Rain",
+          prescription: "Postpone all insecticide sprays. Heavy rain will wash off chemicals.",
+          rationale: `${rainfall}mm rainfall exceeds safe spray limit. Wait for dry conditions.`,
+          timing: "Wait 2-3 days after rain stops",
+          priority: "High",
+          status: "Conditional / On Hold",
+          icon: "thunderstorm",
+        });
+      } else if (isRainyDay) {
+        list.push({
+          id: `chem-rain-delay-${prediction.id}`,
+          category: "Chemical Control",
+          title: "Delay Spray - Rain Expected",
+          prescription: "Postpone spray until rain stops and leaves dry completely.",
+          rationale: `${rainfall}mm rain will wash off spray. Rain itself knocks down nymphs naturally.`,
+          timing: "Wait 24-48 hours after rain",
           priority: "High",
           status: "Conditional / On Hold",
           icon: "hourglass_top",
         });
-      } else if (windSpeed !== null && windSpeed > 12) {
+      } else if (isWindy) {
         list.push({
-          id: "chem-wind-delay",
+          id: `chem-wind-delay-${prediction.id}`,
           category: "Chemical Control",
-          title: "Delay Spraying to Early Morning (Wind Drift Hazard)",
-          prescription:
-            "Apply Flonicamid 50 WG @ 0.3 g/L or Dinotefuran 20 SG @ 0.2 g/L with hollow cone nozzles.",
-          rationale: `Wind velocity is currently ${windSpeed} km/h. High winds cause pesticide drift away from target foliage. Apply early between 6:30 AM – 9:00 AM when wind drops below 8 km/h.`,
-          timing: "Early morning calm window (Tomorrow 07:00 AM).",
+          title: "Spray Early Morning - High Wind",
+          prescription: "Spray Imidacloprid 17.8 SL or Thiamethoxam 25 WG @ 0.5ml/L during calm hours.",
+          rationale: `${windSpeed}km/h wind causes spray drift. Spray 6-8 AM when wind is low.`,
+          timing: "Tomorrow 6-8 AM",
           priority: "High",
           status: "Immediate Action",
           icon: "air",
         });
       } else {
         list.push({
-          id: "chem-immediate",
+          id: `chem-immediate-${prediction.id}`,
           category: "Chemical Control",
-          title: "Targeted ETL Chemical Spray Application",
-          prescription:
-            "Spray Flonicamid 50 WG @ 0.3 g/litre (60 g/acre) or Clothianidin 50 WDG @ 0.05 g/litre.",
-          rationale: `Predicted Jassid count (${prediction?.predicted_next_week_jassid ?? "—"} / 3 leaves) breaches the research threshold (1.95). Dry weather (${rainfall ?? "—"} mm rain) allows residue uptake on leaf undersides.`,
-          timing: "Within next 24 to 36 hours during calm hours.",
+          title: riskSeverity === "CRITICAL" ? "Emergency Spray Required" : "ETL Spray Recommended",
+          prescription: riskSeverity === "CRITICAL"
+            ? "Spray Imidacloprid 17.8 SL @ 0.6ml/L or Acetamiprid 20 SP @ 0.5g/L with sticker."
+            : "Spray Imidacloprid 17.8 SL @ 0.5ml/L or Thiamethoxam 25 WG @ 0.5g/L.",
+          rationale: `Count ${predictedCount}/3 leaves ${riskSeverity === "CRITICAL" ? "very high" : "above"} threshold (${threshold}). Dry conditions suitable for spraying.`,
+          timing: "Within 24-36 hours, calm weather",
           priority: "High",
           status: "Immediate Action",
           icon: "vaccines",
         });
       }
+    } else if (riskSeverity === "MODERATE") {
+      list.push({
+        id: `chem-monitor-${prediction.id}`,
+        category: "Chemical Control",
+        title: "Monitor - No Spray Yet",
+        prescription: "Don't spray. Scout field to check actual pest levels.",
+        rationale: `Count ${predictedCount}/3 leaves below threshold. Natural enemies may control pests.`,
+        timing: "Re-check in 3-5 days",
+        priority: "Medium",
+        status: "Conditional / On Hold",
+        icon: "visibility",
+      });
     } else {
       list.push({
-        id: "chem-low-risk",
+        id: `chem-low-risk-${prediction.id}`,
         category: "Chemical Control",
-        title: "No Chemical Insecticide Required (Below ETL)",
-        prescription: "Withhold synthetic chemical sprays. Conserve natural predators and parasitoids.",
-        rationale: `Model predicts Jassid levels of ${prediction?.predicted_next_week_jassid ?? "—"} / 3 leaves. Preserve predatory Ladybird beetles (Coccinella) and Chrysoperla lacewings for natural suppression.`,
-        timing: "Re-evaluate next scheduled SMW forecast.",
+        title: "No Spray Needed",
+        prescription: "No chemical spray required. Conserve natural enemies.",
+        rationale: `Count ${predictedCount}/3 leaves well below threshold. Ladybirds and lacewings will control pests.`,
+        timing: "Weekly monitoring",
         priority: "Low",
         status: "Standard Maintenance",
         icon: "shield",
       });
     }
 
-    // 2. Botanical / Bio-pesticides
-    if (isHighRisk && !isRainyDay) {
-      list.push({
-        id: "bio-neem-active",
-        category: "Bio-Pesticide & Botanicals",
-        title: "Foliar Application of Neem Formulation (NSKE 5%)",
-        prescription:
-          "Spray Neem Seed Kernel Extract (NSKE 5%) or Azadirachtin 10,000 ppm @ 1.0 ml/litre of water.",
-        rationale:
-          "Acts as an anti-feedant, oviposition deterrent, and insect growth regulator (IGR), arresting nymphal molting on tender flush leaves without harming pollinators.",
-        timing: "Late afternoon (4:30 PM – 6:00 PM) to avoid UV photolysis of Azadirachtin.",
-        priority: "High",
-        status: "Immediate Action",
-        icon: "eco",
-      });
-    } else if (isHighRisk && isRainyDay) {
-      list.push({
-        id: "bio-neem-standby",
-        category: "Bio-Pesticide & Botanicals",
-        title: "Prepare Botanical Spray Tank for Post-Rain Application",
-        prescription:
-          "Prepare 5% NSKE stock solution. Add sticking agent (Teepol or Sandovit @ 0.5 ml/L) once skies clear.",
-        rationale:
-          "Post-rain high humidity accelerates secondary egg hatching. Applying botanical anti-feedants once rain clears prevents rebound multiplication.",
-        timing: "Immediately once rainfall ceases and sun breaks through.",
-        priority: "Medium",
-        status: "Conditional / On Hold",
-        icon: "science",
-      });
-    } else {
-      list.push({
-        id: "bio-preventive",
-        category: "Bio-Pesticide & Botanicals",
-        title: "Prophylactic Neem Oil Application",
-        prescription: "Foliar mist of cold-pressed Neem Oil 3% (30 ml/L) + soap solution.",
-        rationale:
-          "Repels sporadic alate adults migrating from neighboring pulses or weed hosts (Abutilon indicum).",
-        timing: "Routine maintenance cycle.",
-        priority: "Low",
-        status: "Standard Maintenance",
-        icon: "spa",
-      });
+    // 2. Botanical - Indian farmers commonly use neem
+    if (riskSeverity === "CRITICAL" || riskSeverity === "HIGH") {
+      if (!isRainyDay) {
+        list.push({
+          id: `bio-neem-active-${prediction.id}`,
+          category: "Botanical Control",
+          title: "Neem Seed Kernel Extract (NSKE) Spray",
+          prescription: "Spray 5% NSKE (5kg neem kernel powder in 100L water) with sticker.",
+          rationale: "Neem acts as anti-feedant and growth regulator. Safe for beneficial insects.",
+          timing: "Evening 4-6 PM",
+          priority: "High",
+          status: "Immediate Action",
+          icon: "eco",
+        });
+      }
     }
 
-    // 3. Cultural & Trap Practices
+    // 3. Cultural Practices - Simple Indian farming practices
     list.push({
-      id: "traps-sticky",
-      category: "Cultural & Traps",
-      title: isRainyDay
-        ? "Inspect & Refresh Yellow Sticky Traps Post-Rain"
-        : "Deploy Yellow Sticky Traps across Canopy Line",
-      prescription: "Install 10 to 12 yellow sticky traps per acre at 15 cm above the cotton crop canopy.",
-      rationale: isRainyDay
-        ? `Recent rainfall (${rainfall} mm) may wash mud onto trap glue. Wipe clean or replace sticky cards to maintain flight monitoring.`
-        : "Adult Jassids are strongly phototactic to yellow wavelengths. Trapping directly suppresses adult reproductive pairs and signals population surges.",
-      timing: isRainyDay ? "After rain shower concludes" : "Active field installation",
-      priority: isHighRisk ? "High" : "Medium",
+      id: `traps-sticky-${prediction.id}`,
+      category: "Cultural Control",
+      title: "Yellow Sticky Traps",
+      prescription: "Install 10-12 yellow sticky traps per acre, 15cm above canopy.",
+      rationale: "Jassids attracted to yellow color. Traps reduce adult population.",
+      timing: "Install immediately",
+      priority: riskSeverity === "CRITICAL" || riskSeverity === "HIGH" ? "High" : "Medium",
       status: "Immediate Action",
       icon: "wb_incandescent",
     });
 
-    // 4. Water & Soil Management
-    if (isRainyDay) {
-      list.push({
-        id: "water-drainage",
-        category: "Water & Canopy",
-        title: "Clear Drainage Furrows in Black Soil (Vertisols)",
-        prescription: "Inspect field ditches and ensure drain outlets are cleared to remove standing rain water.",
-        rationale: `With ${rainfall} mm rain in Coimbatore, heavy montmorillonite clay soils swell rapidly. Prolonged water stagnation causes root hypoxia and weakens plant immunity.`,
-        timing: "Same-day immediate field round.",
-        priority: "High",
-        status: "Immediate Action",
-        icon: "water",
-      });
-    } else {
-      list.push({
-        id: "water-nutrition",
-        category: "Water & Canopy",
-        title: "Balanced Potassium Nutrition to Toughen Leaf Cuticle",
-        prescription: "Apply MOP (Muriate of Potash) @ 25 kg/ha or foliar spray 1% KNO3 (Potassium Nitrate).",
-        rationale:
-          "Adequate potassium thickens cell walls and promotes epidermal silica deposition, physically impeding the piercing-sucking stylets of leafhoppers.",
-        timing: "During next scheduled drip or furrow fertigation.",
-        priority: "Medium",
-        status: "Standard Maintenance",
-        icon: "yard",
-      });
-    }
-
-    // 5. Scouting Frequency
+    // 4. Field Scouting - Simplified
+    const scoutingDays = riskSeverity === "CRITICAL" ? "Daily" : riskSeverity === "HIGH" ? "Every 3 days" : "Weekly";
     list.push({
-      id: "scouting-freq",
+      id: `scouting-freq-${prediction.id}`,
       category: "Field Scouting",
-      title: isHighRisk
-        ? "Intensive 3-Day Scouting Interval (Top, Mid, Bottom leaves)"
-        : "Weekly Standard Scouting Protocol",
-      prescription: isHighRisk
-        ? "Examine 20 randomly tagged plants across the field. Count nymphs on 3 leaves per plant (1 top, 1 middle, 1 lower)."
-        : "Conduct weekly random walk scouting across 10 plants per block.",
-      rationale: isHighRisk
-        ? "High predicted risk requires tight monitoring of hopperburn progress (Grade I curling to Grade II yellowing)."
-        : "Ensures baseline surveillance while pest pressure is subdued.",
-      timing: isHighRisk ? "Every 48 to 72 hours at dawn" : "Once per Standard Meteorological Week",
-      priority: isHighRisk ? "High" : "Low",
+      title: `Scout Field - ${scoutingDays}`,
+      prescription: riskSeverity === "CRITICAL" || riskSeverity === "HIGH"
+        ? "Check 20 plants, count nymphs on 3 leaves each (top, middle, bottom)."
+        : "Check 10 plants randomly, count nymphs on 3 leaves.",
+      rationale: riskSeverity === "CRITICAL" || riskSeverity === "HIGH"
+        ? "High risk needs frequent monitoring to prevent damage."
+        : "Regular scouting catches pest buildup early.",
+      timing: scoutingDays,
+      priority: riskSeverity === "CRITICAL" || riskSeverity === "HIGH" ? "High" : "Medium",
       status: "Immediate Action",
       icon: "search_check",
     });
 
-    return list;
+    return { recommendations: list, basis };
   };
-
-  const recs = prediction && weather ? getDynamicRecommendations() : [];
 
   return (
     <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <PageHeader
-          eyebrow="Act · Agronomic Decision Support"
-          title="Dynamic Jassid Recommendations"
-          description="Prescriptive action plan refreshed daily for Coimbatore cotton, linking the previous record's ML pest forecast with today's real-time rainfall and weather conditions."
-        />
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <button
-            onClick={() => loadData()}
-            disabled={loading}
-            className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-muted disabled:opacity-50 transition-colors"
-          >
-            <span className={`material-symbols-outlined text-lg ${loading ? "animate-spin" : ""}`}>
-              sync
-            </span>
-            <span>{loading ? "Refreshing..." : "Refresh Daily Plan"}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Dynamic Driver Telemetry Bar */}
-      <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-xl">psychology</span>
-              <h2 className="text-sm font-bold text-foreground">
-                Active Telemetry Driving Today's Recommendations
-              </h2>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Updated: {lastRefreshed ? lastRefreshed.toLocaleString() : "Syncing..."} · Region:
-              Coimbatore Cotton Belt
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Predicted Risk Badge */}
-            <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-2">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
-                ML Predicted Jassid Risk
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {prediction ? <RiskBadge level={isHighRisk ? "high" : "low"} /> : null}
-                <span className="text-xs font-mono font-semibold text-foreground">
-                  {prediction
-                    ? `${prediction.predicted_next_week_jassid} / 3 leaves · saved prediction #${prediction.id}`
-                    : "No database prediction"}
-                </span>
-              </div>
-            </div>
-
-            {/* Today's Rain */}
-            <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-2">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
-                Today's Rainfall
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="material-symbols-outlined text-primary text-base">rainy</span>
-                <span className="text-xs font-bold text-foreground">{rainfall ?? "—"} mm</span>
-                {rainfall !== null ? (
-                  <span className="text-[11px] text-muted-foreground">
-                    ({isRainyDay ? "Wash-off Risk Active" : "Dry Foliage"})
-                  </span>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Weather Wind & Temp */}
-            <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-2">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
-                Surface Wind & Morning RH
-              </p>
-              <p className="text-xs font-semibold text-foreground mt-0.5">
-                {windSpeed ?? "—"} km/h · {weather?.rh_morning_pct ?? "—"}% RH
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Jassid Management Recommendations"
+        description="Actionable recommendations based on ML predictions and current weather."
+      />
 
       {error && (
         <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          <p className="font-semibold">Telemetry Synchronization Alert</p>
+          <p className="font-semibold">Data Loading Error</p>
           <p className="mt-1">{error}</p>
         </div>
       )}
 
-      {initialLoading ? <LoadingBlock label="Loading the latest saved prediction and live weather…" /> : null}
-
-      {!initialLoading && !predictionQuery.isError && !prediction ? (
+      {initialLoading ? (
+        <LoadingBlock label="Loading predictions…" />
+      ) : !predictionsQuery.isError && predictions.length === 0 ? (
         <EmptyState
           icon="checklist"
-          title="No saved prediction in the database"
-          body="Recommendations are built from the most recent row of the predictions table. Run a prediction in the Risk engine to generate the plan."
-          action={
-            <ButtonLink to="/risk" icon="readiness_score">
-              Open Risk engine
-            </ButtonLink>
-          }
+          title="No predictions found"
+          body="Run a prediction in the Risk engine to generate recommendations."
         />
-      ) : null}
+      ) : (
+        <div className="space-y-4">
+          {predictions.map((prediction) => {
+            const result = weather ? getRecommendationsForPrediction(prediction) : null;
+            const recommendations = result?.recommendations ?? [];
+            const basis = result?.basis ?? "";
+            const isHighRisk = prediction.risk === "HIGH" || prediction.predicted_next_week_jassid >= prediction.risk_threshold;
 
-      {/* Dynamic Recommendation Cards */}
-      <div className="space-y-4">
-        {recs.map((r) => (
-          <Panel
-            key={r.id}
-            title={r.title}
-            subtitle={`${r.category} · Timing: ${r.timing}`}
-            icon={r.icon}
-          >
-            <div className="space-y-2.5">
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <p className="text-xs font-bold text-primary uppercase tracking-wide mb-1">
-                  Prescription / Protocol
-                </p>
-                <p className="text-sm font-semibold text-foreground">{r.prescription}</p>
+            return (
+              <div key={prediction.id} className="rounded-xl border border-border bg-card p-4">
+                {/* Simple Header */}
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <RiskBadge level={isHighRisk ? "high" : "low"} />
+                    <div>
+                      <span className="font-semibold text-foreground">{prediction.predicted_next_week_jassid} / 3 leaves</span>
+                      <span className="text-xs text-muted-foreground ml-2">#{prediction.id}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{formatDateTime(prediction.created_at)}</span>
+                </div>
+
+                {/* Basis - simplified */}
+                {basis && (
+                  <div className="mb-4 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                    <span className="font-medium">Basis:</span> {basis}
+                  </div>
+                )}
+
+                {/* Recommendations - simplified list */}
+                {!weather ? (
+                  <p className="text-sm text-muted-foreground">Weather data required for recommendations.</p>
+                ) : recommendations.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No recommendations available.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {recommendations.map((r: ActionRecommendation) => (
+                      <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-muted/30 transition-colors">
+                        <span className="material-symbols-outlined text-primary mt-0.5">{r.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-foreground text-sm">{r.title}</span>
+                            <span
+                              className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                                r.priority === "High"
+                                  ? "bg-risk-high/15 text-risk-high"
+                                  : r.priority === "Medium"
+                                    ? "bg-risk-moderate/15 text-risk-moderate"
+                                    : "bg-risk-low/15 text-risk-low"
+                              }`}
+                            >
+                              {r.priority}
+                            </span>
+                          </div>
+                          <p className="text-xs text-foreground/80 mb-1">{r.prescription}</p>
+                          <p className="text-[11px] text-muted-foreground">{r.rationale}</p>
+                          <p className="text-[11px] text-primary mt-1">⏱ {r.timing}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-
-              <div className="text-sm text-foreground/80 leading-relaxed">
-                <span className="font-semibold text-foreground">Agronomic Rationale: </span>
-                {r.rationale}
-              </div>
-
-              <div className="mt-3 flex flex-wrap items-center gap-2 pt-1 border-t border-border/50">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${
-                    r.priority === "High"
-                      ? "bg-risk-high/15 text-risk-high border border-risk-high/30"
-                      : r.priority === "Medium"
-                        ? "bg-risk-moderate/15 text-risk-moderate border border-risk-moderate/30"
-                        : "bg-risk-low/15 text-risk-low border border-risk-low/30"
-                  }`}
-                >
-                  {r.priority} Priority
-                </span>
-
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold border ${
-                    r.status === "Immediate Action"
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      : r.status === "Conditional / On Hold"
-                        ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                        : "border-border bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {r.status}
-                </span>
-
-                <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
-                  {r.timing}
-                </span>
-              </div>
-            </div>
-          </Panel>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

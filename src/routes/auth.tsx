@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AuthView } from "@/features/auth/AuthView";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: typeof search["mode"] === "string" ? (search["mode"] as "login" | "register" | "forgot") : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — ProCrop Farmer Access" },

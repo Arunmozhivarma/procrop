@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { errorMessage } from "@/services/api";
@@ -10,7 +10,8 @@ const MIN_PASSWORD_LENGTH = 8;
 
 export function AuthView() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>("login");
+  const search = useSearch({ from: "/auth" });
+  const [mode, setMode] = useState<Mode>((search.mode as Mode) || "login");
   const [error, setError] = useState<string | null>(null);
   // Accounts are rows of the users table: both calls go through the backend API.
   const login = useLogin();

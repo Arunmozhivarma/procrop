@@ -4,6 +4,7 @@ import {
   ApiError,
   type AuthResponse,
   autoPredictFromPhotoAndWeather,
+  deletePrediction,
   fetchCurrentUser,
   fetchDatasetSummary,
   fetchLatestPrediction,
@@ -81,6 +82,17 @@ export function useLatestObservationPrediction() {
 
 export function useLeafPhotoPrediction() {
   return usePredictionMutation((file: File) => autoPredictFromPhotoAndWeather(file));
+}
+
+export function useDeletePrediction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deletePrediction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.predictions });
+      queryClient.invalidateQueries({ queryKey: queryKeys.latestPrediction });
+    },
+  });
 }
 
 /** The signed-in user's row of the users table. Signed out when there is no valid token. */

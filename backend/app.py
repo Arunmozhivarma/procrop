@@ -21,6 +21,7 @@ from backend.database import (
     save_prediction_record,
     get_recent_predictions,
     get_latest_prediction,
+    delete_prediction as delete_prediction_db,
     get_observations,
     get_dataset_summary as read_dataset_summary,
 )
@@ -156,6 +157,14 @@ def read_latest_prediction():
     if record is None:
         raise HTTPException(status_code=404, detail="No predictions are stored in the predictions table.")
     return record
+
+@app.delete("/predictions/{prediction_id}")
+def delete_prediction_endpoint(prediction_id: int):
+    """Deletes a prediction by ID from the database table."""
+    deleted = delete_prediction_db(prediction_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Prediction with ID {prediction_id} not found.")
+    return {"message": f"Prediction {prediction_id} deleted successfully"}
 
 @app.post("/analyze-leaf-image")
 async def analyze_leaf_image(file: UploadFile = File(...)):

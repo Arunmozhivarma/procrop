@@ -10,11 +10,18 @@ export const Route = createFileRoute("/_app")({
 
 function AppLayout() {
   const [mobileNav, setMobileNav] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar className="sticky top-0 hidden h-screen lg:flex" />
+      {/* Desktop Sidebar - Always visible, collapsible */}
+      <Sidebar
+        className="sticky top-0 hidden h-screen lg:flex"
+        collapsed={sidebarCollapsed}
+        onNavigate={() => setMobileNav(false)}
+      />
 
+      {/* Mobile Sidebar - Overlay */}
       {mobileNav ? (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div
@@ -27,21 +34,35 @@ function AppLayout() {
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile Header (Menu toggle on small screens; top bar removed on desktop) */}
-        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur lg:hidden">
-          <button
-            type="button"
-            className="rounded-xl p-2 hover:bg-muted"
-            onClick={() => setMobileNav(true)}
-            aria-label="Open navigation"
-          >
-            <Icon name="menu" />
-          </button>
+        {/* Header with sidebar toggle */}
+        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-soft">
-              <Icon name="eco" filled className="text-sm" />
-            </span>
-            <span className="font-display font-semibold text-sm">ProCrop</span>
+            {/* Desktop Sidebar Toggle */}
+            <button
+              type="button"
+              className="hidden rounded-xl p-2 hover:bg-muted lg:block"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              aria-label="Toggle sidebar"
+            >
+              <Icon name={sidebarCollapsed ? "menu_open" : "menu"} />
+            </button>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              type="button"
+              className="rounded-xl p-2 hover:bg-muted lg:hidden"
+              onClick={() => setMobileNav(true)}
+              aria-label="Open navigation"
+            >
+              <Icon name="menu" />
+            </button>
+
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-soft">
+                <Icon name="eco" filled className="text-sm" />
+              </span>
+              <span className="font-display font-semibold text-sm">ProCrop</span>
+            </div>
           </div>
           <div className="w-8" />
         </header>

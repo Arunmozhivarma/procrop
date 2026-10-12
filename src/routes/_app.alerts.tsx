@@ -199,9 +199,8 @@ export default function AlertsPage() {
     <div className="px-5 py-8 md:px-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <PageHeader
-          eyebrow="Act · Real-Time Triggers"
           title="Weather Anomaly Alerts"
-          description="Automated alerts generated when live Open-Meteo weather features for Coimbatore breach critical agronomic thresholds for cotton and Jassid dynamics."
+          description="Automated alerts generated when live weather features for Coimbatore breach critical agronomic thresholds for cotton and Jassid dynamics."
         />
         <div className="flex items-center gap-3 self-start md:self-auto">
           <button
