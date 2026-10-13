@@ -280,6 +280,7 @@ def run_unified_pipeline(
         "vision_analysis": vision_result,
         "live_weather": weather,
         "previous_week_data": prev_week,
+        "feature_vector": row_dict,
         "prediction": {
             "predicted_next_week_jassid": pred_val,
             "risk": risk_label,

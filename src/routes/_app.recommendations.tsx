@@ -198,7 +198,7 @@ export default function RecommendationsPage() {
       prescription: "Install 10-12 yellow sticky traps per acre, 15cm above canopy.",
       rationale: "Jassids attracted to yellow color. Traps reduce adult population.",
       timing: "Install immediately",
-      priority: riskSeverity === "CRITICAL" || riskSeverity === "HIGH" ? "High" : "Medium",
+      priority: riskSeverity === "CRITICAL" || riskSeverity === "HIGH" ? "High" : riskSeverity === "MODERATE" ? "Medium" : "Low",
       status: "Immediate Action",
       icon: "wb_incandescent",
     });
@@ -216,7 +216,7 @@ export default function RecommendationsPage() {
         ? "High risk needs frequent monitoring to prevent damage."
         : "Regular scouting catches pest buildup early.",
       timing: scoutingDays,
-      priority: riskSeverity === "CRITICAL" || riskSeverity === "HIGH" ? "High" : "Medium",
+      priority: riskSeverity === "CRITICAL" || riskSeverity === "HIGH" ? "High" : riskSeverity === "MODERATE" ? "Medium" : "Low",
       status: "Immediate Action",
       icon: "search_check",
     });
