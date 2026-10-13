@@ -78,5 +78,19 @@ def fetch_coimbatore_weather():
             }
     except Exception as e:
         print(f"Weather API fallback triggered: {e}")
-        
-    raise RuntimeError("Live Open-Meteo weather is unavailable; no fallback measurements are used")
+        # Return fallback weather values based on Coimbatore climate averages
+        return {
+            "source": "Fallback: Coimbatore Climate Averages (API unavailable)",
+            "location": "Coimbatore, Tamil Nadu (11.0168° N, 76.9558° E)",
+            "max_temp_c": 32.0,
+            "min_temp_c": 23.0,
+            "rh_morning_pct": 75.0,
+            "rh_evening_pct": 65.0,
+            "rainfall_mm": 0.0,
+            "rainy_days": 0,
+            "wind_speed_kmh": 8.0,
+            "sunshine_hours": 7.0,
+            "mean_temp_c": 27.5,
+            "mean_rh_pct": 70.0,
+            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }

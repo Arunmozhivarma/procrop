@@ -64,13 +64,6 @@ export function LandingView() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-surface py-8">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-foreground/60">
-          <p>© 2026 ProCrop. Cotton Jassid Risk Prediction System for Coimbatore.</p>
-        </div>
-      </footer>
-
     </div>
   );
 }

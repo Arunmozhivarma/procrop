@@ -25,7 +25,7 @@ function DashboardPage() {
     />
 
     {/* Summary Metrics */}
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <MetricCard
         label="Total Predictions"
         value={totalPredictions}
@@ -38,16 +38,10 @@ function DashboardPage() {
         icon="warning"
         color="red"
       />
-      <MetricCard
-        label="Latest Jassid Count"
-        value={`${latestJassidCount} / 3l`}
-        icon="bug_report"
-        color="green"
-      />
     </div>
 
     {/* Quick Actions */}
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <QuickAction
         label="Run Prediction"
         icon="play_arrow"
@@ -75,42 +69,7 @@ function DashboardPage() {
     </div>
 
     {/* Main Content Grid */}
-    <div className="grid gap-6 lg:grid-cols-2">
-      {/* Latest Observation */}
-      <Panel title="Latest Weekly Observation" icon="table_chart">
-        {latest.isPending ? (
-          <LoadingBlock label="Loading latest observation…" />
-        ) : latest.isError ? (
-          <ErrorState message={errorMessage(latest.error)} onRetry={() => latest.refetch()} />
-        ) : latest.data ? (
-          <div className="space-y-2 text-sm">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-border bg-muted/30 p-3">
-                <p className="text-[10px] text-muted-foreground uppercase font-semibold">Jassid Count</p>
-                <p className="text-lg font-bold text-foreground">{latest.data.jassid_per_3_leaves} / 3 leaves</p>
-              </div>
-              <div className="rounded-lg border border-border bg-muted/30 p-3">
-                <p className="text-[10px] text-muted-foreground uppercase font-semibold">SMW</p>
-                <p className="text-lg font-bold text-foreground">{latest.data.smw ?? "—"}</p>
-              </div>
-            </div>
-            <div className="space-y-1 pt-2">
-              {Object.entries(latest.data)
-                .filter(([k]) => !["id", "source", "jassid_per_3_leaves", "smw"].includes(k))
-                .slice(0, 6)
-                .map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-4 border-b border-border/50 py-1.5">
-                    <span className="text-muted-foreground text-xs">{toDisplayName(k)}</span>
-                    <strong className="text-xs">{String(v ?? "—")}</strong>
-                  </div>
-                ))}
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No weekly observations in SQLite yet.</p>
-        )}
-      </Panel>
-
+    <div className="grid gap-6">
       {/* Recent Predictions */}
       <Panel title="Recent Predictions" icon="analytics">
         {predictions.isPending ? (

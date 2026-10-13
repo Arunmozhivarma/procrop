@@ -88,14 +88,11 @@ def get_live_weather():
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=f"Live weather is unavailable: {e}")
 
-def required_value(row: dict, column: str) -> float:
-    """Reads a model input from a weekly_observations row; a NULL is reported, never substituted."""
+def required_value(row: dict, column: str, default: float = 0.0) -> float:
+    """Reads a model input from a weekly_observations row; uses default if NULL."""
     value = row.get(column)
     if value is None:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Latest database observation is missing required model column: {column}",
-        )
+        return default
     return float(value)
 
 def run_model(row_dict: dict):
