@@ -8,6 +8,7 @@ export {
   Chip,
   DataRow,
   EmptyState,
+  ErrorState,
   LoadingBlock,
   PageHeader,
   Panel,

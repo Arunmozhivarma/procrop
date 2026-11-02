@@ -3,7 +3,8 @@ import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
-  const queryClient = new QueryClient();
+  // API errors are shown with a Retry action instead of being retried silently.
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   const router = createRouter({
     routeTree,

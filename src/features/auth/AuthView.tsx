@@ -1,37 +1,59 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
+import { errorMessage } from "@/services/api";
+import { useLogin, useRegister } from "@/services/queries";
 
 type Mode = "login" | "register" | "forgot";
 
+const MIN_PASSWORD_LENGTH = 8;
+
 export function AuthView() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>("login");
-  const [busy, setBusy] = useState(false);
+  const search = useSearch({ from: "/auth" });
+  const [mode, setMode] = useState<Mode>((search.mode as Mode) || "login");
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
+  // Accounts are rows of the users table: both calls go through the backend API.
+  const login = useLogin();
+  const register = useRegister();
+  const busy = login.isPending || register.isPending;
 
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const switchMode = (next: Mode) => {
+    setMode(next);
+    setError(null);
+  };
+
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     const data = new FormData(e.currentTarget);
-    const email = String(data.get("email") ?? "");
+    const email = String(data.get("email") ?? "").trim();
+    const name = String(data.get("name") ?? "").trim();
+    const password = String(data.get("password") ?? "");
+
     if (!email.includes("@")) {
       setError("Enter a valid email address.");
       return;
     }
-    setBusy(true);
-    setTimeout(() => {
-      setBusy(false);
-      if (mode === "forgot") {
-        setSent(true);
-        return;
-      }
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("procrop.session", email);
+    if (mode === "register" && !name) {
+      setError("Please enter your name.");
+      return;
+    }
+    if (mode === "register" && password.length < MIN_PASSWORD_LENGTH) {
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+      return;
+    }
+
+    try {
+      if (mode === "register") {
+        await register.mutateAsync({ name, email, password });
+      } else {
+        await login.mutateAsync({ email, password });
       }
       navigate({ to: "/dashboard" });
-    }, 900);
+    } catch (err: unknown) {
+      setError(errorMessage(err));
+    }
   };
 
   return (
@@ -80,79 +102,79 @@ export function AuthView() {
               ? "Sign in to your ProCrop workspace."
               : mode === "register"
                 ? "Register your farm and start monitoring in minutes."
-                : "We'll email you a reset link."}
+                : "Password reset by email is not available."}
           </p>
 
-          {sent ? (
-            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-risk-low/40 bg-risk-low/10 p-4 text-sm">
-              <Icon name="mark_email_read" className="text-risk-low" />
+          {mode === "forgot" ? (
+            <div className="mt-6 flex items-start gap-3 rounded-2xl border border-border bg-muted/40 p-4 text-sm">
+              <Icon name="mail_off" className="text-muted-foreground" />
               <div>
-                <p className="font-semibold">Reset link sent</p>
-                <p className="text-foreground/70">Check your inbox for the password reset email.</p>
+                <p className="font-semibold">Reset links cannot be sent</p>
+                <p className="text-foreground/70">
+                  No email service is configured for this ProCrop installation, so a password cannot
+                  be reset from here.
+                </p>
               </div>
             </div>
-          ) : null}
-
-          <form onSubmit={submit} className="mt-8 space-y-4">
-            {mode === "register" ? (
-              <>
-                <Field label="Full name" name="name" placeholder="Uma Vardhan" />
-                <Field label="Farm name" name="farm" placeholder="Northfield Estate" />
-              </>
-            ) : null}
-            <Field label="Email" name="email" type="email" placeholder="farmer@procrop.in" />
-            {mode !== "forgot" ? (
-              <Field label="Password" name="password" type="password" placeholder="••••••••" />
-            ) : null}
-            {mode === "register" ? (
-              <Field label="Phone" name="phone" placeholder="+91 98765 43210" required={false} />
-            ) : null}
-
-            {error ? (
-              <p className="flex items-center gap-2 rounded-xl bg-critical/10 px-3 py-2 text-sm text-critical">
-                <Icon name="error" className="text-[18px]" />
-                {error}
-              </p>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
-            >
-              {busy ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+          ) : (
+            <form key={mode} onSubmit={submit} className="mt-8 space-y-4">
+              {mode === "register" ? (
+                <Field label="Full name" name="name" placeholder="Your full name" />
               ) : null}
-              {mode === "login"
-                ? "Sign in"
-                : mode === "register"
-                  ? "Create account"
-                  : "Send reset link"}
-            </button>
-          </form>
+              <Field
+                label="Email (Mail ID)"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+              />
+              <Field
+                label="Password"
+                name="password"
+                type="password"
+                placeholder={
+                  mode === "register" ? `At least ${MIN_PASSWORD_LENGTH} characters` : "••••••••"
+                }
+              />
+
+              {error ? (
+                <p
+                  role="alert"
+                  className="flex items-center gap-2 rounded-xl bg-critical/10 px-3 py-2 text-sm text-critical"
+                >
+                  <Icon name="error" className="text-[18px]" />
+                  {error}
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={busy}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              >
+                {busy ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                ) : null}
+                {mode === "login" ? "Sign in" : "Create account"}
+              </button>
+            </form>
+          )}
 
           <div className="mt-6 space-y-2 text-sm">
             {mode !== "login" ? (
-              <button
-                className="text-primary hover:underline"
-                onClick={() => {
-                  setMode("login");
-                  setSent(false);
-                }}
-              >
+              <button className="text-primary hover:underline" onClick={() => switchMode("login")}>
                 Already have an account? Sign in
               </button>
             ) : (
               <>
                 <button
                   className="block text-primary hover:underline"
-                  onClick={() => setMode("register")}
+                  onClick={() => switchMode("register")}
                 >
                   New to ProCrop? Create an account
                 </button>
                 <button
                   className="block text-muted-foreground hover:underline"
-                  onClick={() => setMode("forgot")}
+                  onClick={() => switchMode("forgot")}
                 >
                   Forgot your password?
                 </button>

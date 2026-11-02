@@ -6,6 +6,7 @@ export * from "./StatTile";
 export * from "./RangeBar";
 export * from "./Chip";
 export * from "./EmptyState";
+export * from "./ErrorState";
 export * from "./LoadingBlock";
 export * from "./ButtonLink";
 export * from "./button-styles";
