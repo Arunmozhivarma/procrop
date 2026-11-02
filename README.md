@@ -1,15 +1,18 @@
 # Machine Learning-Based Prediction of Next-Week Cotton Jassid Risk Using Weather and Historical Pest Data
 
 ## Project Title & Scope
-**Crop:** Cotton (*Gossypium hirsutum*)  
+
+**Crop:** Cotton (_Gossypium hirsutum_)  
 **Region:** Coimbatore, Tamil Nadu, India (South Zone)  
-**Pest:** Jassid (*Amrasca biguttula biguttula*) — measured as Jassids per 3 leaves  
-**Source Dataset:** AICRP on Cotton (Table 102) & IMD Weather Summaries  
+**Pest:** Jassid (_Amrasca biguttula biguttula_) — measured as Jassids per 3 leaves  
+**Source Dataset:** AICRP on Cotton (Table 102) & IMD Weather Summaries
 
 ---
 
 ## 1. Project Overview
+
 This project predicts whether Cotton Jassid pest activity will be **LOW** or **HIGH** in the following week for Coimbatore, using a combined dataset of:
+
 - Current week weather conditions (temperature, humidity, rainfall, rainy days, wind speed, sunshine hours)
 - Derived weekly weather metrics (`mean_temp_c`, `mean_rh_pct`)
 - Lagged weather conditions (`*_lag_1`)
@@ -18,7 +21,8 @@ This project predicts whether Cotton Jassid pest activity will be **LOW** or **H
 ---
 
 ## 2. Research Question & Feature Configurations
-> **Research Question:** *"Can historical weather conditions and recent Jassid population history be used to predict next-week Jassid activity and classify cotton pest risk in Coimbatore?"*
+
+> **Research Question:** _"Can historical weather conditions and recent Jassid population history be used to predict next-week Jassid activity and classify cotton pest risk in Coimbatore?"_
 
 To evaluate the contribution of historical pest counts, two feature configurations were built and compared on the exact same chronological test split:
 
@@ -28,8 +32,9 @@ To evaluate the contribution of historical pest counts, two feature configuratio
 ---
 
 ## 3. Classification Threshold Disclaimer
+
 - **Classification Rule:** `target_high_risk_median_rule` (≥ 1.95 Jassids per 3 leaves → HIGH RISK).
-- **Important Note:** *Since a verified ICAR threshold was not established for this dataset, an experimental median-based classification rule was used, with 1.95 Jassids per 3 leaves as the cutoff. This is a data-derived research classification rule and not an official ICAR economic threshold level (ETL).*
+- **Important Note:** _Since a verified ICAR threshold was not established for this dataset, an experimental median-based classification rule was used, with 1.95 Jassids per 3 leaves as the cutoff. This is a data-derived research classification rule and not an official ICAR economic threshold level (ETL)._
 
 ---
 
@@ -37,28 +42,29 @@ To evaluate the contribution of historical pest counts, two feature configuratio
 
 ### Regression Models (`target_next_week_jassid`)
 
-| Feature Set | Model | MAE | RMSE | R² |
-| :--- | :--- | :---: | :---: | :---: |
-| Baseline | Naive (Current Jassid count) | 2.8100 | 3.5198 | 0.0441 |
-| Model A (Weather Only) | Random Forest Regressor | 3.2295 | 4.4168 | -0.5052 |
-| Model A (Weather Only) | XGBoost Regressor | 3.1311 | 3.8745 | -0.1583 |
-| **Model B (Weather + Pest History)** | **Random Forest Regressor** | **2.6519** | **3.1717** | **0.2238** |
-| **Model B (Weather + Pest History)** | **XGBoost Regressor** | **2.1953** | **3.1312** | **0.2435** |
+| Feature Set                          | Model                        |    MAE     |    RMSE    |     R²     |
+| :----------------------------------- | :--------------------------- | :--------: | :--------: | :--------: |
+| Baseline                             | Naive (Current Jassid count) |   2.8100   |   3.5198   |   0.0441   |
+| Model A (Weather Only)               | Random Forest Regressor      |   3.2295   |   4.4168   |  -0.5052   |
+| Model A (Weather Only)               | XGBoost Regressor            |   3.1311   |   3.8745   |  -0.1583   |
+| **Model B (Weather + Pest History)** | **Random Forest Regressor**  | **2.6519** | **3.1717** | **0.2238** |
+| **Model B (Weather + Pest History)** | **XGBoost Regressor**        | **2.1953** | **3.1312** | **0.2435** |
 
 ### Classification Models (`target_high_risk_median_rule`)
 
-| Feature Set | Model | Accuracy | Precision | Recall | F1-Score | Confusion Matrix |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| Model A (Weather Only) | Random Forest Classifier | 0.3000 | 0.0000 | 0.0000 | 0.0000 | `[[3, 0], [7, 0]]` |
-| Model A (Weather Only) | XGBoost Classifier | 0.7000 | 0.8333 | 0.7143 | 0.7692 | `[[2, 1], [2, 5]]` |
-| Model B (Weather + Pest History) | Random Forest Classifier | 0.5000 | 1.0000 | 0.2857 | 0.4444 | `[[3, 0], [5, 2]]` |
-| **Model B (Weather + Pest History)** | **XGBoost Classifier** | **0.7000** | **1.0000** | **0.5714** | **0.7273** | `[[3, 0], [3, 4]]` |
+| Feature Set                          | Model                    |  Accuracy  | Precision  |   Recall   |  F1-Score  |  Confusion Matrix  |
+| :----------------------------------- | :----------------------- | :--------: | :--------: | :--------: | :--------: | :----------------: |
+| Model A (Weather Only)               | Random Forest Classifier |   0.3000   |   0.0000   |   0.0000   |   0.0000   | `[[3, 0], [7, 0]]` |
+| Model A (Weather Only)               | XGBoost Classifier       |   0.7000   |   0.8333   |   0.7143   |   0.7692   | `[[2, 1], [2, 5]]` |
+| Model B (Weather + Pest History)     | Random Forest Classifier |   0.5000   |   1.0000   |   0.2857   |   0.4444   | `[[3, 0], [5, 2]]` |
+| **Model B (Weather + Pest History)** | **XGBoost Classifier**   | **0.7000** | **1.0000** | **0.5714** | **0.7273** | `[[3, 0], [3, 4]]` |
 
 > **Research Conclusion:** Model B (Weather + Pest History) consistently achieves lower MAE/RMSE and positive R² compared to Model A (Weather-only) and Naive Baseline. Including recent Jassid lag features significantly improves next-week risk predictions.
 
 ---
 
 ## 5. Project Structure
+
 ```
 procrop/
 │
@@ -92,35 +98,74 @@ procrop/
 
 ---
 
-## 6. Installation & Execution Guide
+## 6. Demo Accounts
+
+For immediate exploration, two pre-configured demo accounts are automatically seeded into SQLite at backend startup:
+
+| Account | Email | Password | Role | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Farmer** | `farmer@procrop.in` | `password123` | Farmer | Ramesh Kumar (Coimbatore). Pre-populated with 2 fields and 3 historical checks (Low, Medium, High). |
+| **Extension Officer** | `officer@tnau.ac.in` | `password123` | Extension Officer | Dr. S. Kavitha (Salem). Pre-populated with 5 monitoring fields across districts. |
+
+---
+
+## 7. Installation & Execution Guide
 
 ### Prerequisites
-- Python 3.10+
-- Node.js 18+ or Bun
+
+- Python 3.10+ (tested on Python 3.13)
+- Node.js 18+ (tested on Node v24) or Bun
 
 ### 1. Install Python Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Train Models
-Run the regression and classification training scripts:
+### 2. Train Models (LOSOCV & YOLOv8n)
+
+Run the real model training pipelines:
+
 ```bash
-python src/train_regression.py
-python src/train_classification.py
+# Train Leave-One-Season-Out CV risk models & generate backend/models/risk_metrics.json
+python scripts/train_risk_models.py
+
+# Train YOLOv8n on cotton jassid dataset & generate backend/models/detector_metrics.json
+python scripts/train_detector.py
 ```
 
 ### 3. Start Backend API
+
 ```bash
 uvicorn backend.app:app --reload --port 8000
 ```
-- API root: `http://localhost:8000/`
-- Interactive docs (Swagger): `http://localhost:8000/docs`
-- Prediction Endpoint: `POST http://localhost:8000/predict`
+
+- API root / health: `http://localhost:8000/health`
+- Dynamic configuration: `http://localhost:8000/api/config`
+- Live model info & metrics: `http://localhost:8000/api/model-info`
+- Interactive Swagger documentation: `http://localhost:8000/docs`
 
 ### 4. Start Frontend
+
 ```bash
 npm install
 npm run dev
 ```
-Open `http://localhost:3000` in your browser.
+
+Open `http://localhost:3000` (or the Vite dev server port shown in terminal).
+
+### 5. Run Verification & Test Suites
+
+```bash
+# Run backend pytest suite (all 7 tests: config, model info, migration idempotency, auth isolation, image validation, spray monotonicity)
+python -m pytest tests/test_config.py tests/test_model_info.py tests/test_backend.py -v
+
+# Run end-to-end component smoke test (vision, aggregator, weather, risk engine, IPM recommender)
+python scripts/smoke_test.py
+
+# Run frontend typecheck, format, and production build
+npx tsc --noEmit
+npm run lint
+npm run build
+```
+

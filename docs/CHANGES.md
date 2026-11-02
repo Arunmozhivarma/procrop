@@ -41,3 +41,71 @@ This document records architectural decisions, real model metrics, expert priors
 - **Verification**:
   - `tests/test_config.py` passes asserting upload bounds, ETL definitions, and risk class thresholds.
 
+---
+
+## Phase 6: Demo Accounts & User Roles
+
+- **`backend/database.py`**:
+  - Added `role` and `location` columns to `users` table via idempotent `ALTER TABLE ... PRAGMA table_info` guard.
+  - Updated `get_user_by_id` and `create_user` to include `role` and `location`.
+  - Added `seed_demo_accounts_if_missing()` called at startup — seeds two demo accounts if they don't exist:
+    - `farmer@procrop.in` / `password123` → Ramesh Kumar (Farmer, Coimbatore). Seeded with 2 fields and 3 historical predictions (Low / Medium / High).
+    - `officer@tnau.ac.in` / `password123` → Dr. S. Kavitha (Extension Officer, Salem). Seeded with 5 fields.
+  - Bcrypt password hash used: `$2b$12$w9XNRZDRSx4J2A/x7ZocxuL6YLrHaHoBsCxaGnNH21qtYOSCUMFZW` (corresponds to `password123`).
+- **`backend/schemas.py`**: Extended `UserRegisterInput` and `UserResponse` with optional `role` and `location` fields.
+- **`backend/app.py`**: `register` passes `role`/`location` to `create_user`; `login` includes `role`/`location` in response.
+
+---
+
+## Phase 7: Frontend — Recommendations Page (Real Data)
+
+- **`src/routes/_app.recommendations.tsx`** completely rewritten.
+  - Reads `?id=` from search params via TanStack Router `validateSearch`.
+  - Fetches prediction detail from `GET /predictions/{id}` (falls back to `fetchLatestPrediction()` when no ID supplied).
+  - Six real data sections:
+    1. **Risk badge** — class, score, confidence, ETL progress bar, headline text.
+    2. **SHAP drivers** — bar chart of model feature contributions + management modifier cards.
+    3. **Photo evidence** — aggregate stats (n_images, confidence_level, mean_per_leaf, SD, 95% CI, burn grade) + per-image breakdown table with QC flags.
+    4. **Weather context** — 8-tile weather grid from `weather_snapshot` (temperature, humidity, rainfall, wind, sunshine).
+    5. **IPM action plan** — re-scout date, actions list, spray guidance, IRAC rotation note. No brand names or dosages.
+    6. **Advisory disclaimer** footer — labels expert priors as unvalidated, recommends agronomist confirmation.
+- Navigation: Back to Dashboard and New Field Check links.
+
+---
+
+## Phase 8: Sidebar — Account Switcher & Latest Risk Chip
+
+- **`src/components/layout/Sidebar.tsx`** completely rewritten.
+  - **Latest risk chip**: Reads from `fetchLatestPrediction()`; shows risk class (colour-coded), field name, and links to `/recommendations?id=<prediction_id>`. Displayed above the nav links.
+  - **Account switcher popover**: Shows all accounts from `getStoredAccounts()`, indicates active account (✓), allows switching, removing, signing out, or adding a second account. Displays user `role` under name in the footer.
+
+---
+
+## Phase 9: Dashboard — Live Prediction Card
+
+- **`src/routes/_app.dashboard.tsx`** updated.
+  - Hero banner replaced with a **live backend data card**: shows actual risk class, final_score, confidence level, image count, burn grade, and recommendation headline fetched from `fetchLatestPrediction()`.
+  - Links to `/recommendations?id=<prediction_id>`.
+  - "Recommended Action" stat tile replaced with live urgency + rescout date.
+
+---
+
+## Phase 9b: Frontend API Service & Type Extensions
+
+- **`src/services/api.ts`**:
+  - `StoredAccount` extended with optional `role` and `location`.
+  - `loginUser` / `registerUser` save `role` and `location` to stored accounts.
+  - `fetchLatestPrediction()` added — fetches the most recent prediction for the current user.
+  - `DetailedPredictionResponse` extended with `wind_speed_kmh`, `sunshine_hours` on `weather_snapshot` and `per_image_results` array.
+  - `removeAccount` guard fixed for undefined active account.
+
+---
+
+## Quality & Verification (End-to-End)
+
+- **TypeScript**: `npx tsc --noEmit` exits 0 — zero type errors.
+- **Prettier**: `npm run format` — zero formatting changes needed.
+- **ESLint**: `npm run lint` — 0 errors, 8 pre-existing fast-refresh warnings (in shadcn/ui generated files and one exhaustive-deps advisory).
+- **Vite Production Build**: `npm run build` — succeeded in ~769ms.
+- **Pytest**: 7/7 tests pass (`test_config.py`, `test_model_info.py`, `test_backend.py` — including migration idempotency, auth isolation, image count validation, and spray monotonicity).
+- **Smoke Test**: 5/5 components validated (detector, aggregator, weather, risk engine, recommendation engine).
