@@ -1,6 +1,14 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@/components/Icon";
+import {
+  loginUser,
+  registerUser,
+  getAllAccounts,
+  setActiveAccountId,
+  removeAccount,
+  StoredAccount,
+} from "@/services/api";
 
 type Mode = "login" | "register" | "forgot";
 
@@ -10,50 +18,65 @@ export function AuthView() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [existingAccounts, setExistingAccounts] = useState<StoredAccount[]>([]);
 
-  const [savedName, setSavedName] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.localStorage.getItem("procrop.name") || "";
-    }
-    return "";
-  });
-  const [savedEmail, setSavedEmail] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.localStorage.getItem("procrop.email") || "";
-    }
-    return "";
-  });
+  useEffect(() => {
+    setExistingAccounts(getAllAccounts());
+  }, []);
 
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSwitchToAccount = (acc: StoredAccount) => {
+    setActiveAccountId(acc.id);
+    navigate({ to: "/dashboard" });
+  };
+
+  const handleRemoveSaved = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    removeAccount(id);
+    setExistingAccounts(getAllAccounts());
+  };
+
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     const data = new FormData(e.currentTarget);
     const email = String(data.get("email") ?? "").trim();
+    const password = String(data.get("password") ?? "");
     const name = String(data.get("name") ?? "").trim();
 
     if (!email.includes("@")) {
       setError("Enter a valid email address.");
       return;
     }
-    if (mode !== "forgot" && !name) {
+
+    if (mode === "forgot") {
+      setSent(true);
+      return;
+    }
+
+    if (mode === "register" && !name) {
       setError("Please enter your name.");
       return;
     }
 
+    if (!password || password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     setBusy(true);
-    setTimeout(() => {
-      setBusy(false);
-      if (mode === "forgot") {
-        setSent(true);
-        return;
-      }
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("procrop.session", email);
-        window.localStorage.setItem("procrop.name", name || "Dr. K. Ramesh");
-        window.localStorage.setItem("procrop.email", email);
+    try {
+      if (mode === "login") {
+        await loginUser(email, password);
+      } else {
+        await registerUser(email, password, name);
       }
       navigate({ to: "/dashboard" });
-    }, 900);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Authentication failed.";
+      setError(msg);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -105,6 +128,40 @@ export function AuthView() {
                 : "We'll email you a reset link."}
           </p>
 
+          {/* Quick Account Switcher if Accounts Exist on Device */}
+          {existingAccounts.length > 0 && mode === "login" && (
+            <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                Signed-in Accounts on this Device
+              </p>
+              <div className="mt-3 space-y-2">
+                {existingAccounts.map((acc) => (
+                  <div
+                    key={acc.id}
+                    onClick={() => handleSwitchToAccount(acc)}
+                    className="flex cursor-pointer items-center justify-between rounded-xl border border-border bg-surface p-3 transition hover:border-primary hover:shadow-xs"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{acc.name}</p>
+                      <p className="text-xs text-muted-foreground">{acc.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-primary">Switch →</span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveSaved(e, acc.id)}
+                        className="rounded-md p-1 text-muted-foreground hover:bg-critical/10 hover:text-critical"
+                        title="Remove from device"
+                      >
+                        <Icon name="close" className="text-xs" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {sent ? (
             <div className="mt-6 flex items-start gap-3 rounded-2xl border border-risk-low/40 bg-risk-low/10 p-4 text-sm">
               <Icon name="mark_email_read" className="text-risk-low" />
@@ -116,34 +173,24 @@ export function AuthView() {
           ) : null}
 
           <form onSubmit={submit} className="mt-8 space-y-4">
-            {mode !== "forgot" ? (
+            {mode === "register" ? (
               <Field
                 label="Full name"
                 name="name"
-                defaultValue={savedName}
                 placeholder="e.g. Dr. K. Ramesh"
                 required={true}
               />
             ) : null}
-            {mode === "register" ? (
-              <Field
-                label="Farm / Station name"
-                name="farm"
-                placeholder="TNAU Cotton Research Station"
-              />
-            ) : null}
+
             <Field
               label="Email (Mail ID)"
               name="email"
               type="email"
-              defaultValue={savedEmail}
               placeholder="farmer@procrop.in"
             />
+
             {mode !== "forgot" ? (
               <Field label="Password" name="password" type="password" placeholder="••••••••" />
-            ) : null}
-            {mode === "register" ? (
-              <Field label="Phone" name="phone" placeholder="+91 98765 43210" required={false} />
             ) : null}
 
             {error ? (
@@ -156,7 +203,7 @@ export function AuthView() {
             <button
               type="submit"
               disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60 cursor-pointer"
             >
               {busy ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
@@ -172,7 +219,7 @@ export function AuthView() {
           <div className="mt-6 space-y-2 text-sm">
             {mode !== "login" ? (
               <button
-                className="text-primary hover:underline"
+                className="text-primary hover:underline cursor-pointer"
                 onClick={() => {
                   setMode("login");
                   setSent(false);
@@ -183,13 +230,13 @@ export function AuthView() {
             ) : (
               <>
                 <button
-                  className="block text-primary hover:underline"
+                  className="block text-primary hover:underline cursor-pointer"
                   onClick={() => setMode("register")}
                 >
                   New to ProCrop? Create an account
                 </button>
                 <button
-                  className="block text-muted-foreground hover:underline"
+                  className="block text-muted-foreground hover:underline cursor-pointer"
                   onClick={() => setMode("forgot")}
                 >
                   Forgot your password?

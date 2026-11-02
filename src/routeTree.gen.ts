@@ -25,6 +25,7 @@ import { Route as AppEnvironmentRouteImport } from './routes/_app.environment'
 import { Route as AppExplainRouteImport } from './routes/_app.explain'
 import { Route as AppFarmsRouteImport } from './routes/_app.farms'
 import { Route as AppHelpRouteImport } from './routes/_app.help'
+import { Route as AppHowItWorksRouteImport } from './routes/_app.how-it-works'
 import { Route as AppImagesRouteImport } from './routes/_app.images'
 import { Route as AppOverviewRouteImport } from './routes/_app.overview'
 import { Route as AppRecommendationsRouteImport } from './routes/_app.recommendations'
@@ -112,6 +113,11 @@ const AppHelpRoute = AppHelpRouteImport.update({
   path: '/help',
   getParentRoute: () => AppRoute,
 } as any)
+const AppHowItWorksRoute = AppHowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppImagesRoute = AppImagesRouteImport.update({
   id: '/images',
   path: '/images',
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/explain': typeof AppExplainRoute
   '/farms': typeof AppFarmsRoute
   '/help': typeof AppHelpRoute
+  '/how-it-works': typeof AppHowItWorksRoute
   '/images': typeof AppImagesRoute
   '/overview': typeof AppOverviewRoute
   '/recommendations': typeof AppRecommendationsRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/explain': typeof AppExplainRoute
   '/farms': typeof AppFarmsRoute
   '/help': typeof AppHelpRoute
+  '/how-it-works': typeof AppHowItWorksRoute
   '/images': typeof AppImagesRoute
   '/overview': typeof AppOverviewRoute
   '/recommendations': typeof AppRecommendationsRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/_app/explain': typeof AppExplainRoute
   '/_app/farms': typeof AppFarmsRoute
   '/_app/help': typeof AppHelpRoute
+  '/_app/how-it-works': typeof AppHowItWorksRoute
   '/_app/images': typeof AppImagesRoute
   '/_app/overview': typeof AppOverviewRoute
   '/_app/recommendations': typeof AppRecommendationsRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/explain'
     | '/farms'
     | '/help'
+    | '/how-it-works'
     | '/images'
     | '/overview'
     | '/recommendations'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/explain'
     | '/farms'
     | '/help'
+    | '/how-it-works'
     | '/images'
     | '/overview'
     | '/recommendations'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/_app/explain'
     | '/_app/farms'
     | '/_app/help'
+    | '/_app/how-it-works'
     | '/_app/images'
     | '/_app/overview'
     | '/_app/recommendations'
@@ -418,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHelpRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/how-it-works': {
+      id: '/_app/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof AppHowItWorksRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/images': {
       id: '/_app/images'
       path: '/images'
@@ -484,6 +503,7 @@ interface AppRouteChildren {
   AppExplainRoute: typeof AppExplainRoute
   AppFarmsRoute: typeof AppFarmsRoute
   AppHelpRoute: typeof AppHelpRoute
+  AppHowItWorksRoute: typeof AppHowItWorksRoute
   AppImagesRoute: typeof AppImagesRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppRecommendationsRoute: typeof AppRecommendationsRoute
@@ -507,6 +527,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExplainRoute: AppExplainRoute,
   AppFarmsRoute: AppFarmsRoute,
   AppHelpRoute: AppHelpRoute,
+  AppHowItWorksRoute: AppHowItWorksRoute,
   AppImagesRoute: AppImagesRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppRecommendationsRoute: AppRecommendationsRoute,

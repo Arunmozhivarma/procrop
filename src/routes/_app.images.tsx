@@ -84,9 +84,10 @@ function ImagesPage() {
 
       const res = await autoPredictFromPhotoAndWeather(file);
       setAutoResult(res);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not connect to FastAPI backend.";
       setErrorMsg(
-        err.message ||
+        msg ||
           "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running.",
       );
     } finally {
@@ -101,9 +102,10 @@ function ImagesPage() {
     try {
       const res = await autoPredictFromPhotoAndWeather(selectedFile);
       setAutoResult(res);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not connect to FastAPI backend.";
       setErrorMsg(
-        err.message ||
+        msg ||
           "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running.",
       );
     } finally {

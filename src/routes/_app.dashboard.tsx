@@ -3,7 +3,12 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { PageHeader, Panel, ScoreRing, StatTile } from "@/components/procrop/ui";
 import { alerts, platformScores, recommendations, riskFromScore } from "@/lib/procrop-data";
-import { fetchLiveCoimbatoreWeather, LiveWeatherResponse } from "@/services/api";
+import {
+  fetchLiveCoimbatoreWeather,
+  fetchLatestPrediction,
+  LiveWeatherResponse,
+  DetailedPredictionResponse,
+} from "@/services/api";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
@@ -25,8 +30,21 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
+function riskBgClass(risk: string) {
+  if (risk === "High") return "from-risk-high/10 border-risk-high/30";
+  if (risk === "Medium") return "from-risk-moderate/10 border-risk-moderate/30";
+  return "from-risk-low/10 border-risk-low/30";
+}
+function riskTextClass(risk: string) {
+  if (risk === "High") return "text-risk-high";
+  if (risk === "Medium") return "text-risk-moderate";
+  return "text-risk-low";
+}
+
 function DashboardPage() {
   const [weather, setWeather] = useState<LiveWeatherResponse | null>(null);
+  const [latestPred, setLatestPred] = useState<DetailedPredictionResponse | null>(null);
+  const [predLoading, setPredLoading] = useState(true);
 
   useEffect(() => {
     fetchLiveCoimbatoreWeather()
@@ -34,8 +52,13 @@ function DashboardPage() {
       .catch(() => null);
   }, []);
 
-  const criticalAction =
-    recommendations.find((r) => r.priority === "critical") ?? recommendations[0];
+  useEffect(() => {
+    fetchLatestPrediction()
+      .then((pred) => setLatestPred(pred))
+      .catch(() => null)
+      .finally(() => setPredLoading(false));
+  }, []);
+
   const pendingActions = recommendations.filter((r) => r.status === "pending");
   const activeAlerts = alerts.filter((a) => !a.read);
 
@@ -63,58 +86,105 @@ function DashboardPage() {
         }
       />
 
-      {/* Hero Next-Week Forecast Banner (Executive Status Card) */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface via-surface to-primary/5 p-6 shadow-soft">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-3 w-3">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-critical opacity-75" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-critical" />
-              </span>
-              <span className="font-semibold text-xs uppercase tracking-wider text-critical">
-                Next-Week Forecast · Elevated Pressure Zone
-              </span>
+      {/* Hero: Latest Field Check Result (from backend) */}
+      {predLoading ? (
+        <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground animate-pulse">
+          Loading latest field check…
+        </div>
+      ) : latestPred ? (
+        <Link
+          to="/recommendations"
+          search={{ id: String(latestPred.prediction_id) }}
+          className={`block relative overflow-hidden rounded-2xl border-2 bg-gradient-to-br from-surface via-surface to-primary/5 p-6 shadow-soft transition-colors hover:opacity-90 ${riskBgClass(latestPred.risk_class)}`}
+        >
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  <span
+                    className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
+                      latestPred.risk_class === "High"
+                        ? "bg-risk-high"
+                        : latestPred.risk_class === "Medium"
+                          ? "bg-risk-moderate"
+                          : "bg-risk-low"
+                    }`}
+                  />
+                  <span
+                    className={`relative inline-flex h-3 w-3 rounded-full ${
+                      latestPred.risk_class === "High"
+                        ? "bg-risk-high"
+                        : latestPred.risk_class === "Medium"
+                          ? "bg-risk-moderate"
+                          : "bg-risk-low"
+                    }`}
+                  />
+                </span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Latest Field Check{latestPred.field_name ? ` · ${latestPred.field_name}` : ""}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span
+                  className={`font-display text-3xl sm:text-4xl font-extrabold ${riskTextClass(latestPred.risk_class)}`}
+                >
+                  {latestPred.risk_class.toUpperCase()} RISK
+                </span>
+                <span className="text-sm font-medium text-foreground/75">
+                  ({latestPred.final_score.toFixed(2)} / 3 leaves · ETL: 6.0)
+                </span>
+              </div>
+
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Confidence: <strong>{latestPred.confidence}</strong> ·{" "}
+                {latestPred.image_aggregates?.n_images_used ?? "—"} leaf images · Hopper burn grade{" "}
+                {latestPred.image_aggregates?.mean_burn_grade?.toFixed(1) ?? "—"}{" "}
+                {latestPred.recommendation?.headline
+                  ? `· ${latestPred.recommendation.headline}`
+                  : ""}
+              </p>
             </div>
 
-            <div className="flex flex-wrap items-baseline gap-3">
-              <span className="font-display text-3xl sm:text-4xl font-extrabold text-foreground">
-                HIGH RISK FORECAST
-              </span>
-              <span className="text-sm font-medium text-foreground/75">
-                (Predicted <strong className="text-foreground">2.47</strong> Jassids / 3 leaves vs
-                1.95 threshold)
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 px-4 py-2 text-xs font-bold text-primary border border-primary/20">
+                <Icon name="open_in_new" className="text-[14px]" />
+                View Full Report
               </span>
             </div>
-
-            <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-              XGBoost Model B projects upward population trajectory driven by warm daytime
-              temperatures ({weather ? `${weather.max_temp_c}°C` : "34°C"}) and recent nymph
-              emergence on lower canopy foliage.
-            </p>
           </div>
-
-          <div className="flex shrink-0 items-center gap-3">
+        </Link>
+      ) : (
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface via-surface to-primary/5 p-6 shadow-soft">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                No field checks yet
+              </span>
+              <p className="text-sm text-foreground/80">
+                Run your first guided field check to get an explainable jassid risk prediction.
+              </p>
+            </div>
             <Link
               to="/risk"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
             >
-              <Icon name="document_scanner" className="text-[16px]" />
-              Analyze Leaf Photo & Predict
+              <Icon name="add_a_photo" className="text-[16px]" />
+              Start Field Check
             </Link>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* 3 Focused, Clean Key Metric Cards (No redundant badges) */}
+      {/* 3 Key Metric Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatTile
           icon="pest_control"
-          label="Current Pest Count"
-          value="2.1"
+          label="Latest Jassid Count"
+          value={latestPred ? latestPred.final_score.toFixed(2) : "—"}
           unit="/ 3 leaves"
-          hint="Threshold: 1.95 · Slightly above ETL"
-          to="/risk"
+          hint={latestPred ? `ETL: 6.0 · Confidence: ${latestPred.confidence}` : "No check yet"}
+          to="/recommendations"
         />
 
         <StatTile
@@ -130,14 +200,26 @@ function DashboardPage() {
           to="/environment"
         />
 
-        <StatTile
-          icon="checklist"
-          label="Recommended Action"
-          value="Neem Bio-Spray"
-          unit="within 48h"
-          hint="Target early nymphs on underleaf"
-          to="/recommendations"
-        />
+        <Link to="/recommendations" search={{ id: undefined }} className="block h-full">
+          <div className="flex h-full flex-col justify-between rounded-2xl border border-border bg-surface p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lg">
+            <div className="flex items-start justify-between gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Icon name="checklist" className="text-[20px]" />
+              </span>
+            </div>
+            <div className="mt-5">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Recommended Action
+              </p>
+              <p className="mt-1 font-display text-2xl font-semibold">
+                {latestPred?.recommendation?.urgency ?? "Scout"}
+              </p>
+              <p className="mt-1 text-xs text-foreground/60">
+                {latestPred?.recommendation?.rescout_date ?? "Start a field check to get advice"}
+              </p>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Two Balanced, High-Clarity Panels */}
@@ -227,6 +309,7 @@ function DashboardPage() {
           action={
             <Link
               to="/recommendations"
+              search={{ id: undefined }}
               className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
             >
               All actions ({pendingActions.length})

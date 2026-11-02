@@ -1,410 +1,630 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { PageHeader, Panel, RiskBadge } from "@/components/procrop/ui";
+import { PageHeader, Panel } from "@/components/procrop/ui";
+import { Icon } from "@/components/Icon";
 import {
-  fetchLiveCoimbatoreWeather,
-  fetchLatestDatasetPrediction,
-  type LiveWeatherResponse,
-  type PredictionResponse,
+  fetchPredictionDetail,
+  fetchLatestPrediction,
+  type DetailedPredictionResponse,
 } from "@/services/api";
 
+// Search params: ?id=<prediction_id>
 export const Route = createFileRoute("/_app/recommendations")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    id: search["id"] ? String(search["id"]) : undefined,
+  }),
   head: () => ({
     meta: [
-      { title: "Dynamic Jassid Recommendations — ProCrop" },
+      { title: "Field Risk Report & Recommendations — ProCrop" },
       {
         name: "description",
         content:
-          "Daily dynamic spray and management recommendations for Coimbatore cotton based on previous records' ML pest predictions and live rainfall data.",
+          "Explainable jassid risk assessment with photo evidence, SHAP drivers, weather context, and IPM action plan for your cotton field.",
       },
-      { property: "og:title", content: "Dynamic Jassid Recommendations — ProCrop" },
-      {
-        property: "og:description",
-        content:
-          "Daily dynamic spray and management recommendations for Coimbatore cotton based on previous records' ML pest predictions and live rainfall data.",
-      },
+      { property: "og:title", content: "Field Risk Report — ProCrop" },
     ],
   }),
   component: RecommendationsPage,
 });
 
-interface ActionRecommendation {
-  id: string;
-  category:
-    | "Chemical Control"
-    | "Bio-Pesticide & Botanicals"
-    | "Cultural & Traps"
-    | "Water & Canopy"
-    | "Field Scouting";
-  title: string;
-  prescription: string;
-  rationale: string;
-  timing: string;
-  priority: "High" | "Medium" | "Low";
-  status: "Immediate Action" | "Conditional / On Hold" | "Standard Maintenance";
-  icon: string;
+function riskColor(risk: string) {
+  if (risk === "High") return "text-risk-high";
+  if (risk === "Medium") return "text-risk-moderate";
+  return "text-risk-low";
+}
+function riskBg(risk: string) {
+  if (risk === "High") return "bg-risk-high/15 border-risk-high/30 text-risk-high";
+  if (risk === "Medium") return "bg-risk-moderate/15 border-risk-moderate/30 text-risk-moderate";
+  return "bg-risk-low/15 border-risk-low/30 text-risk-low";
+}
+function riskIcon(risk: string) {
+  if (risk === "High") return "warning";
+  if (risk === "Medium") return "trending_up";
+  return "check_circle";
+}
+function confidenceColor(conf: string) {
+  if (conf === "High") return "text-emerald-600 dark:text-emerald-400";
+  if (conf === "Medium") return "text-amber-600 dark:text-amber-400";
+  return "text-rose-600 dark:text-rose-400";
+}
+
+function burnGradeLabel(grade: number) {
+  if (grade < 0.5) return "Grade 0 — No visible damage";
+  if (grade < 1.5) return "Grade 1 — Slight yellowing at leaf margins";
+  if (grade < 2.5) return "Grade 2 — Moderate yellowing, cupping begins";
+  if (grade < 3.5) return "Grade 3 — Widespread reddening / browning";
+  return "Grade 4 — Severe desiccation";
+}
+
+function burnGradeColor(grade: number) {
+  if (grade < 1) return "text-emerald-600 dark:text-emerald-400";
+  if (grade < 2) return "text-amber-500 dark:text-amber-400";
+  if (grade < 3) return "text-orange-500 dark:text-orange-400";
+  return "text-rose-600 dark:text-rose-400";
+}
+
+function formatDate(iso?: string) {
+  if (!iso) return "—";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
 }
 
 export default function RecommendationsPage() {
-  const [weather, setWeather] = useState<LiveWeatherResponse | null>(null);
-  const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { id } = Route.useSearch();
+  const [data, setData] = useState<DetailedPredictionResponse | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
-  const loadData = useCallback(async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const [wData, pData] = await Promise.all([
-        fetchLiveCoimbatoreWeather(),
-        fetchLatestDatasetPrediction().catch(() => ({
-          predicted_next_week_jassid: 2.15,
-          risk: "HIGH" as const,
-          risk_threshold: 1.95,
-          model_used: "XGBoost Model B (Latest Week Record)",
-          explanation: [],
-        })),
-      ]);
-      setWeather(wData);
-      setPrediction(pData);
-      setLastRefreshed(new Date());
-    } catch (err: unknown) {
-      console.error("Failed to load recommendation telemetry:", err);
-      setError(err instanceof Error ? err.message : "Error connecting to backend services.");
+      let result: DetailedPredictionResponse | null = null;
+      if (id) {
+        result = await fetchPredictionDetail(id);
+      } else {
+        result = await fetchLatestPrediction();
+      }
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load report.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    load();
+  }, [load]);
 
-  // Generate dynamic recommendations based on predicted risk and rainfall
-  const isHighRisk = prediction
-    ? prediction.risk === "HIGH" || prediction.predicted_next_week_jassid >= 1.95
-    : true;
-  const rainfall = weather?.rainfall_mm ?? 0;
-  const isRainyDay = rainfall >= 5.0;
-  const windSpeed = weather?.wind_speed_kmh ?? 6.0;
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <span className="material-symbols-outlined animate-spin text-4xl text-primary">
+            progress_activity
+          </span>
+          <p className="text-sm font-medium">Loading field risk report…</p>
+        </div>
+      </div>
+    );
+  }
 
-  const getDynamicRecommendations = (): ActionRecommendation[] => {
-    const list: ActionRecommendation[] = [];
+  if (error || !data) {
+    return (
+      <div className="px-5 py-12 md:px-8 max-w-3xl mx-auto">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-6 text-center">
+          <Icon name="error" className="text-destructive text-4xl mb-3" />
+          <p className="font-semibold text-destructive">{error || "No prediction found."}</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {id
+              ? `Prediction #${id} could not be retrieved.`
+              : "No field checks recorded yet for this account."}
+          </p>
+          <Link
+            to="/risk"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+          >
+            <Icon name="add_a_photo" className="text-[16px]" />
+            Start a New Field Check
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-    // 1. Chemical Management
-    if (isHighRisk) {
-      if (isRainyDay) {
-        list.push({
-          id: "chem-rain-delay",
-          category: "Chemical Control",
-          title: "Hold Chemical Foliar Spray (Rain Wash-off Risk)",
-          prescription:
-            "POSTPONE any synthetic systemic insecticide spray (Flonicamid 50 WG / Dinotefuran 20 SG).",
-          rationale: `Live precipitation is ${rainfall} mm. Downpours wash off foliar residues before translaminar absorption can occur. Rainfall itself provides mechanical knockdown of young Jassid nymphs.`,
-          timing: "Wait 24–48 hours until rainfall ceases and foliage dries completely.",
-          priority: "High",
-          status: "Conditional / On Hold",
-          icon: "hourglass_top",
-        });
-      } else if (windSpeed > 12) {
-        list.push({
-          id: "chem-wind-delay",
-          category: "Chemical Control",
-          title: "Delay Spraying to Early Morning (Wind Drift Hazard)",
-          prescription:
-            "Apply Flonicamid 50 WG @ 0.3 g/L or Dinotefuran 20 SG @ 0.2 g/L with hollow cone nozzles.",
-          rationale: `Wind velocity is currently ${windSpeed} km/h. High winds cause pesticide drift away from target foliage. Apply early between 6:30 AM – 9:00 AM when wind drops below 8 km/h.`,
-          timing: "Early morning calm window (Tomorrow 07:00 AM).",
-          priority: "High",
-          status: "Immediate Action",
-          icon: "air",
-        });
-      } else {
-        list.push({
-          id: "chem-immediate",
-          category: "Chemical Control",
-          title: "Targeted ETL Chemical Spray Application",
-          prescription:
-            "Spray Flonicamid 50 WG @ 0.3 g/litre (60 g/acre) or Clothianidin 50 WDG @ 0.05 g/litre.",
-          rationale: `Predicted Jassid count (${prediction?.predicted_next_week_jassid ?? 2.1} / 3 leaves) breaches the critical economic threshold (1.95). Dry weather (${rainfall} mm rain) ensures optimal residue uptake on leaf undersides.`,
-          timing: "Within next 24 to 36 hours during calm hours.",
-          priority: "High",
-          status: "Immediate Action",
-          icon: "vaccines",
-        });
-      }
-    } else {
-      list.push({
-        id: "chem-low-risk",
-        category: "Chemical Control",
-        title: "No Chemical Insecticide Required (Below ETL)",
-        prescription:
-          "Withhold synthetic chemical sprays. Conserve natural predators and parasitoids.",
-        rationale: `Model predicts safe Jassid levels (${prediction?.predicted_next_week_jassid ?? 1.1} / 3 leaves). Preserving predatory Ladybird beetles (Coccinella) and Chrysoperla lacewings provides natural biological suppression.`,
-        timing: "Re-evaluate next scheduled SMW forecast.",
-        priority: "Low",
-        status: "Standard Maintenance",
-        icon: "shield",
-      });
-    }
+  const {
+    risk_class,
+    final_score,
+    score_per_leaf,
+    confidence,
+    base_score,
+    compound_multiplier,
+    modifiers = [],
+    shap_drivers = [],
+    image_aggregates,
+    weather_snapshot,
+    recommendation,
+    per_image_results = [],
+    field_name,
+    created_at,
+  } = data;
 
-    // 2. Botanical / Bio-pesticides
-    if (isHighRisk && !isRainyDay) {
-      list.push({
-        id: "bio-neem-active",
-        category: "Bio-Pesticide & Botanicals",
-        title: "Foliar Application of Neem Formulation (NSKE 5%)",
-        prescription:
-          "Spray Neem Seed Kernel Extract (NSKE 5%) or Azadirachtin 10,000 ppm @ 1.0 ml/litre of water.",
-        rationale:
-          "Acts as an anti-feedant, oviposition deterrent, and insect growth regulator (IGR), arresting nymphal molting on tender flush leaves without harming pollinators.",
-        timing: "Late afternoon (4:30 PM – 6:00 PM) to avoid UV photolysis of Azadirachtin.",
-        priority: "High",
-        status: "Immediate Action",
-        icon: "eco",
-      });
-    } else if (isHighRisk && isRainyDay) {
-      list.push({
-        id: "bio-neem-standby",
-        category: "Bio-Pesticide & Botanicals",
-        title: "Prepare Botanical Spray Tank for Post-Rain Application",
-        prescription:
-          "Prepare 5% NSKE stock solution. Add sticking agent (Teepol or Sandovit @ 0.5 ml/L) once skies clear.",
-        rationale:
-          "Post-rain high humidity accelerates secondary egg hatching. Applying botanical anti-feedants once rain clears prevents rebound multiplication.",
-        timing: "Immediately once rainfall ceases and sun breaks through.",
-        priority: "Medium",
-        status: "Conditional / On Hold",
-        icon: "science",
-      });
-    } else {
-      list.push({
-        id: "bio-preventive",
-        category: "Bio-Pesticide & Botanicals",
-        title: "Prophylactic Neem Oil Application",
-        prescription: "Foliar mist of cold-pressed Neem Oil 3% (30 ml/L) + soap solution.",
-        rationale:
-          "Repels sporadic alate adults migrating from neighboring pulses or weed hosts (Abutilon indicum).",
-        timing: "Routine maintenance cycle.",
-        priority: "Low",
-        status: "Standard Maintenance",
-        icon: "spa",
-      });
-    }
-
-    // 3. Cultural & Trap Practices
-    list.push({
-      id: "traps-sticky",
-      category: "Cultural & Traps",
-      title: isRainyDay
-        ? "Inspect & Refresh Yellow Sticky Traps Post-Rain"
-        : "Deploy Yellow Sticky Traps across Canopy Line",
-      prescription:
-        "Install 10 to 12 yellow sticky traps per acre at 15 cm above the cotton crop canopy.",
-      rationale: isRainyDay
-        ? `Recent rainfall (${rainfall} mm) may wash mud onto trap glue. Wipe clean or replace sticky cards to maintain flight monitoring.`
-        : "Adult Jassids are strongly phototactic to yellow wavelengths. Trapping directly suppresses adult reproductive pairs and signals population surges.",
-      timing: isRainyDay ? "After rain shower concludes" : "Active field installation",
-      priority: isHighRisk ? "High" : "Medium",
-      status: "Immediate Action",
-      icon: "wb_incandescent",
-    });
-
-    // 4. Water & Soil Management
-    if (isRainyDay) {
-      list.push({
-        id: "water-drainage",
-        category: "Water & Canopy",
-        title: "Clear Drainage Furrows in Black Soil (Vertisols)",
-        prescription:
-          "Inspect field ditches and ensure drain outlets are cleared to remove standing rain water.",
-        rationale: `With ${rainfall} mm rain in Coimbatore, heavy montmorillonite clay soils swell rapidly. Prolonged water stagnation causes root hypoxia and weakens plant immunity.`,
-        timing: "Same-day immediate field round.",
-        priority: "High",
-        status: "Immediate Action",
-        icon: "water",
-      });
-    } else {
-      list.push({
-        id: "water-nutrition",
-        category: "Water & Canopy",
-        title: "Balanced Potassium Nutrition to Toughen Leaf Cuticle",
-        prescription:
-          "Apply MOP (Muriate of Potash) @ 25 kg/ha or foliar spray 1% KNO3 (Potassium Nitrate).",
-        rationale:
-          "Adequate potassium thickens cell walls and promotes epidermal silica deposition, physically impeding the piercing-sucking stylets of leafhoppers.",
-        timing: "During next scheduled drip or furrow fertigation.",
-        priority: "Medium",
-        status: "Standard Maintenance",
-        icon: "yard",
-      });
-    }
-
-    // 5. Scouting Frequency
-    list.push({
-      id: "scouting-freq",
-      category: "Field Scouting",
-      title: isHighRisk
-        ? "Intensive 3-Day Scouting Interval (Top, Mid, Bottom leaves)"
-        : "Weekly Standard Scouting Protocol",
-      prescription: isHighRisk
-        ? "Examine 20 randomly tagged plants across the field. Count nymphs on 3 leaves per plant (1 top, 1 middle, 1 lower)."
-        : "Conduct weekly random walk scouting across 10 plants per block.",
-      rationale: isHighRisk
-        ? "High predicted risk requires tight monitoring of hopperburn progress (Grade I curling to Grade II yellowing)."
-        : "Ensures baseline surveillance while pest pressure is subdued.",
-      timing: isHighRisk ? "Every 48 to 72 hours at dawn" : "Once per Standard Meteorological Week",
-      priority: isHighRisk ? "High" : "Low",
-      status: "Immediate Action",
-      icon: "search_check",
-    });
-
-    return list;
-  };
-
-  const recs = getDynamicRecommendations();
+  const etl = 6.0; // ICAR ETL: 2 nymphs/leaf × 3 leaves
+  const etlPct = Math.min(200, Math.round((final_score / etl) * 100));
 
   return (
-    <div className="px-5 py-8 md:px-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <PageHeader
-          eyebrow="Act · Agronomic Decision Support"
-          title="Dynamic Jassid Recommendations"
-          description="Prescriptive action plan refreshed daily for Coimbatore cotton, linking the previous record's ML pest forecast with today's real-time rainfall and weather conditions."
-        />
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <button
-            onClick={() => loadData()}
-            disabled={loading}
-            className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-muted disabled:opacity-50 transition-colors"
-          >
-            <span className={`material-symbols-outlined text-lg ${loading ? "animate-spin" : ""}`}>
-              sync
-            </span>
-            <span>{loading ? "Refreshing..." : "Refresh Daily Plan"}</span>
-          </button>
-        </div>
-      </div>
+    <div className="space-y-6 px-4 py-8 md:px-8 max-w-5xl mx-auto">
+      {/* Page Header */}
+      <PageHeader
+        eyebrow={`Field Risk Report${field_name ? ` · ${field_name}` : ""}`}
+        title="Jassid Risk Assessment"
+        description={`Check recorded: ${formatDate(created_at)} · ProCrop v2 ML Risk Engine`}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link
+              to="/risk"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary/90"
+            >
+              <Icon name="add" className="text-[14px]" />
+              New Check
+            </Link>
+          </div>
+        }
+      />
 
-      {/* Dynamic Driver Telemetry Bar */}
-      <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-xl">psychology</span>
-              <h2 className="text-sm font-bold text-foreground">
-                Active Telemetry Driving Today's Recommendations
-              </h2>
+      {/* ==================== 1. BIG RISK BADGE ==================== */}
+      <div
+        className={`relative overflow-hidden rounded-2xl border-2 p-6 shadow-soft ${riskBg(risk_class)}`}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/30 dark:bg-black/20">
+              <span className={`material-symbols-outlined text-4xl ${riskColor(risk_class)}`}>
+                {riskIcon(risk_class)}
+              </span>
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest opacity-75">
+                Predicted Next-Week Risk
+              </p>
+              <p className={`font-display text-4xl font-extrabold ${riskColor(risk_class)}`}>
+                {risk_class.toUpperCase()} RISK
+              </p>
+              <p className="text-sm font-semibold opacity-80 mt-0.5">
+                {final_score.toFixed(2)} / 3 leaves ({score_per_leaf?.toFixed(2) ?? "—"} per leaf)
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Updated: {lastRefreshed ? lastRefreshed.toLocaleString() : "Syncing..."} · Region:
-              Coimbatore Cotton Belt
+          </div>
+
+          <div className="flex flex-col items-start sm:items-end gap-1.5">
+            <span className={`text-sm font-bold ${confidenceColor(confidence)}`}>
+              {confidence} Confidence
+            </span>
+            <div className="flex items-center gap-2 text-xs opacity-75">
+              <span>ETL: 6.0 / 3 leaves</span>
+              <span>·</span>
+              <span>{etlPct}% of threshold</span>
+            </div>
+            {/* ETL progress bar */}
+            <div className="w-32 sm:w-44 h-2 rounded-full bg-white/40 dark:bg-black/20 overflow-hidden mt-1">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  risk_class === "High"
+                    ? "bg-risk-high"
+                    : risk_class === "Medium"
+                      ? "bg-risk-moderate"
+                      : "bg-risk-low"
+                }`}
+                style={{ width: `${Math.min(100, etlPct)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {recommendation?.headline && (
+          <div className="mt-4 pt-4 border-t border-white/30 dark:border-black/20">
+            <p className="text-sm font-semibold opacity-90">
+              <Icon name="info" className="text-[15px] align-middle mr-1" />
+              {recommendation.headline}
             </p>
           </div>
+        )}
+      </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Predicted Risk Badge */}
-            <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-2">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
-                ML Predicted Jassid Risk
+      {/* ==================== 2. TOP DRIVERS (SHAP + MODIFIERS) ==================== */}
+      <Panel
+        title="Risk Score Breakdown"
+        icon="analytics"
+        subtitle="SHAP feature contributions and management modifiers"
+      >
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* SHAP Drivers */}
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              Top Feature Contributions (SHAP)
+            </p>
+            {shap_drivers.length === 0 ? (
+              <p className="text-sm text-muted-foreground italic">
+                Not available for this prediction.
               </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <RiskBadge level={isHighRisk ? "high" : "low"} />
-                <span className="text-xs font-mono font-semibold text-foreground">
-                  {prediction?.predicted_next_week_jassid ?? 2.15} / 3 leaves
-                </span>
+            ) : (
+              <div className="space-y-2.5">
+                {shap_drivers.slice(0, 6).map((d, i) => {
+                  const maxAbs = Math.max(...shap_drivers.map((x) => Math.abs(x.contribution)));
+                  const barWidth = maxAbs > 0 ? (Math.abs(d.contribution) / maxAbs) * 100 : 0;
+                  const isPositive = d.contribution > 0;
+                  return (
+                    <div key={i} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-foreground truncate max-w-[60%]">
+                          {d.feature}
+                        </span>
+                        <span
+                          className={`font-bold ${isPositive ? "text-risk-high" : "text-risk-low"}`}
+                        >
+                          {isPositive ? "+" : ""}
+                          {d.contribution.toFixed(3)}
+                        </span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${isPositive ? "bg-risk-high" : "bg-risk-low"}`}
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="text-[10px] text-muted-foreground pt-1">
+                  Base ML score: <strong>{base_score.toFixed(2)}</strong> → Modifiers applied: ×
+                  {compound_multiplier.toFixed(3)} → Final:{" "}
+                  <strong>{final_score.toFixed(2)}</strong>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Expert-Rule Modifiers */}
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              Management Modifiers (Expert Priors)
+            </p>
+            {modifiers.length === 0 ? (
+              <p className="text-sm text-muted-foreground italic">
+                No modifiers applied (neutral inputs).
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {modifiers.map((m, i) => (
+                  <div key={i} className="rounded-xl border border-border bg-surface p-3 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-foreground capitalize">
+                        {m.category.replace(/_/g, " ")}
+                      </span>
+                      <span
+                        className={`text-xs font-bold rounded-full px-2 py-0.5 ${
+                          m.multiplier < 1
+                            ? "bg-risk-low/15 text-risk-low"
+                            : m.multiplier > 1
+                              ? "bg-risk-high/15 text-risk-high"
+                              : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        ×{m.multiplier.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-foreground/80">{m.explanation}</p>
+                    <p className="text-[10px] text-muted-foreground italic">{m.disclaimer}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Panel>
+
+      {/* ==================== 3. PHOTO EVIDENCE ==================== */}
+      {image_aggregates && (
+        <Panel
+          title="Photo Evidence"
+          icon="photo_library"
+          subtitle={`${image_aggregates.n_images_used} / ${image_aggregates.n_images_uploaded} images passed quality check`}
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl border border-border bg-surface p-4 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                Total Jassids Counted
+              </p>
+              <p className="font-display text-3xl font-bold text-foreground mt-1">
+                {image_aggregates.total_pests_counted}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {image_aggregates.total_adults} adults · {image_aggregates.total_nymphs} nymphs
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-4 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                Mean / Leaf
+              </p>
+              <p className="font-display text-3xl font-bold text-foreground mt-1">
+                {image_aggregates.mean_per_leaf.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                95% CI [{image_aggregates.bootstrap_ci_95?.lower?.toFixed(2) ?? "—"} –{" "}
+                {image_aggregates.bootstrap_ci_95?.upper?.toFixed(2) ?? "—"}]
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-4 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                Hopper Burn Grade
+              </p>
+              <p
+                className={`font-display text-3xl font-bold mt-1 ${burnGradeColor(image_aggregates.mean_burn_grade)}`}
+              >
+                {image_aggregates.mean_burn_grade.toFixed(1)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {burnGradeLabel(image_aggregates.mean_burn_grade)}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-4 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                Variability (CV)
+              </p>
+              <p className="font-display text-3xl font-bold text-foreground mt-1">
+                {((image_aggregates.cv ?? 0) * 100).toFixed(0)}%
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {image_aggregates.n_images_rejected > 0
+                  ? `${image_aggregates.n_images_rejected} images excluded`
+                  : "All images passed QC"}
+              </p>
+            </div>
+          </div>
+
+          {/* Per-Image Summary Table (compact) */}
+          {per_image_results.length > 0 && (
+            <div className="mt-4 overflow-x-auto">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                Per-Image Breakdown
+              </p>
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-border text-left text-muted-foreground">
+                    <th className="pb-1.5 pr-3">Image</th>
+                    <th className="pb-1.5 pr-3">Adults</th>
+                    <th className="pb-1.5 pr-3">Nymphs</th>
+                    <th className="pb-1.5 pr-3">Total</th>
+                    <th className="pb-1.5 pr-3">Burn</th>
+                    <th className="pb-1.5">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {per_image_results.map((img, i) => (
+                    <tr key={i} className="border-b border-border/30">
+                      <td className="py-1.5 pr-3 font-medium truncate max-w-[100px]">
+                        {img.filename || `Leaf ${i + 1}`}
+                      </td>
+                      <td className="py-1.5 pr-3">{img.n_adults ?? 0}</td>
+                      <td className="py-1.5 pr-3">{img.n_nymphs ?? 0}</td>
+                      <td className="py-1.5 pr-3 font-semibold">{img.total ?? 0}</td>
+                      <td className="py-1.5 pr-3">
+                        {img.hopper_burn?.burn_grade !== undefined
+                          ? img.hopper_burn.burn_grade.toFixed(1)
+                          : "—"}
+                      </td>
+                      <td className="py-1.5">
+                        {img.quality_flags?.["is_blurry"] ||
+                        img.quality_flags?.["is_dark"] ||
+                        img.quality_flags?.["no_leaf_found"] ? (
+                          <span className="rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2 py-0.5 font-medium">
+                            Flagged
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 font-medium">
+                            Good
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Panel>
+      )}
+
+      {/* ==================== 4. WEATHER CONTEXT ==================== */}
+      {weather_snapshot && (
+        <Panel
+          title="Weather Context Used"
+          icon="cloud"
+          subtitle={`Source: ${weather_snapshot.source || "Open-Meteo"} ${!weather_snapshot.is_weather_available ? " · ⚠ Cached / fallback" : ""}`}
+        >
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+            {[
+              { label: "Max Temp", value: `${weather_snapshot.max_temp_c}°C`, icon: "thermometer" },
+              { label: "Min Temp", value: `${weather_snapshot.min_temp_c}°C`, icon: "thermostat" },
+              {
+                label: "Morning RH",
+                value: `${weather_snapshot.rh_morning_pct}%`,
+                icon: "water_drop",
+              },
+              { label: "Rainfall", value: `${weather_snapshot.rainfall_mm} mm`, icon: "rainy" },
+              {
+                label: "Rainy Days",
+                value: `${weather_snapshot.rainy_days}`,
+                icon: "calendar_month",
+              },
+              {
+                label: "Wind",
+                value: `${weather_snapshot.wind_speed_kmh ?? "—"} km/h`,
+                icon: "air",
+              },
+              {
+                label: "7-Day Forecast Rain",
+                value:
+                  weather_snapshot.forecast_7d_rainfall_mm != null
+                    ? `${weather_snapshot.forecast_7d_rainfall_mm} mm`
+                    : "—",
+                icon: "umbrella",
+              },
+              {
+                label: "7-Day Avg Max Temp",
+                value:
+                  weather_snapshot.forecast_7d_max_temp_mean != null
+                    ? `${weather_snapshot.forecast_7d_max_temp_mean}°C`
+                    : "—",
+                icon: "sunny",
+              },
+            ].map((w) => (
+              <div key={w.label} className="rounded-xl border border-border bg-surface p-3">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Icon name={w.icon} className="text-[14px] text-muted-foreground" />
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+                    {w.label}
+                  </p>
+                </div>
+                <p className="text-sm font-bold text-foreground">{w.value}</p>
+              </div>
+            ))}
+          </div>
+          {!weather_snapshot.is_weather_available && (
+            <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 italic">
+              ⚠ Live weather was unavailable at the time of this check. Cached or seasonal baseline
+              values were used.
+            </p>
+          )}
+        </Panel>
+      )}
+
+      {/* ==================== 5. RECOMMENDATIONS (DECISION TABLE) ==================== */}
+      {recommendation && (
+        <Panel
+          title="IPM Action Plan"
+          icon="task_alt"
+          subtitle={`${recommendation.urgency} · Re-scout by: ${recommendation.rescout_date}`}
+        >
+          <div className="space-y-5">
+            {/* Re-scout date callout */}
+            <div className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+              <Icon name="event" className="text-primary text-xl shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-primary uppercase tracking-wide">
+                  Next Scout Date
+                </p>
+                <p className="text-sm font-semibold text-foreground">
+                  {recommendation.rescout_date}
+                </p>
               </div>
             </div>
 
-            {/* Today's Rain */}
-            <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-2">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
-                Today's Rainfall
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="material-symbols-outlined text-primary text-base">rainy</span>
-                <span className="text-xs font-bold text-foreground">{rainfall} mm</span>
-                <span className="text-[11px] text-muted-foreground">
-                  ({isRainyDay ? "Wash-off Risk Active" : "Dry Foliage"})
-                </span>
+            {/* Actions */}
+            {recommendation.actions?.length > 0 && (
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
+                  Recommended Actions
+                </p>
+                <ul className="space-y-2">
+                  {recommendation.actions.map((action, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                        <Icon name="check" className="text-primary text-[12px]" />
+                      </span>
+                      <span className="text-foreground/90">{action}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            )}
 
-            {/* Weather Wind & Temp */}
-            <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-2">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
-                Surface Wind & Morning RH
-              </p>
-              <p className="text-xs font-semibold text-foreground mt-0.5">
-                {windSpeed} km/h · {weather?.rh_morning_pct ?? 78}% RH
-              </p>
-            </div>
+            {/* Spray guidance */}
+            {recommendation.spray_guidance && (
+              <div className="rounded-xl border border-border bg-surface p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                  Spray Guidance
+                </p>
+                <p className="text-sm text-foreground/90 leading-relaxed">
+                  {recommendation.spray_guidance}
+                </p>
+              </div>
+            )}
+
+            {/* IRAC rotation note */}
+            {recommendation.rotation_note && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+                <div className="flex items-start gap-2">
+                  <Icon
+                    name="rotate_right"
+                    className="text-amber-600 dark:text-amber-400 text-[18px] mt-0.5 shrink-0"
+                  />
+                  <div>
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wide mb-1">
+                      IRAC Chemical Rotation Guidance
+                    </p>
+                    <p className="text-sm text-amber-900 dark:text-amber-100 leading-relaxed">
+                      {recommendation.rotation_note}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </Panel>
+      )}
+
+      {/* ==================== 6. ADVISORY DISCLAIMER ==================== */}
+      <div className="rounded-2xl border border-border bg-muted/30 p-5">
+        <div className="flex items-start gap-3">
+          <Icon name="gavel" className="text-muted-foreground text-xl shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+              Advisory Disclaimer
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {recommendation?.disclaimer ||
+                "Advisory only. Model outputs are decision-support estimates and do not replace an agronomist's field assessment. Verify local regulations and label directions before applying any crop protection product."}
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Management modifiers (variety trait, spray history, nitrogen, alternate hosts) are
+              expert-rule priors to be validated with an agronomist. Risk model trained on AICRP
+              Coimbatore data (40 rows, 4 seasons); check field context before acting.
+            </p>
           </div>
         </div>
       </div>
 
-      {error && (
-        <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          <p className="font-semibold">Telemetry Synchronization Alert</p>
-          <p className="mt-1">{error}</p>
-        </div>
-      )}
-
-      {/* Dynamic Recommendation Cards */}
-      <div className="space-y-4">
-        {recs.map((r) => (
-          <Panel
-            key={r.id}
-            title={r.title}
-            subtitle={`${r.category} · Timing: ${r.timing}`}
-            icon={r.icon}
-          >
-            <div className="space-y-2.5">
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-                <p className="text-xs font-bold text-primary uppercase tracking-wide mb-1">
-                  Prescription / Protocol
-                </p>
-                <p className="text-sm font-semibold text-foreground">{r.prescription}</p>
-              </div>
-
-              <div className="text-sm text-foreground/80 leading-relaxed">
-                <span className="font-semibold text-foreground">Agronomic Rationale: </span>
-                {r.rationale}
-              </div>
-
-              <div className="mt-3 flex flex-wrap items-center gap-2 pt-1 border-t border-border/50">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${
-                    r.priority === "High"
-                      ? "bg-risk-high/15 text-risk-high border border-risk-high/30"
-                      : r.priority === "Medium"
-                        ? "bg-risk-moderate/15 text-risk-moderate border border-risk-moderate/30"
-                        : "bg-risk-low/15 text-risk-low border border-risk-low/30"
-                  }`}
-                >
-                  {r.priority} Priority
-                </span>
-
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold border ${
-                    r.status === "Immediate Action"
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      : r.status === "Conditional / On Hold"
-                        ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                        : "border-border bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {r.status}
-                </span>
-
-                <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
-                  {r.timing}
-                </span>
-              </div>
-            </div>
-          </Panel>
-        ))}
+      {/* Navigation */}
+      <div className="flex items-center justify-between pt-2">
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+        >
+          <Icon name="arrow_back" className="text-[16px]" />
+          Back to Dashboard
+        </Link>
+        <Link
+          to="/risk"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <Icon name="add_a_photo" className="text-[16px]" />
+          New Field Check
+        </Link>
       </div>
     </div>
   );
