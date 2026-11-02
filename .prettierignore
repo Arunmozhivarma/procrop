@@ -2,6 +2,9 @@ node_modules
 dist
 .output
 .vinxi
+.venv
+data
+models
 pnpm-lock.yaml
 package-lock.json
 bun.lock
