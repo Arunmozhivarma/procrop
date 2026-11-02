@@ -1,5 +1,15 @@
 import os
 import sys
+
+# Ensure local writable cache for matplotlib and numba before any imports
+_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+os.environ.setdefault('MPLCONFIGDIR', os.path.join(_root, '.mplconfig'))
+os.environ.setdefault('NUMBA_CACHE_DIR', os.path.join(_root, '.numbacache'))
+os.makedirs(os.environ['MPLCONFIGDIR'], exist_ok=True)
+os.makedirs(os.environ['NUMBA_CACHE_DIR'], exist_ok=True)
+
+import os
+import sys
 import joblib
 import pandas as pd
 import numpy as np
@@ -21,6 +31,8 @@ from backend.database import (
 )
 from src.preprocessing import MODEL_B_FEATURES, load_dataset
 from src.shap_analysis import get_shap_explanation
+
+from backend.config import get_app_config
 
 app = FastAPI(
     title="Cotton Jassid Risk Prediction API",
@@ -76,7 +88,17 @@ def read_root():
         "status": "API is running"
     }
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "procrop-api"}
+
+@app.get("/api/config")
+def get_config():
+    """Returns application configuration as single source of truth for frontend and clients."""
+    return get_app_config()
+
 @app.get("/weather/coimbatore")
+
 def get_coimbatore_weather():
     """Fetches real-time weather parameters for Coimbatore, Tamil Nadu from Open-Meteo API."""
     return fetch_coimbatore_weather()

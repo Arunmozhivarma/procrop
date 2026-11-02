@@ -1,0 +1,67 @@
+{
+  "upload": {
+    "min_images": 5,
+    "target_images": 15,
+    "max_images": 30,
+    "max_image_mb": 8,
+    "compression_max_dimension": 1600,
+    "compression_quality": 0.85
+  },
+  "economic_threshold_level": {
+    "jassids_per_leaf": 2.0,
+    "jassids_per_3_leaves": 6.0,
+    "source": "ICAR - Central Institute for Cotton Research (CICR) & TNAU Agritech Portal (Cotton Sucking Pests IPM)",
+    "description": "Economic Threshold Level (ETL) is 2 nymphs per leaf (6 per 3 leaves), or Grade II hopper burn injury symptoms."
+  },
+  "risk_classes": {
+    "low": {
+      "label": "Low",
+      "max_jassids_per_leaf": 1.0,
+      "max_jassids_per_3_leaves": 3.0,
+      "max_burn_grade": 1,
+      "description": "Below 50% of ETL and hopper burn grade <= 1."
+    },
+    "medium": {
+      "label": "Medium",
+      "min_jassids_per_leaf": 1.0,
+      "max_jassids_per_leaf": 2.0,
+      "min_jassids_per_3_leaves": 3.0,
+      "max_jassids_per_3_leaves": 6.0,
+      "burn_grade": 2,
+      "description": "50% to 100% of ETL, or grade 2 hopper burn appearing."
+    },
+    "high": {
+      "label": "High",
+      "min_jassids_per_leaf": 2.0,
+      "min_jassids_per_3_leaves": 6.0,
+      "burn_grade": 2,
+      "description": "At or exceeding ETL (>= 2.0 per leaf / >= 6.0 per 3 leaves) or widespread hopper burn grade >= 2."
+    }
+  },
+  "hopper_burn_override_share": 0.25,
+  "confidence_levels": {
+    "high": {
+      "min_images": 15,
+      "label": "High Confidence",
+      "description": "15 or more photos with verified foliage clarity"
+    },
+    "medium": {
+      "min_images": 8,
+      "max_images": 14,
+      "label": "Medium Confidence",
+      "description": "8 to 14 photos analysed"
+    },
+    "low": {
+      "min_images": 5,
+      "max_images": 7,
+      "label": "Low Confidence",
+      "description": "5 to 7 photos analysed; below target sample size"
+    }
+  },
+  "sampling_protocol": {
+    "target_plants": 5,
+    "leaves_per_plant": 3,
+    "canopy_levels": ["top", "middle", "bottom"],
+    "orientation": "underside"
+  }
+}

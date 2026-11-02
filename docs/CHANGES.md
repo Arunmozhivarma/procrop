@@ -19,3 +19,25 @@ This document records architectural decisions, real model metrics, expert priors
 - **Authentication**:
   - Existing frontend authentication was simulated with local storage and timeout.
   - Decision: Implement secure backend authentication with bcrypt password hashing, JWT tokens with server-side revocation, per-user database isolation, and multi-account switching.
+
+---
+
+## Phase 1: Shared Configuration (Single Source of Truth)
+
+- **Backend Configuration File**: Created `backend/config/app_config.json`.
+  - Image constraints: `MIN_IMAGES = 5` (hard lower bound), `TARGET_IMAGES = 15`, `MAX_IMAGES = 30`, `MAX_IMAGE_MB = 8`.
+  - Client compression parameters: max long side 1600 px, quality 0.85 JPEG.
+  - Economic Threshold Level (ETL): Sourced from ICAR-CICR and TNAU Agritech Portal Cotton IPM guidelines: 2 nymphs per leaf (equivalent to 6 nymphs per 3 leaves), or Grade II hopper burn injury symptoms.
+  - Risk class cut-offs:
+    - **Low**: < 50% ETL (< 1.0 jassid/leaf, < 3.0 jassids/3 leaves) and hopper burn grade <= 1.
+    - **Medium**: 50–100% ETL (1.0–2.0 jassids/leaf, 3.0–6.0 jassids/3 leaves) or grade 2 appearing.
+    - **High**: >= 100% ETL (>= 2.0 jassids/leaf, >= 6.0 jassids/3 leaves) or widespread grade >= 2 (>= 25% of leaves).
+  - Sampling protocol: 5 plants $\times$ 3 leaves (top, middle, bottom), underside orientation.
+- **Backend Endpoints**:
+  - `GET /health`: Basic operational probe.
+  - `GET /api/config`: Exposes `app_config.json` directly to frontend and client apps.
+- **Frontend Integration**:
+  - Added `AppConfig` type and `fetchAppConfig()` with fallback `DEFAULT_APP_CONFIG` in `src/services/api.ts`.
+- **Verification**:
+  - `tests/test_config.py` passes asserting upload bounds, ETL definitions, and risk class thresholds.
+

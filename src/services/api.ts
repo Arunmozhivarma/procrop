@@ -1,3 +1,137 @@
+export interface AppConfig {
+  upload: {
+    min_images: number;
+    target_images: number;
+    max_images: number;
+    max_image_mb: number;
+    compression_max_dimension: number;
+    compression_quality: number;
+  };
+  economic_threshold_level: {
+    jassids_per_leaf: number;
+    jassids_per_3_leaves: number;
+    source: string;
+    description: string;
+  };
+  risk_classes: {
+    low: {
+      label: string;
+      max_jassids_per_leaf: number;
+      max_jassids_per_3_leaves: number;
+      max_burn_grade: number;
+      description: string;
+    };
+    medium: {
+      label: string;
+      min_jassids_per_leaf: number;
+      max_jassids_per_leaf: number;
+      min_jassids_per_3_leaves: number;
+      max_jassids_per_3_leaves: number;
+      burn_grade: number;
+      description: string;
+    };
+    high: {
+      label: string;
+      min_jassids_per_leaf: number;
+      min_jassids_per_3_leaves: number;
+      burn_grade: number;
+      description: string;
+    };
+  };
+  hopper_burn_override_share: number;
+  confidence_levels: {
+    high: { min_images: number; label: string; description: string };
+    medium: { min_images: number; max_images: number; label: string; description: string };
+    low: { min_images: number; max_images: number; label: string; description: string };
+  };
+  sampling_protocol: {
+    target_plants: number;
+    leaves_per_plant: number;
+    canopy_levels: string[];
+    orientation: string;
+  };
+}
+
+export const DEFAULT_APP_CONFIG: AppConfig = {
+  upload: {
+    min_images: 5,
+    target_images: 15,
+    max_images: 30,
+    max_image_mb: 8,
+    compression_max_dimension: 1600,
+    compression_quality: 0.85,
+  },
+  economic_threshold_level: {
+    jassids_per_leaf: 2.0,
+    jassids_per_3_leaves: 6.0,
+    source: "ICAR-CICR & TNAU Agritech Portal (Cotton IPM)",
+    description: "ETL: 2 nymphs/leaf (6 per 3 leaves), or Grade II hopper burn.",
+  },
+  risk_classes: {
+    low: {
+      label: "Low",
+      max_jassids_per_leaf: 1.0,
+      max_jassids_per_3_leaves: 3.0,
+      max_burn_grade: 1,
+      description: "Below 50% of ETL and hopper burn grade <= 1.",
+    },
+    medium: {
+      label: "Medium",
+      min_jassids_per_leaf: 1.0,
+      max_jassids_per_leaf: 2.0,
+      min_jassids_per_3_leaves: 3.0,
+      max_jassids_per_3_leaves: 6.0,
+      burn_grade: 2,
+      description: "50% to 100% of ETL, or grade 2 hopper burn appearing.",
+    },
+    high: {
+      label: "High",
+      min_jassids_per_leaf: 2.0,
+      min_jassids_per_3_leaves: 6.0,
+      burn_grade: 2,
+      description: "At or exceeding ETL (>= 2.0 per leaf) or widespread hopper burn grade >= 2.",
+    },
+  },
+  hopper_burn_override_share: 0.25,
+  confidence_levels: {
+    high: {
+      min_images: 15,
+      label: "High Confidence",
+      description: "15 or more photos with verified foliage clarity",
+    },
+    medium: {
+      min_images: 8,
+      max_images: 14,
+      label: "Medium Confidence",
+      description: "8 to 14 photos analysed",
+    },
+    low: {
+      min_images: 5,
+      max_images: 7,
+      label: "Low Confidence",
+      description: "5 to 7 photos analysed; below target sample size",
+    },
+  },
+  sampling_protocol: {
+    target_plants: 5,
+    leaves_per_plant: 3,
+    canopy_levels: ["top", "middle", "bottom"],
+    orientation: "underside",
+  },
+};
+
+export async function fetchAppConfig(): Promise<AppConfig> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/config`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch {
+    // fallback to DEFAULT_APP_CONFIG
+  }
+  return DEFAULT_APP_CONFIG;
+}
+
 export interface JassidPredictionInput {
   jassid_per_3_leaves: number;
   jassid_lag_1: number;
@@ -243,7 +377,7 @@ export async function runUnifiedPrediction(params: {
 export async function autoPredictFromPhotoAndWeather(
   file: File,
   lag1 = 1.8,
-  lag2 = 1.5
+  lag2 = 1.5,
 ): Promise<AutoPredictResponse> {
   const formData = new FormData();
   formData.append("file", file);
@@ -262,7 +396,7 @@ export async function autoPredictFromPhotoAndWeather(
 }
 
 export async function fetchLivePrediction(
-  inputData: JassidPredictionInput
+  inputData: JassidPredictionInput,
 ): Promise<PredictionResponse> {
   const res = await fetch(`${API_BASE_URL}/predict`, {
     method: "POST",
