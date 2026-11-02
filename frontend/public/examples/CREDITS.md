@@ -12,7 +12,7 @@ The example images provided in this directory for the ProCrop "How to take a goo
    - Source: Roboflow Universe dataset `hc147/cotton-jassid` (Version 4).
    - Author: hc147 (Roboflow Universe).
    - License: CC BY 4.0.
-   - Purpose: Demonstrates clear adult wedge-shaped cotton jassid (*Amrasca biguttula biguttula*) morphology.
+   - Purpose: Demonstrates clear adult wedge-shaped cotton jassid (_Amrasca biguttula biguttula_) morphology.
 
 3. **`hopperburn_grades_0_to_4.jpg`**:
    - Source: Roboflow Universe dataset `guava-segmentation/cotton-data-qdtse` (Version 3) and `cotton-plant-224mo/leaf-redding`.

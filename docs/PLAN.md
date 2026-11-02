@@ -3,6 +3,7 @@
 ## Phase 0: Inspection Findings & Current State Analysis
 
 ### 1. File Structure & Existing Components
+
 - **Backend**:
   - `backend/app.py`: FastAPI application exposing prediction and dataset endpoints.
   - `backend/database.py`: SQLite layer managing `data/procrop.db`. Existing tables: `weekly_observations` (40 rows seeded from `02_Jassid_Model_Ready.xlsx`), `predictions` (9 rows).
@@ -17,6 +18,7 @@
   - Navigation: `src/config/navigation.ts`, `src/components/layout/Sidebar.tsx`.
 
 ### 2. Critical Findings: Real Models vs Heuristics
+
 1. **Vision Detector (`backend/vision_detector.py`)**:
    - **Current Status**: **Heuristic / Simulated**. It checks filenames for keywords ("heavy", "moderate", "mild") and falls back to naive RGB thresholding and deterministic pseudo-random bounding boxes derived from MD5 hashes of image bytes (`((img_hash + i * 37) % 70) + 15`). There are no neural network weights or genuine object detector.
    - **Upgrade Plan**: Replace with a real lightweight model (ultralytics YOLOv8n / PyTorch detector) trained or calibrated on cotton leafhopper datasets, with image slicing/tiling for tiny insects, and report true precision, recall, mAP@0.5, and count MAE in `backend/models/detector_metrics.json`. If public datasets are small, explicitly document metrics and provide an honest classical vision fallback clearly labeled as "heuristic".
