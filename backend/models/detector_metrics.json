@@ -1,0 +1,39 @@
+{
+  "model_architecture": "YOLOv8n (ultralytics)",
+  "training_dataset": {
+    "name": "Roboflow Universe hc147/cotton-jassid (v4)",
+    "license": "CC BY 4.0",
+    "train_images": 136,
+    "val_images": 39,
+    "test_images": 19,
+    "classes": [
+      "adult",
+      "molt",
+      "nymph"
+    ]
+  },
+  "held_out_test_metrics": {
+    "test_images": 19,
+    "precision": 0.8627,
+    "recall": 0.3512,
+    "mAP_50": 0.4198,
+    "mAP_50_95": 0.2588,
+    "count_mae_per_image": {
+      "adults_mae": 0.526,
+      "nymphs_mae": 0.368,
+      "total_pest_mae": 0.474
+    }
+  },
+  "heuristic_fallback_metrics": {
+    "method": "Classical Blob / Adaptive Color Slicing (Heuristic)",
+    "count_mae_per_image": 19.158,
+    "test_images_evaluated": 19
+  },
+  "inference_resolution": 960,
+  "slicing_tiling_supported": true,
+  "quality_checks": {
+    "min_laplacian_variance": 50.0,
+    "min_brightness": 35.0,
+    "max_brightness": 235.0
+  }
+}

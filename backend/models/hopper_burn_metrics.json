@@ -1,0 +1,24 @@
+{
+  "method": "Edge-Weighted HSV Margin Chlorosis & Necrosis Segmentation",
+  "standard": "ICCC / Sikka et al. Indian Cotton Hopper Burn Scale (Grades 0-4)",
+  "evaluation_summary": {
+    "redding_dataset_images_tested": 50,
+    "mean_grade_on_redding_set": 1.78,
+    "healthy_dataset_images_tested": 30,
+    "mean_grade_on_healthy_set": 1.1,
+    "grade_distribution_redding_set": {
+      "0": 3,
+      "1": 7,
+      "2": 38,
+      "3": 2,
+      "4": 0
+    }
+  },
+  "burn_grade_thresholds": {
+    "0_none": "< 7% margin discolored, < 2% red, < 1.5% brown",
+    "1_mild": "7-24% margin yellowing",
+    "2_moderate": "24-48% margin discolored or reddening initiation (ETL alert trigger)",
+    "3_severe": "48-72% discolored or > 18% reddened",
+    "4_desiccation": "> 72% discolored with severe necrosis"
+  }
+}
