@@ -1,0 +1,115 @@
+{
+  "version": "1.0.0",
+  "label": "Agronomic Prior Modifiers (Expert Rules)",
+  "disclaimer": "Expert-rule priors to be validated with an agronomist. Applied as transparent multipliers on the base statistical forecast.",
+  "spray_classes": {
+    "none": {
+      "label": "No spray / No intervention",
+      "knockdown_factor": 1.0,
+      "residual_days": 0,
+      "rebound_factor": 1.0,
+      "description": "Baseline natural pest dynamics with no chemical or botanical suppression."
+    },
+    "botanical_neem": {
+      "label": "Botanical / Neem formulation (Azadirachtin)",
+      "knockdown_factor": 0.7,
+      "residual_days": 5,
+      "rebound_factor": 1.05,
+      "description": "Mild antifeedant and oviposition deterrent; 30% suppression lasting ~5 days."
+    },
+    "neonicotinoid": {
+      "label": "Neonicotinoid (e.g., Imidacloprid, Acetamiprid, Thiamethoxam)",
+      "knockdown_factor": 0.35,
+      "residual_days": 14,
+      "rebound_factor": 1.25,
+      "description": "Systemic sucking-pest control with ~65% knockdown lasting up to 14 days; secondary resurgence risk thereafter."
+    },
+    "organophosphate": {
+      "label": "Organophosphate (e.g., Acephate, Dimethoate)",
+      "knockdown_factor": 0.4,
+      "residual_days": 10,
+      "rebound_factor": 1.2,
+      "description": "Broad-spectrum contact/ingestion action with ~60% knockdown lasting ~10 days."
+    },
+    "pyrethroid": {
+      "label": "Synthetic Pyrethroid (e.g., Cypermethrin, Lambda-cyhalothrin)",
+      "knockdown_factor": 0.45,
+      "residual_days": 7,
+      "rebound_factor": 1.3,
+      "description": "Rapid knockdown with ~7 day residual; may flare sucking pests by suppressing natural predators."
+    },
+    "other": {
+      "label": "Other Registered Insecticide",
+      "knockdown_factor": 0.5,
+      "residual_days": 10,
+      "rebound_factor": 1.15,
+      "description": "Generic chemical treatment assumed ~50% population suppression for 10 days."
+    }
+  },
+  "variety_traits": {
+    "tolerant_hairy": {
+      "multiplier": 0.88,
+      "description": "Dense leaf trichomes (pubescence) physically hinder jassid stylet penetration and oviposition (-12% pressure)."
+    },
+    "susceptible": {
+      "multiplier": 1.15,
+      "description": "Glabrous or susceptible leaf canopy facilitates rapid nymph establishment (+15% pressure)."
+    },
+    "unknown": {
+      "multiplier": 1.0,
+      "description": "Neutral baseline; no phenotypic adjustment."
+    }
+  },
+  "bt_trait": {
+    "bt": {
+      "multiplier": 1.0,
+      "description": "Bt (Cry endotoxin) targets lepidopteran bollworms; does not confer sucking pest resistance (neutral)."
+    },
+    "non_bt": {
+      "multiplier": 1.0,
+      "description": "Non-Bt conventional cotton; neutral to sucking pests."
+    }
+  },
+  "nitrogen_level": {
+    "low": {
+      "multiplier": 0.95,
+      "description": "Low plant nitrogen reduces leaf succulent amino acid pools, slightly discouraging leafhoppers (-5%)."
+    },
+    "medium": {
+      "multiplier": 1.0,
+      "description": "Balanced crop nutrition baseline."
+    },
+    "high": {
+      "multiplier": 1.12,
+      "description": "Excess vegetative nitrogen promotes lush, tender leaf tissue highly attractive to sucking jassids (+12%)."
+    }
+  },
+  "alternate_hosts": {
+    "okra": {
+      "multiplier": 1.15,
+      "description": "Adjacent Okra (Bhendi, Abelmoschus esculentus) is a major Malvaceae reservoir host for jassid migration (+15%)."
+    },
+    "brinjal": {
+      "multiplier": 1.1,
+      "description": "Adjacent Brinjal (Eggplant) serves as an active secondary host harbouring jassid populations (+10%)."
+    },
+    "none": {
+      "multiplier": 1.0,
+      "description": "No major solanaceous or malvaceous crop reservoirs nearby (neutral)."
+    }
+  },
+  "irrigation": {
+    "rainfed": {
+      "multiplier": 1.0,
+      "description": "Neutral (input recorded for future longitudinal modeling)."
+    },
+    "drip": {
+      "multiplier": 1.0,
+      "description": "Neutral (input recorded for future longitudinal modeling)."
+    },
+    "flood": {
+      "multiplier": 1.0,
+      "description": "Neutral (input recorded for future longitudinal modeling)."
+    }
+  }
+}

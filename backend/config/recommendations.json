@@ -1,0 +1,144 @@
+{
+  "version": "1.0.0",
+  "disclaimer": "Advisory only. Confirm with your local agriculture officer / KVK and follow the product label.",
+  "rules": [
+    {
+      "risk_class": "Low",
+      "hopper_burn_bucket": "low",
+      "recently_sprayed": false,
+      "rescout_days": 7,
+      "urgency": "Routine Monitoring",
+      "headline": "Pest population low and canopy healthy",
+      "actions": [
+        "Maintain routine weekly scouting across 5 plants x 3 canopy levels (top, middle, bottom leaves).",
+        "Conserve natural bio-control agents: Ladybird beetles (Coccinellids), Green Lacewings (Chrysoperla zastrowi), and predatory spiders.",
+        "Maintain balanced soil nutrition; avoid excess urea/nitrogen top-dressing which stimulates succulent vegetative growth.",
+        "Eradicate alternate host weeds (e.g., Abutilon indicum, Parthenium) along field borders."
+      ],
+      "spray_guidance": "No chemical intervention warranted. Economic threshold level has not been reached."
+    },
+    {
+      "risk_class": "Low",
+      "hopper_burn_bucket": "moderate_or_high",
+      "recently_sprayed": false,
+      "rescout_days": 5,
+      "urgency": "Scout for Recovery",
+      "headline": "Residual leaf symptoms observed despite low pest count",
+      "actions": [
+        "Re-inspect foliage in 5 days to confirm whether hopper burn is residual from a previous generation or secondary stress.",
+        "Check leaf underside closely for emerging first-instar translucent nymphs along veins.",
+        "Ensure adequate soil moisture to relieve physiological leaf edge scorching."
+      ],
+      "spray_guidance": "Hold chemical spray; evaluate if hopper burn is stabilized or expanding."
+    },
+    {
+      "risk_class": "Low",
+      "hopper_burn_bucket": "any",
+      "recently_sprayed": true,
+      "rescout_days": 7,
+      "urgency": "Post-Spray Monitoring",
+      "headline": "Effective suppression maintained by recent treatment",
+      "actions": [
+        "Previous spray is actively suppressing jassid population within expected residual window.",
+        "Monitor underside for surviving nymph hot-spots; avoid unnecessary repeat spray to conserve natural enemies.",
+        "Next field scout scheduled in 7 days."
+      ],
+      "spray_guidance": "Do not repeat spray; allow residual window to protect beneficial predatory fauna."
+    },
+    {
+      "risk_class": "Medium",
+      "hopper_burn_bucket": "low",
+      "recently_sprayed": false,
+      "rescout_days": 4,
+      "urgency": "Heightened Vigilance",
+      "headline": "Moderate pest density approaching economic threshold",
+      "actions": [
+        "Re-scout field in 4 days. Sample at least 15 leaves to verify population trajectory.",
+        "Install yellow sticky traps (5-10 traps per acre) at crop canopy level to monitor adult leafhopper flight.",
+        "Eliminate alternate host weed reservoirs surrounding the field margins (Okra, Brinjal, and wild mallows).",
+        "Prepare botanical bio-pesticide option (Neem Oil 1500 ppm or 5% Neem Seed Kernel Extract)."
+      ],
+      "spray_guidance": "Consider bio-pesticide (Neem formulation 1500 ppm / Azadirachtin) or bio-agent release (Chrysoperla zastrowi) if count crosses 1.5 per leaf."
+    },
+    {
+      "risk_class": "Medium",
+      "hopper_burn_bucket": "moderate_or_high",
+      "recently_sprayed": false,
+      "rescout_days": 3,
+      "urgency": "Action Window Approaching",
+      "headline": "Noticeable leaf margin injury and growing nymph counts",
+      "actions": [
+        "Re-scout within 3 days. Early upward leaf cupping indicates active phloem feeding.",
+        "Avoid any supplemental nitrogenous fertilizers; promote potassium / foliar micronutrients to support leaf recovery.",
+        "Consult local Krishi Vigyan Kendra (KVK) or State Agricultural Extension officer for locally approved IPM products."
+      ],
+      "spray_guidance": "If counts reach 2 jassids/leaf upon next scout, plan targeted intervention using an appropriate chemical class. Rotate class if previously sprayed."
+    },
+    {
+      "risk_class": "Medium",
+      "hopper_burn_bucket": "any",
+      "recently_sprayed": true,
+      "rescout_days": 4,
+      "urgency": "Residual Window Audit",
+      "headline": "Moderate pest count detected within post-spray window",
+      "actions": [
+        "Re-evaluate efficacy of the applied product. Check for pesticide rain wash-off or improper spray coverage under leaves.",
+        "Ensure full canopy underside penetration in any subsequent application.",
+        "Check for presence of nymphal stages vs migrating adults from neighboring fields."
+      ],
+      "spray_guidance": "If re-treatment is needed after residual period ends, rotate to an alternate IRAC mode of action class (never reuse same class back-to-back)."
+    },
+    {
+      "risk_class": "High",
+      "hopper_burn_bucket": "low",
+      "recently_sprayed": false,
+      "rescout_days": 2,
+      "urgency": "Immediate Intervention Recommended",
+      "headline": "Pest population has breached Economic Threshold Level (ETL)",
+      "actions": [
+        "Immediate intervention warranted: jassid density exceeds ETL (>= 2 nymphs/leaf or >= 6 per 3 leaves).",
+        "Calibrate spray equipment (hollow cone nozzle) to thoroughly target the underside of the canopy.",
+        "Re-scout 2-3 days post-treatment to verify knock-down efficacy.",
+        "Withhold nitrogen application until pest pressure is subdued."
+      ],
+      "spray_guidance": "Select an approved sucking pest insecticide from a fresh chemical class (e.g. Neonicotinoid or Organophosphate if not sprayed recently). Follow label directions."
+    },
+    {
+      "risk_class": "High",
+      "hopper_burn_bucket": "moderate_or_high",
+      "recently_sprayed": false,
+      "rescout_days": 2,
+      "urgency": "Critical Outbreak Alert",
+      "headline": "Severe pest outbreak with widespread hopper burn injury",
+      "actions": [
+        "Urgent action required: High pest count combined with severe Grade 2+ leafhopper burn cupping/scorching.",
+        "Risk of premature boll drop, stunted vegetative growth, and significant yield loss.",
+        "Spray without delay during early morning or evening hours with proper personal protective equipment (PPE).",
+        "Inspect adjoining fields (especially okra/eggplant) for incoming pest swarms."
+      ],
+      "spray_guidance": "Apply recommended systemic / contact insecticide class per ICAR/TNAU guidelines. Rotate IRAC group from prior sprays to prevent resistance."
+    },
+    {
+      "risk_class": "High",
+      "hopper_burn_bucket": "any",
+      "recently_sprayed": true,
+      "rescout_days": 2,
+      "urgency": "Pesticide Resistance / Wash-off Alert",
+      "headline": "High pest pressure persists despite recent spray",
+      "actions": [
+        "Investigate spray failure causes: heavy rainfall wash-off, degraded product, inadequate water volume (use 200 L/acre), or development of insecticide resistance.",
+        "Strictly rotate to a completely different chemical class (e.g., if Neonicotinoid was used, switch to Flonicamid, Diafenthiuron, or Organophosphate as advised by KVK).",
+        "Report persistent control failure to local Agricultural Officer."
+      ],
+      "spray_guidance": "Do not repeat the same chemical class. Consult KVK for resistance-breaking IPM rotation."
+    }
+  ],
+  "class_rotation_matrix": {
+    "neonicotinoid": ["organophosphate", "botanical_neem", "other"],
+    "organophosphate": ["neonicotinoid", "botanical_neem", "other"],
+    "pyrethroid": ["neonicotinoid", "organophosphate", "botanical_neem"],
+    "botanical_neem": ["neonicotinoid", "organophosphate"],
+    "other": ["botanical_neem", "neonicotinoid", "organophosphate"],
+    "none": ["botanical_neem", "neonicotinoid", "organophosphate"]
+  }
+}
