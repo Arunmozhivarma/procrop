@@ -1,7 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
-import { PageHeader, Panel, ScoreRing, StatTile } from "@/components/procrop/ui";
+import {
+  EmptyState,
+  LoadingBlock,
+  PageHeader,
+  Panel,
+  RiskBadge,
+  ScoreRing,
+  StatTile,
+} from "@/components/procrop/ui";
 import { alerts, platformScores, recommendations, riskFromScore } from "@/lib/procrop-data";
 import {
   fetchLiveCoimbatoreWeather,
@@ -9,6 +17,8 @@ import {
   LiveWeatherResponse,
   DetailedPredictionResponse,
 } from "@/services/api";
+import { useRecentPredictions } from "@/services/queries";
+import { formatDateTime } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
@@ -41,10 +51,17 @@ function riskTextClass(risk: string) {
   return "text-risk-low";
 }
 
+function getRiskLevel(risk: string) {
+  if (risk.toLowerCase() === "high") return "high";
+  if (risk.toLowerCase() === "medium") return "moderate";
+  return "low";
+}
+
 function DashboardPage() {
   const [weather, setWeather] = useState<LiveWeatherResponse | null>(null);
   const [latestPred, setLatestPred] = useState<DetailedPredictionResponse | null>(null);
   const [predLoading, setPredLoading] = useState(true);
+  const recentPredictions = useRecentPredictions(5);
 
   useEffect(() => {
     fetchLiveCoimbatoreWeather()
@@ -69,7 +86,6 @@ function DashboardPage() {
         eyebrow="Monitor · Coimbatore Cotton Surveillance"
         title="Cotton Jassid Intelligence"
         description="Next-week pest risk forecasting and real-time field surveillance for Coimbatore cotton."
-        
       />
 
       {/* Hero: Latest Field Check Result (from backend) */}
@@ -207,7 +223,106 @@ function DashboardPage() {
           </div>
         </Link>
       </div>
-   
-      </div>
+
+      <Panel
+        title="Recent Predictions"
+        subtitle="Your latest five field predictions"
+        icon="history"
+        action={
+          <Link
+            to="/recommendations-history"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+          >
+            View history
+            <Icon name="arrow_forward" className="text-[14px]" />
+          </Link>
+        }
+      >
+        {recentPredictions.isPending ? (
+          <LoadingBlock label="Loading recent predictions…" />
+        ) : recentPredictions.isError ? (
+          <div
+            role="alert"
+            className="flex flex-col items-start gap-3 rounded-xl border border-critical/20 bg-critical/5 p-4 text-sm"
+          >
+            <p className="text-critical">
+              {recentPredictions.error instanceof Error
+                ? recentPredictions.error.message
+                : "Unable to load recent predictions."}
+            </p>
+            <button
+              type="button"
+              onClick={() => recentPredictions.refetch()}
+              className="font-semibold text-primary hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : recentPredictions.data.length === 0 ? (
+          <EmptyState
+            icon="analytics"
+            title="No predictions yet"
+            body="Run a field check to see your recent Jassid risk predictions here."
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="border-b border-border bg-muted/40 text-xs font-semibold uppercase text-muted-foreground">
+                <tr>
+                  <th scope="col" className="px-3 py-3">
+                    Prediction
+                  </th>
+                  <th scope="col" className="px-3 py-3">
+                    Date
+                  </th>
+                  <th scope="col" className="px-3 py-3">
+                    Observed
+                  </th>
+                  <th scope="col" className="px-3 py-3">
+                    Next week
+                  </th>
+                  <th scope="col" className="px-3 py-3">
+                    Risk
+                  </th>
+                  <th scope="col" className="px-3 py-3">
+                    Model
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {recentPredictions.data.map((prediction) => (
+                  <tr key={prediction.id} className="text-foreground/80">
+                    <td className="px-3 py-3 font-medium">
+                      <Link
+                        to="/recommendations"
+                        search={{ id: String(prediction.id) }}
+                        className="text-primary hover:underline"
+                      >
+                        #{prediction.id}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {formatDateTime(prediction.created_at)}
+                    </td>
+                    <td className="px-3 py-3">{prediction.detected_jassid}</td>
+                    <td className="px-3 py-3">
+                      {prediction.predicted_next_week_jassid.toFixed(2)}
+                    </td>
+                    <td className="px-3 py-3">
+                      <RiskBadge
+                        level={getRiskLevel(prediction.risk)}
+                        label={prediction.risk}
+                        size="sm"
+                      />
+                    </td>
+                    <td className="px-3 py-3">{prediction.model_used}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Panel>
+    </div>
   );
 }

@@ -135,6 +135,7 @@ export interface StoredAccount {
 
 const STORAGE_KEY_ACCOUNTS = "procrop_multi_accounts";
 const STORAGE_KEY_ACTIVE = "procrop_active_account_id";
+export const ACTIVE_ACCOUNT_UPDATED_EVENT = "procrop:active-account-updated";
 
 export function getAllAccounts(): StoredAccount[] {
   if (typeof window === "undefined") return [];
@@ -169,6 +170,7 @@ export function saveAccount(acc: StoredAccount): void {
   }
   localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
   localStorage.setItem(STORAGE_KEY_ACTIVE, acc.id.toString());
+  window.dispatchEvent(new Event(ACTIVE_ACCOUNT_UPDATED_EVENT));
 }
 
 export function setActiveAccountId(id: number): void {

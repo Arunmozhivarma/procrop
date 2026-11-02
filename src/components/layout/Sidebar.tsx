@@ -10,15 +10,20 @@ import {
   removeAccount,
   logoutUser,
   fetchLatestPrediction,
+  ACTIVE_ACCOUNT_UPDATED_EVENT,
   type StoredAccount,
 } from "@/services/api";
 
 export function Sidebar({
   onNavigate,
   className,
+  collapsed = false,
+  onToggle,
 }: {
   onNavigate?: () => void;
   className?: string;
+  collapsed?: boolean;
+  onToggle?: () => void;
 }) {
   const [activeAccount, setActiveAccountState] = useState<StoredAccount | null>(null);
   const [allAccounts, setAllAccountsState] = useState<StoredAccount[]>([]);
@@ -31,9 +36,13 @@ export function Sidebar({
   const switcherRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const acc = getActiveAccount();
-    setActiveAccountState(acc);
-    setAllAccountsState(getAllAccounts());
+    const syncAccounts = () => {
+      setActiveAccountState(getActiveAccount());
+      setAllAccountsState(getAllAccounts());
+    };
+    syncAccounts();
+    window.addEventListener(ACTIVE_ACCOUNT_UPDATED_EVENT, syncAccounts);
+    return () => window.removeEventListener(ACTIVE_ACCOUNT_UPDATED_EVENT, syncAccounts);
   }, []);
 
   // Load latest risk chip
@@ -120,28 +129,54 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "flex w-[264px] shrink-0 flex-col border-r border-border bg-surface",
+        "flex shrink-0 flex-col border-r border-border bg-surface",
+        collapsed ? "w-[76px]" : "w-[264px]",
         className,
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-6">
-        <Link to="/" className="flex items-center gap-3" onClick={onNavigate}>
+      <div
+        className={cn(
+          "flex py-6",
+          collapsed ? "flex-col items-center gap-2 px-3" : "items-center justify-between px-5",
+        )}
+      >
+        <Link
+          to="/"
+          className={cn("flex min-w-0 items-center", collapsed ? "justify-center" : "gap-3")}
+          onClick={onNavigate}
+          aria-label="ProCrop home"
+        >
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-soft">
             <Icon name="eco" filled />
           </div>
-          <div className="flex flex-col">
-            <span className="font-display text-xl font-semibold leading-tight">ProCrop</span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
-              Cotton Jassid Intelligence
-            </span>
-          </div>
+          {!collapsed && (
+            <div className="flex flex-col">
+              <span className="font-display text-xl font-semibold leading-tight">ProCrop</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
+                Cotton Jassid Intelligence
+              </span>
+            </div>
+          )}
         </Link>
+        {onToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className={cn(
+              "rounded-xl p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            )}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <Icon name={collapsed ? "menu_open" : "menu"} />
+          </button>
+        )}
       </div>
 
       {/* Latest Risk Chip */}
       {latestRisk && (
-        <div className="px-4 pb-3">
+        <div className={cn("pb-3", collapsed ? "px-3" : "px-4")}>
           <Link
             to="/recommendations"
             search={
@@ -151,38 +186,53 @@ export function Sidebar({
             }
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors hover:opacity-80",
+              "flex items-center gap-2 rounded-xl border py-2 text-xs font-semibold transition-colors hover:opacity-80",
+              collapsed ? "justify-center px-2" : "px-3",
               riskChipStyle(latestRisk.risk_class),
             )}
+            aria-label={`Latest risk: ${latestRisk.risk_class}${latestRisk.field_name ? `, ${latestRisk.field_name}` : ""}`}
+            title={collapsed ? `Latest risk: ${latestRisk.risk_class}` : undefined}
           >
             <Icon name={riskChipIcon(latestRisk.risk_class)} className="text-[14px] shrink-0" />
-            <span className="truncate">
-              Latest Risk: <strong>{latestRisk.risk_class}</strong>
-              {latestRisk.field_name ? ` · ${latestRisk.field_name}` : ""}
-            </span>
-            <Icon name="arrow_forward" className="text-[12px] shrink-0 ml-auto" />
+            {!collapsed && (
+              <span className="truncate">
+                Latest Risk: <strong>{latestRisk.risk_class}</strong>
+                {latestRisk.field_name ? ` · ${latestRisk.field_name}` : ""}
+              </span>
+            )}
+            {!collapsed && <Icon name="arrow_forward" className="text-[12px] shrink-0 ml-auto" />}
           </Link>
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 pb-6">
+      <nav
+        className={cn("flex-1 overflow-y-auto pb-6", collapsed ? "px-3" : "px-4")}
+        aria-label="Main navigation"
+      >
         {navGroups.map((group) => (
-          <div key={group.label} className="mb-5">
-            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              {group.label}
-            </p>
-            <div className="flex flex-col gap-0.5">
+          <div key={group.label} className={cn("mb-5", collapsed && "flex flex-col items-center")}>
+            {!collapsed && (
+              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {group.label}
+              </p>
+            )}
+            <div className="flex w-full flex-col gap-0.5">
               {group.items.map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
                   onClick={onNavigate}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted"
+                  className={cn(
+                    "flex items-center rounded-xl py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-muted",
+                    collapsed ? "justify-center px-2" : "gap-3 px-3",
+                  )}
                   activeProps={{ className: "bg-primary/10 text-primary" }}
+                  aria-label={collapsed ? item.label : undefined}
+                  title={collapsed ? item.label : undefined}
                 >
                   <Icon name={item.icon} className="text-[20px]" />
-                  <span>{item.label}</span>
+                  {!collapsed && <span>{item.label}</span>}
                 </Link>
               ))}
             </div>
@@ -191,10 +241,18 @@ export function Sidebar({
       </nav>
 
       {/* Account Switcher Footer */}
-      <div ref={switcherRef} className="relative shrink-0 border-t border-border/60 p-4">
+      <div
+        ref={switcherRef}
+        className={cn("relative shrink-0 border-t border-border/60", collapsed ? "p-3" : "p-4")}
+      >
         {/* Account Switcher Popover */}
         {switcherOpen && (
-          <div className="absolute bottom-full left-4 right-4 mb-2 rounded-2xl border border-border bg-surface shadow-lg z-50 overflow-hidden">
+          <div
+            className={cn(
+              "absolute z-50 mb-2 overflow-hidden rounded-2xl border border-border bg-surface shadow-lg",
+              collapsed ? "bottom-0 left-full ml-2 w-[260px]" : "bottom-full left-4 right-4",
+            )}
+          >
             <div className="px-4 py-3 border-b border-border/60">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Signed-in Accounts
@@ -277,21 +335,30 @@ export function Sidebar({
         <button
           type="button"
           onClick={() => setSwitcherOpen((o) => !o)}
-          className="flex w-full items-center gap-3 rounded-2xl border border-border/80 bg-background/50 px-3 py-2.5 text-left transition-colors hover:bg-muted"
+          className={cn(
+            "flex w-full items-center rounded-2xl border border-border/80 bg-background/50 py-2.5 text-left transition-colors hover:bg-muted",
+            collapsed ? "justify-center px-1" : "gap-3 px-3",
+          )}
+          aria-label={collapsed ? `Account menu for ${displayName}` : undefined}
+          title={collapsed ? displayName : undefined}
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-semibold text-primary">
             {initials}
           </span>
-          <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-sm font-medium text-foreground">{displayName}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {displayRole} · {displayEmail || "Not signed in"}
+          {!collapsed && (
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-sm font-medium text-foreground">{displayName}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {displayRole} · {displayEmail || "Not signed in"}
+              </span>
             </span>
-          </span>
-          <Icon
-            name={switcherOpen ? "expand_more" : "unfold_more"}
-            className="text-[18px] text-muted-foreground shrink-0"
-          />
+          )}
+          {!collapsed && (
+            <Icon
+              name={switcherOpen ? "expand_more" : "unfold_more"}
+              className="text-[18px] text-muted-foreground shrink-0"
+            />
+          )}
         </button>
       </div>
     </aside>

@@ -196,7 +196,7 @@ export default function EnvironmentPage() {
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-base">functions</span>
-              Model Derived Synthetic Features (Fed to XGBoost)
+              Model Derived Synthetic Features
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border border-border/70 bg-muted/30 p-3.5">
@@ -216,62 +216,6 @@ export default function EnvironmentPage() {
               </div>
             </div>
           </div>
-
-          {/* Agronomic Meteorological Impact for Cotton Jassid */}
-          <Panel
-            title="Meteorological Jassid Risk Context (Coimbatore Agro-climatic Zone)"
-            icon="biotech"
-          >
-            <div className="space-y-4 text-sm text-foreground/80">
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
-                  wb_twilight
-                </span>
-                <div>
-                  <h4 className="font-semibold text-foreground">Temperature & Egg Incubation</h4>
-                  <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
-                    Cotton Jassids (<em>Amrasca biguttula biguttula</em>) flourish optimally when
-                    mean temperatures hover between 26°C and 33°C. Current mean of{" "}
-                    {weather.mean_temp_c}°C
-                    {weather.mean_temp_c >= 26 && weather.mean_temp_c <= 33
-                      ? " falls directly into the high-risk proliferation bracket."
-                      : " is outside the peak multiplication window."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
-                  water_drop
-                </span>
-                <div>
-                  <h4 className="font-semibold text-foreground">
-                    Relative Humidity & Nymph Longevity
-                  </h4>
-                  <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
-                    Morning humidity of {weather.rh_morning_pct}%{" "}
-                    {weather.rh_morning_pct > 80
-                      ? "exceeds 80%, providing damp microclimate under broad leaves that prevents early-instar desiccation."
-                      : "remains below critical dampness thresholds, limiting fast multiplication."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
-                  thunderstorm
-                </span>
-                <div>
-                  <h4 className="font-semibold text-foreground">Precipitation Wash-off Effect</h4>
-                  <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
-                    {weather.rainfall_mm > 10
-                      ? `Significant rain (${weather.rainfall_mm} mm) dislodges nymphs from the leaf undersides and knocks adults off canopy.`
-                      : `Low rainfall (${weather.rainfall_mm} mm) creates dry or light moisture conditions where Jassid colonies remain undisturbed on lower leaf surfaces.`}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Panel>
         </div>
       )}
     </div>

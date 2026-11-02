@@ -11,13 +11,18 @@ export const Route = createFileRoute("/_app")({
 
 function AppLayout() {
   const [mobileNav, setMobileNav] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [farmId, setFarmId] = useState(farms[0]?.id ?? "");
   const unread = alerts.filter((a) => !a.read).length;
   const farm = farms.find((f) => f.id === farmId) ?? farms[0];
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar className="sticky top-0 hidden h-screen lg:flex" />
+      <Sidebar
+        className="sticky top-0 hidden h-screen transition-[width] duration-200 lg:flex"
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed((collapsed) => !collapsed)}
+      />
 
       {mobileNav ? (
         <div className="fixed inset-0 z-50 flex lg:hidden">
