@@ -23,6 +23,8 @@ __pycache__/
 *$py.class
 .pytest_cache/
 *.egg-info/
+.mplconfig/
+.numbacache/
 
 # ProCrop dynamic data & secrets
 data/.session_secret
