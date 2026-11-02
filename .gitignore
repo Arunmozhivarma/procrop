@@ -29,6 +29,8 @@ __pycache__/
 # ProCrop dynamic data & secrets
 data/.session_secret
 data/uploads/
+data/datasets/
+runs/
 .env
 
 # Wrangler / Cloudflare

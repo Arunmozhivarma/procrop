@@ -122,7 +122,8 @@ const coimbatoreSoils: SoilType[] = [
 
 function SoilPage() {
   const [selectedSoil, setSelectedSoil] = useState<string>("vertisol");
-  const current: SoilType = coimbatoreSoils.find((s) => s.id === selectedSoil) ?? coimbatoreSoils[0]!;
+  const current: SoilType =
+    coimbatoreSoils.find((s) => s.id === selectedSoil) ?? coimbatoreSoils[0]!;
 
   return (
     <div className="px-5 py-8 md:px-8">
@@ -144,16 +145,18 @@ function SoilPage() {
             </div>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
               Coimbatore district lies in the rain-shadow of the Western Ghats (Palakkad Gap),
-              characterized by semi-arid tropical conditions. Cotton cultivation here relies heavily on two
-              predominant soil orders: <strong>Vertisols (Black Cotton Soils)</strong> and{" "}
-              <strong>Alfisols (Red Loams)</strong>, supplemented by fertile riparian alluvium along the
-              Noyyal basin. Soil texture, drainage, and potassium availability dictate canopy thickness,
-              cuticle resilience, and vulnerability to Jassid (<em>Amrasca biguttula biguttula</em>) sap-feeding.
+              characterized by semi-arid tropical conditions. Cotton cultivation here relies heavily
+              on two predominant soil orders: <strong>Vertisols (Black Cotton Soils)</strong> and{" "}
+              <strong>Alfisols (Red Loams)</strong>, supplemented by fertile riparian alluvium along
+              the Noyyal basin. Soil texture, drainage, and potassium availability dictate canopy
+              thickness, cuticle resilience, and vulnerability to Jassid (
+              <em>Amrasca biguttula biguttula</em>) sap-feeding.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 md:flex-col">
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-3 py-1.5 text-xs font-semibold">
-              <span className="h-2 w-2 rounded-full bg-emerald-500"></span> Vertisols (Karibal): ~58%
+              <span className="h-2 w-2 rounded-full bg-emerald-500"></span> Vertisols (Karibal):
+              ~58%
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-3 py-1.5 text-xs font-semibold">
               <span className="h-2 w-2 rounded-full bg-amber-500"></span> Alfisols (Semman): ~34%
@@ -215,7 +218,9 @@ function SoilPage() {
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Suitability for Hybrid Bt Cotton
                 </p>
-                <span className={`inline-block mt-1 rounded-md px-2.5 py-1 text-xs font-bold border ${current.colorClass}`}>
+                <span
+                  className={`inline-block mt-1 rounded-md px-2.5 py-1 text-xs font-bold border ${current.colorClass}`}
+                >
                   {current.cottonSuitability}
                 </span>
               </div>
@@ -234,7 +239,9 @@ function SoilPage() {
               </div>
               <div className="flex justify-between border-b border-border/50 pb-2">
                 <span className="text-muted-foreground">Water Capacity:</span>
-                <span className="font-medium text-right text-foreground">{current.waterHolding}</span>
+                <span className="font-medium text-right text-foreground">
+                  {current.waterHolding}
+                </span>
               </div>
               <div className="flex justify-between pb-1">
                 <span className="text-muted-foreground">Cation Exchange (CEC):</span>
@@ -250,7 +257,10 @@ function SoilPage() {
           <Panel title={`Agronomic Benefits for Cotton Cultivation`} icon="verified">
             <div className="space-y-3">
               {current.keyBenefits.map((benefit, idx) => (
-                <div key={idx} className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 p-3.5">
+                <div
+                  key={idx}
+                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 p-3.5"
+                >
                   <span className="material-symbols-outlined mt-0.5 text-emerald-500 text-lg shrink-0">
                     check_circle
                   </span>
@@ -306,7 +316,9 @@ function SoilPage() {
                   <td className="py-3 px-4 text-muted-foreground">Palladam, Pollachi, Annur</td>
                   <td className="py-3 px-4 text-emerald-600 font-medium">Very High (220 mm/m)</td>
                   <td className="py-3 px-4 text-muted-foreground">Slow (crack aeration)</td>
-                  <td className="py-3 px-4 text-amber-600 font-semibold">High if excess N applied</td>
+                  <td className="py-3 px-4 text-amber-600 font-semibold">
+                    High if excess N applied
+                  </td>
                   <td className="py-3 px-4 text-muted-foreground">Potassium (K2O) top-dress</td>
                 </tr>
                 <tr className="hover:bg-muted/30">

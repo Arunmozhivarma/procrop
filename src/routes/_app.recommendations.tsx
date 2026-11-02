@@ -30,7 +30,12 @@ export const Route = createFileRoute("/_app/recommendations")({
 
 interface ActionRecommendation {
   id: string;
-  category: "Chemical Control" | "Bio-Pesticide & Botanicals" | "Cultural & Traps" | "Water & Canopy" | "Field Scouting";
+  category:
+    | "Chemical Control"
+    | "Bio-Pesticide & Botanicals"
+    | "Cultural & Traps"
+    | "Water & Canopy"
+    | "Field Scouting";
   title: string;
   prescription: string;
   rationale: string;
@@ -77,7 +82,9 @@ export default function RecommendationsPage() {
   }, [loadData]);
 
   // Generate dynamic recommendations based on predicted risk and rainfall
-  const isHighRisk = prediction ? prediction.risk === "HIGH" || prediction.predicted_next_week_jassid >= 1.95 : true;
+  const isHighRisk = prediction
+    ? prediction.risk === "HIGH" || prediction.predicted_next_week_jassid >= 1.95
+    : true;
   const rainfall = weather?.rainfall_mm ?? 0;
   const isRainyDay = rainfall >= 5.0;
   const windSpeed = weather?.wind_speed_kmh ?? 6.0;
@@ -132,7 +139,8 @@ export default function RecommendationsPage() {
         id: "chem-low-risk",
         category: "Chemical Control",
         title: "No Chemical Insecticide Required (Below ETL)",
-        prescription: "Withhold synthetic chemical sprays. Conserve natural predators and parasitoids.",
+        prescription:
+          "Withhold synthetic chemical sprays. Conserve natural predators and parasitoids.",
         rationale: `Model predicts safe Jassid levels (${prediction?.predicted_next_week_jassid ?? 1.1} / 3 leaves). Preserving predatory Ladybird beetles (Coccinella) and Chrysoperla lacewings provides natural biological suppression.`,
         timing: "Re-evaluate next scheduled SMW forecast.",
         priority: "Low",
@@ -192,7 +200,8 @@ export default function RecommendationsPage() {
       title: isRainyDay
         ? "Inspect & Refresh Yellow Sticky Traps Post-Rain"
         : "Deploy Yellow Sticky Traps across Canopy Line",
-      prescription: "Install 10 to 12 yellow sticky traps per acre at 15 cm above the cotton crop canopy.",
+      prescription:
+        "Install 10 to 12 yellow sticky traps per acre at 15 cm above the cotton crop canopy.",
       rationale: isRainyDay
         ? `Recent rainfall (${rainfall} mm) may wash mud onto trap glue. Wipe clean or replace sticky cards to maintain flight monitoring.`
         : "Adult Jassids are strongly phototactic to yellow wavelengths. Trapping directly suppresses adult reproductive pairs and signals population surges.",
@@ -208,7 +217,8 @@ export default function RecommendationsPage() {
         id: "water-drainage",
         category: "Water & Canopy",
         title: "Clear Drainage Furrows in Black Soil (Vertisols)",
-        prescription: "Inspect field ditches and ensure drain outlets are cleared to remove standing rain water.",
+        prescription:
+          "Inspect field ditches and ensure drain outlets are cleared to remove standing rain water.",
         rationale: `With ${rainfall} mm rain in Coimbatore, heavy montmorillonite clay soils swell rapidly. Prolonged water stagnation causes root hypoxia and weakens plant immunity.`,
         timing: "Same-day immediate field round.",
         priority: "High",
@@ -220,7 +230,8 @@ export default function RecommendationsPage() {
         id: "water-nutrition",
         category: "Water & Canopy",
         title: "Balanced Potassium Nutrition to Toughen Leaf Cuticle",
-        prescription: "Apply MOP (Muriate of Potash) @ 25 kg/ha or foliar spray 1% KNO3 (Potassium Nitrate).",
+        prescription:
+          "Apply MOP (Muriate of Potash) @ 25 kg/ha or foliar spray 1% KNO3 (Potassium Nitrate).",
         rationale:
           "Adequate potassium thickens cell walls and promotes epidermal silica deposition, physically impeding the piercing-sucking stylets of leafhoppers.",
         timing: "During next scheduled drip or furrow fertigation.",

@@ -3,7 +3,8 @@ import type { RiskLevel } from "./common";
 export type Recommendation = {
   id: string;
   title: string;
-  category: "Irrigation" | "Nutrients" | "Monitoring" | "Pest control" | "Disease control" | "Data entry";
+  category:
+    "Irrigation" | "Nutrients" | "Monitoring" | "Pest control" | "Disease control" | "Data entry";
   icon: string;
   fieldId: string;
   fieldName: string;

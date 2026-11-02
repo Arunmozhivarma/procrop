@@ -10,12 +10,14 @@ export const Route = createFileRoute("/_app/settings/profile")({
       { title: "Settings — ProCrop" },
       {
         name: "description",
-        content: "User profile, agronomic defaults, telemetry preferences and station configuration.",
+        content:
+          "User profile, agronomic defaults, telemetry preferences and station configuration.",
       },
       { property: "og:title", content: "Settings — ProCrop" },
       {
         property: "og:description",
-        content: "User profile, agronomic defaults, telemetry preferences and station configuration.",
+        content:
+          "User profile, agronomic defaults, telemetry preferences and station configuration.",
       },
     ],
   }),
@@ -205,7 +207,10 @@ function SettingsProfilePage() {
               label="Classification Standard"
               value="1.95 Jassids / 3 leaves (TNAU / AICRP Standard)"
             />
-            <DataRow label="Weather Telemetry Source" value="Open-Meteo Automated API (Coimbatore)" />
+            <DataRow
+              label="Weather Telemetry Source"
+              value="Open-Meteo Automated API (Coimbatore)"
+            />
             <DataRow label="Telemetry Sync Interval" value="Every 1 Hour (Automated polling)" />
             <DataRow label="Offline Feature Cache" value="Enabled (Local browser storage)" />
             <DataRow label="Default Export Format" value="Excel (.xlsx) / CSV tabular" />

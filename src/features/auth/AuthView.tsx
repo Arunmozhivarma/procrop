@@ -126,7 +126,11 @@ export function AuthView() {
               />
             ) : null}
             {mode === "register" ? (
-              <Field label="Farm / Station name" name="farm" placeholder="TNAU Cotton Research Station" />
+              <Field
+                label="Farm / Station name"
+                name="farm"
+                placeholder="TNAU Cotton Research Station"
+              />
             ) : null}
             <Field
               label="Email (Mail ID)"

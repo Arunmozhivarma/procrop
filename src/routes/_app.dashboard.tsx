@@ -1,18 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
-import {
-  PageHeader,
-  Panel,
-  ScoreRing,
-  StatTile,
-} from "@/components/procrop/ui";
-import {
-  alerts,
-  platformScores,
-  recommendations,
-  riskFromScore,
-} from "@/lib/procrop-data";
+import { PageHeader, Panel, ScoreRing, StatTile } from "@/components/procrop/ui";
+import { alerts, platformScores, recommendations, riskFromScore } from "@/lib/procrop-data";
 import { fetchLiveCoimbatoreWeather, LiveWeatherResponse } from "@/services/api";
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -44,7 +34,8 @@ function DashboardPage() {
       .catch(() => null);
   }, []);
 
-  const criticalAction = recommendations.find((r) => r.priority === "critical") ?? recommendations[0];
+  const criticalAction =
+    recommendations.find((r) => r.priority === "critical") ?? recommendations[0];
   const pendingActions = recommendations.filter((r) => r.status === "pending");
   const activeAlerts = alerts.filter((a) => !a.read);
 
@@ -91,12 +82,15 @@ function DashboardPage() {
                 HIGH RISK FORECAST
               </span>
               <span className="text-sm font-medium text-foreground/75">
-                (Predicted <strong className="text-foreground">2.47</strong> Jassids / 3 leaves vs 1.95 threshold)
+                (Predicted <strong className="text-foreground">2.47</strong> Jassids / 3 leaves vs
+                1.95 threshold)
               </span>
             </div>
 
             <p className="text-xs text-muted-foreground max-w-2xl leading-relaxed">
-              XGBoost Model B projects upward population trajectory driven by warm daytime temperatures ({weather ? `${weather.max_temp_c}°C` : "34°C"}) and recent nymph emergence on lower canopy foliage.
+              XGBoost Model B projects upward population trajectory driven by warm daytime
+              temperatures ({weather ? `${weather.max_temp_c}°C` : "34°C"}) and recent nymph
+              emergence on lower canopy foliage.
             </p>
           </div>
 
@@ -128,7 +122,11 @@ function DashboardPage() {
           label="Live Coimbatore Weather"
           value={weather ? `${weather.max_temp_c}°C` : "34.2°C"}
           unit={weather ? `· ${weather.rh_morning_pct}% RH` : "· 67% RH"}
-          hint={weather ? `Rain: ${weather.rainfall_mm}mm · Wind: ${weather.wind_speed_kmh}km/h` : "Open-Meteo live feed"}
+          hint={
+            weather
+              ? `Rain: ${weather.rainfall_mm}mm · Wind: ${weather.wind_speed_kmh}km/h`
+              : "Open-Meteo live feed"
+          }
           to="/environment"
         />
 
@@ -197,17 +195,19 @@ function DashboardPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-                  <span>Ensemble Confidence: <strong className="text-foreground">88%</strong></span>
-                  <span>Primary Driver: <strong className="text-foreground">Daytime Temp</strong></span>
+                  <span>
+                    Ensemble Confidence: <strong className="text-foreground">88%</strong>
+                  </span>
+                  <span>
+                    Primary Driver: <strong className="text-foreground">Daytime Temp</strong>
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Quick action bar */}
             <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-xs">
-              <span className="text-foreground/75">
-                Need fresh field diagnosis?
-              </span>
+              <span className="text-foreground/75">Need fresh field diagnosis?</span>
               <Link
                 to="/risk"
                 className="font-semibold text-primary hover:underline inline-flex items-center gap-1"
@@ -275,10 +275,7 @@ function DashboardPage() {
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Recent Alerts ({activeAlerts.length} active)
                 </p>
-                <Link
-                  to="/alerts"
-                  className="text-[11px] text-primary hover:underline"
-                >
+                <Link to="/alerts" className="text-[11px] text-primary hover:underline">
                   View all
                 </Link>
               </div>
@@ -311,7 +308,9 @@ function DashboardPage() {
       {/* Discreet research threshold footnote */}
       <div className="text-center pt-2">
         <p className="text-[11px] text-muted-foreground/80">
-          Research note: The cutoff of <span className="font-medium text-foreground/70">≥ 1.95 Jassids per 3 leaves</span> is a median-derived rule on Coimbatore AICRP data (not official ICAR ETL).
+          Research note: The cutoff of{" "}
+          <span className="font-medium text-foreground/70">≥ 1.95 Jassids per 3 leaves</span> is a
+          median-derived rule on Coimbatore AICRP data (not official ICAR ETL).
         </p>
       </div>
     </div>

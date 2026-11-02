@@ -44,7 +44,9 @@ export default function EnvironmentPage() {
     } catch (err: unknown) {
       console.error("Failed to fetch live weather:", err);
       setError(
-        err instanceof Error ? err.message : "Unable to reach weather API. Ensure backend is running."
+        err instanceof Error
+          ? err.message
+          : "Unable to reach weather API. Ensure backend is running.",
       );
     } finally {
       setLoading(false);
@@ -165,7 +167,9 @@ export default function EnvironmentPage() {
                 icon="rainy"
                 label="Precipitation"
                 value={`${weather.rainfall_mm} mm`}
-                hint={weather.rainfall_mm > 5 ? "High rain wash-off effect" : "Dry canopy conditions"}
+                hint={
+                  weather.rainfall_mm > 5 ? "High rain wash-off effect" : "Dry canopy conditions"
+                }
               />
               <StatTile
                 icon="calendar_today"
@@ -197,18 +201,14 @@ export default function EnvironmentPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border border-border/70 bg-muted/30 p-3.5">
                 <p className="text-xs text-muted-foreground font-mono">mean_temp_c</p>
-                <p className="mt-1 text-xl font-bold text-foreground">
-                  {weather.mean_temp_c} °C
-                </p>
+                <p className="mt-1 text-xl font-bold text-foreground">{weather.mean_temp_c} °C</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Arithmetic mean: (T_max {weather.max_temp_c}°C + T_min {weather.min_temp_c}°C) / 2
                 </p>
               </div>
               <div className="rounded-lg border border-border/70 bg-muted/30 p-3.5">
                 <p className="text-xs text-muted-foreground font-mono">mean_rh_pct</p>
-                <p className="mt-1 text-xl font-bold text-foreground">
-                  {weather.mean_rh_pct} %
-                </p>
+                <p className="mt-1 text-xl font-bold text-foreground">{weather.mean_rh_pct} %</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Mean relative humidity: (RH_morning {weather.rh_morning_pct}% + RH_evening{" "}
                   {weather.rh_evening_pct}%) / 2
@@ -218,7 +218,10 @@ export default function EnvironmentPage() {
           </div>
 
           {/* Agronomic Meteorological Impact for Cotton Jassid */}
-          <Panel title="Meteorological Jassid Risk Context (Coimbatore Agro-climatic Zone)" icon="biotech">
+          <Panel
+            title="Meteorological Jassid Risk Context (Coimbatore Agro-climatic Zone)"
+            icon="biotech"
+          >
             <div className="space-y-4 text-sm text-foreground/80">
               <div className="flex items-start gap-3">
                 <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
@@ -227,8 +230,9 @@ export default function EnvironmentPage() {
                 <div>
                   <h4 className="font-semibold text-foreground">Temperature & Egg Incubation</h4>
                   <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
-                    Cotton Jassids (<em>Amrasca biguttula biguttula</em>) flourish optimally when mean
-                    temperatures hover between 26°C and 33°C. Current mean of {weather.mean_temp_c}°C
+                    Cotton Jassids (<em>Amrasca biguttula biguttula</em>) flourish optimally when
+                    mean temperatures hover between 26°C and 33°C. Current mean of{" "}
+                    {weather.mean_temp_c}°C
                     {weather.mean_temp_c >= 26 && weather.mean_temp_c <= 33
                       ? " falls directly into the high-risk proliferation bracket."
                       : " is outside the peak multiplication window."}
@@ -241,7 +245,9 @@ export default function EnvironmentPage() {
                   water_drop
                 </span>
                 <div>
-                  <h4 className="font-semibold text-foreground">Relative Humidity & Nymph Longevity</h4>
+                  <h4 className="font-semibold text-foreground">
+                    Relative Humidity & Nymph Longevity
+                  </h4>
                   <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
                     Morning humidity of {weather.rh_morning_pct}%{" "}
                     {weather.rh_morning_pct > 80

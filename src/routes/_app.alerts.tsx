@@ -68,7 +68,8 @@ export default function AlertsPage() {
         severity: "moderate",
         title: "Elevated Daytime Temperature",
         description: `Temperature at ${data.max_temp_c}°C creates warm microclimates favoring rapid insect metabolic turnover.`,
-        agronomicAction: "Scout leaf undersides in the early morning before midday heat pushes nymphs into deep foliage.",
+        agronomicAction:
+          "Scout leaf undersides in the early morning before midday heat pushes nymphs into deep foliage.",
         icon: "thermostat",
       });
     }
@@ -96,7 +97,8 @@ export default function AlertsPage() {
         severity: "high",
         title: "Elevated Morning Humidity",
         description: `Morning RH of ${data.rh_morning_pct}% creates favorable conditions for sucking pests and fungal foliar pathogens.`,
-        agronomicAction: "Inspect lower and middle third leaves for early marginal curling (hopperburn).",
+        agronomicAction:
+          "Inspect lower and middle third leaves for early marginal curling (hopperburn).",
         icon: "humidity_mid",
       });
     }
@@ -124,7 +126,8 @@ export default function AlertsPage() {
         severity: "low",
         title: "Breezy Conditions",
         description: `Winds of ${data.wind_speed_kmh} km/h may cause mild drift during mist spraying.`,
-        agronomicAction: "Use drift-reducing nozzles or spray early in the morning when winds are calm.",
+        agronomicAction:
+          "Use drift-reducing nozzles or spray early in the morning when winds are calm.",
         icon: "air",
       });
     }
@@ -152,7 +155,8 @@ export default function AlertsPage() {
         severity: "high",
         title: "Moderate Rainfall — Natural Pest Dislodgement",
         description: `Rainfall of ${data.rainfall_mm} mm will mechanically wash off young Jassid nymphs from upper leaf surfaces.`,
-        agronomicAction: "Delay pesticide re-sprays until leaves dry completely and new scouting is conducted.",
+        agronomicAction:
+          "Delay pesticide re-sprays until leaves dry completely and new scouting is conducted.",
         icon: "rainy",
       });
     }
@@ -167,7 +171,8 @@ export default function AlertsPage() {
         severity: "low",
         title: "Overcast Conditions & Reduced Sunshine",
         description: `Only ${data.sunshine_hours} hours of bright sunshine recorded today. Extended gloom dampens photosynthesis and shields nymphs from solar UV drying.`,
-        agronomicAction: "Maintain field scouting; nymph survivorship increases during cloudy spells.",
+        agronomicAction:
+          "Maintain field scouting; nymph survivorship increases during cloudy spells.",
         icon: "cloud",
       });
     }
@@ -231,7 +236,11 @@ export default function AlertsPage() {
         </div>
         <div>
           <span>Alerts Triggered: </span>
-          <strong className={alerts.length > 0 ? "text-amber-500 font-bold" : "text-emerald-500 font-bold"}>
+          <strong
+            className={
+              alerts.length > 0 ? "text-amber-500 font-bold" : "text-emerald-500 font-bold"
+            }
+          >
             {alerts.length} Active Notice{alerts.length === 1 ? "" : "s"}
           </strong>
         </div>
@@ -253,8 +262,9 @@ export default function AlertsPage() {
           </h3>
           <p className="mt-2 mx-auto max-w-lg text-sm text-muted-foreground">
             All current Open-Meteo telemetry readings for Coimbatore (Temp: {weather.max_temp_c}°C /{" "}
-            {weather.min_temp_c}°C, Morning RH: {weather.rh_morning_pct}%, Wind: {weather.wind_speed_kmh} km/h,
-            Rain: {weather.rainfall_mm} mm) are within safe agronomic boundaries. No immediate weather hazards detected.
+            {weather.min_temp_c}°C, Morning RH: {weather.rh_morning_pct}%, Wind:{" "}
+            {weather.wind_speed_kmh} km/h, Rain: {weather.rainfall_mm} mm) are within safe agronomic
+            boundaries. No immediate weather hazards detected.
           </p>
         </div>
       )}
@@ -306,25 +316,33 @@ export default function AlertsPage() {
                   <td className="py-2 px-3 font-medium">Max Temperature</td>
                   <td className="py-2 px-3 text-emerald-600">26.0 – 33.0 °C</td>
                   <td className="py-2 px-3 text-destructive font-semibold">&gt; 35.0 °C</td>
-                  <td className="py-2 px-3 text-muted-foreground">Leaf scorching, moisture stress, altered pest oviposition</td>
+                  <td className="py-2 px-3 text-muted-foreground">
+                    Leaf scorching, moisture stress, altered pest oviposition
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-2 px-3 font-medium">Morning Relative Humidity</td>
                   <td className="py-2 px-3 text-emerald-600">60.0 – 78.0 %</td>
                   <td className="py-2 px-3 text-destructive font-semibold">&gt; 85.0 %</td>
-                  <td className="py-2 px-3 text-muted-foreground">High nymph emergence rate and leafhopper survival</td>
+                  <td className="py-2 px-3 text-muted-foreground">
+                    High nymph emergence rate and leafhopper survival
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-2 px-3 font-medium">Wind Speed</td>
                   <td className="py-2 px-3 text-emerald-600">2.0 – 10.0 km/h</td>
                   <td className="py-2 px-3 text-destructive font-semibold">&gt; 12.0 km/h</td>
-                  <td className="py-2 px-3 text-muted-foreground">Pesticide spray drift, uneven droplet distribution</td>
+                  <td className="py-2 px-3 text-muted-foreground">
+                    Pesticide spray drift, uneven droplet distribution
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-2 px-3 font-medium">Daily Precipitation</td>
                   <td className="py-2 px-3 text-emerald-600">0.0 – 8.0 mm</td>
                   <td className="py-2 px-3 text-destructive font-semibold">&gt; 15.0 mm</td>
-                  <td className="py-2 px-3 text-muted-foreground">Wash-off of chemicals, field waterlogging in Vertisols</td>
+                  <td className="py-2 px-3 text-muted-foreground">
+                    Wash-off of chemicals, field waterlogging in Vertisols
+                  </td>
                 </tr>
               </tbody>
             </table>

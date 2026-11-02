@@ -12,9 +12,7 @@ export type NavGroup = {
 export const navGroups = [
   {
     label: "Monitor",
-    items: [
-      { to: "/dashboard", label: "Dashboard", icon: "space_dashboard" },
-    ],
+    items: [{ to: "/dashboard", label: "Dashboard", icon: "space_dashboard" }],
   },
   {
     label: "Sense",

@@ -115,7 +115,9 @@ function RiskPage() {
     try {
       const weather = await fetchLiveCoimbatoreWeather();
       setLiveWeather(weather);
-      setSuccessNotice(`Live Open-Meteo weather updated: ${weather.max_temp_c}°C / ${weather.min_temp_c}°C, ${weather.rh_morning_pct}% RH.`);
+      setSuccessNotice(
+        `Live Open-Meteo weather updated: ${weather.max_temp_c}°C / ${weather.min_temp_c}°C, ${weather.rh_morning_pct}% RH.`,
+      );
     } catch (err: any) {
       setErrorMsg(`Failed to refresh weather: ${err.message}`);
     } finally {
@@ -137,7 +139,7 @@ function RiskPage() {
     }
   };
 
-  const handleSelectSample = (sample: typeof sampleLeaves[0]) => {
+  const handleSelectSample = (sample: (typeof sampleLeaves)[0]) => {
     setSelectedSampleId(sample.id);
     setCustomFile(null);
     setPreviewSrc(sample.src);
@@ -179,7 +181,7 @@ function RiskPage() {
       const res = await runUnifiedPrediction(params);
       setUnifiedResult(res);
       setSuccessNotice(
-        `Prediction complete! Risk assessed as ${res.prediction.risk}. Recorded to database table (#ID ${res.db_record.id}).`
+        `Prediction complete! Risk assessed as ${res.prediction.risk}. Recorded to database table (#ID ${res.db_record.id}).`,
       );
 
       // Refresh recent predictions from DB table
@@ -188,7 +190,7 @@ function RiskPage() {
     } catch (err: any) {
       setErrorMsg(
         err.message ||
-          "Prediction failed. Ensure the FastAPI backend server is running on http://localhost:8000."
+          "Prediction failed. Ensure the FastAPI backend server is running on http://localhost:8000.",
       );
     } finally {
       setLoading(false);
@@ -243,7 +245,9 @@ function RiskPage() {
           <div>
             <p className="font-semibold text-foreground">Weather API</p>
             <p className="text-[11px] text-muted-foreground">
-              {liveWeather ? `${liveWeather.max_temp_c}°C / ${liveWeather.rh_morning_pct}% RH` : "Open-Meteo Live"}
+              {liveWeather
+                ? `${liveWeather.max_temp_c}°C / ${liveWeather.rh_morning_pct}% RH`
+                : "Open-Meteo Live"}
             </p>
           </div>
         </div>
@@ -255,7 +259,9 @@ function RiskPage() {
           <div>
             <p className="font-semibold text-foreground">Excel / DB Lags</p>
             <p className="text-[11px] text-muted-foreground">
-              {prevWeekData ? `SMW ${prevWeekData.smw} (${prevWeekData.jassid_per_3_leaves}/3l)` : "Historical synced"}
+              {prevWeekData
+                ? `SMW ${prevWeekData.smw} (${prevWeekData.jassid_per_3_leaves}/3l)`
+                : "Historical synced"}
             </p>
           </div>
         </div>
@@ -276,7 +282,10 @@ function RiskPage() {
       {/* Threshold disclaimer */}
       <div className="mb-6 rounded-xl border border-border bg-muted/40 p-3.5 text-xs text-foreground/75">
         <span className="font-semibold text-foreground">Classification note: </span>
-        The HIGH / LOW risk threshold of <span className="font-semibold">≥ 1.95 Jassids per 3 leaves</span> is an experimental median-derived rule applied to the Coimbatore dataset. It is <span className="font-semibold">not an official ICAR economic threshold level (ETL)</span>.
+        The HIGH / LOW risk threshold of{" "}
+        <span className="font-semibold">≥ 1.95 Jassids per 3 leaves</span> is an experimental
+        median-derived rule applied to the Coimbatore dataset. It is{" "}
+        <span className="font-semibold">not an official ICAR economic threshold level (ETL)</span>.
       </div>
 
       {/* Feedback Messages */}
@@ -293,9 +302,15 @@ function RiskPage() {
       ) : null}
 
       {/* STEP 1: LEAF PHOTO PEST COUNT (3 SAMPLES OR INSERT PIC) */}
-      <Panel title="Step 1: Leaf Photo Pest Count (3 Field Samples or Insert Photo)" icon="document_scanner" className="mb-8">
+      <Panel
+        title="Step 1: Leaf Photo Pest Count (3 Field Samples or Insert Photo)"
+        icon="document_scanner"
+        className="mb-8"
+      >
         <p className="mb-4 text-xs text-muted-foreground">
-          Select one of the 3 standardized Coimbatore field samples below, or upload your own leaf picture. Computer vision analyzes pest spots and calculates <code className="font-mono">jassid_per_3_leaves</code> automatically.
+          Select one of the 3 standardized Coimbatore field samples below, or upload your own leaf
+          picture. Computer vision analyzes pest spots and calculates{" "}
+          <code className="font-mono">jassid_per_3_leaves</code> automatically.
         </p>
 
         {/* 3 Preset Samples Grid */}
@@ -314,11 +329,7 @@ function RiskPage() {
                 }`}
               >
                 <div className="relative mb-3 h-36 w-full overflow-hidden rounded-xl border border-border">
-                  <img
-                    src={sample.src}
-                    alt={sample.title}
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={sample.src} alt={sample.title} className="h-full w-full object-cover" />
                   <span className="absolute top-2 left-2 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-bold text-foreground shadow-sm">
                     {sample.badge}
                   </span>
@@ -330,9 +341,7 @@ function RiskPage() {
                 </div>
                 <p className="font-semibold text-xs text-foreground">{sample.title}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{sample.subtitle}</p>
-                <p className="text-[10px] font-semibold text-primary mt-2">
-                  {sample.expectedTag}
-                </p>
+                <p className="text-[10px] font-semibold text-primary mt-2">{sample.expectedTag}</p>
               </button>
             );
           })}
@@ -367,7 +376,9 @@ function RiskPage() {
             </div>
             <div className="flex-1">
               <p className="text-xs font-semibold text-foreground">
-                {customFile ? `Custom: ${customFile.name}` : sampleLeaves.find((s) => s.id === selectedSampleId)?.title || "Field Sample"}
+                {customFile
+                  ? `Custom: ${customFile.name}`
+                  : sampleLeaves.find((s) => s.id === selectedSampleId)?.title || "Field Sample"}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 Target leaf inspection sample for automated nymph & adult count.
@@ -406,28 +417,48 @@ function RiskPage() {
           {liveWeather ? (
             <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Max / Min Temp</span>
-                <p className="text-sm font-semibold mt-0.5">{liveWeather.max_temp_c}°C / {liveWeather.min_temp_c}°C</p>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Max / Min Temp
+                </span>
+                <p className="text-sm font-semibold mt-0.5">
+                  {liveWeather.max_temp_c}°C / {liveWeather.min_temp_c}°C
+                </p>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Morning / Eve RH</span>
-                <p className="text-sm font-semibold mt-0.5">{liveWeather.rh_morning_pct}% / {liveWeather.rh_evening_pct}%</p>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Morning / Eve RH
+                </span>
+                <p className="text-sm font-semibold mt-0.5">
+                  {liveWeather.rh_morning_pct}% / {liveWeather.rh_evening_pct}%
+                </p>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Rainfall & Days</span>
-                <p className="text-sm font-semibold mt-0.5">{liveWeather.rainfall_mm} mm ({liveWeather.rainy_days}d)</p>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Rainfall & Days
+                </span>
+                <p className="text-sm font-semibold mt-0.5">
+                  {liveWeather.rainfall_mm} mm ({liveWeather.rainy_days}d)
+                </p>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Wind Speed</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Wind Speed
+                </span>
                 <p className="text-sm font-semibold mt-0.5">{liveWeather.wind_speed_kmh} km/h</p>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Sunshine Hours</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Sunshine Hours
+                </span>
                 <p className="text-sm font-semibold mt-0.5">{liveWeather.sunshine_hours} hrs</p>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Mean Temp & RH</span>
-                <p className="text-sm font-semibold mt-0.5">{liveWeather.mean_temp_c}°C / {liveWeather.mean_rh_pct}%</p>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Mean Temp & RH
+                </span>
+                <p className="text-sm font-semibold mt-0.5">
+                  {liveWeather.mean_temp_c}°C / {liveWeather.mean_rh_pct}%
+                </p>
               </div>
             </div>
           ) : (
@@ -441,7 +472,8 @@ function RiskPage() {
         <Panel title="Step 2B: Previous Week Lags (Excel / SQLite DB)" icon="dataset">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] text-muted-foreground">
-              Lag features (<code className="font-mono">jassid_lag_1</code>, <code className="font-mono">jassid_lag_2</code>) automatically pulled from Excel.
+              Lag features (<code className="font-mono">jassid_lag_1</code>,{" "}
+              <code className="font-mono">jassid_lag_2</code>) automatically pulled from Excel.
             </p>
             <button
               type="button"
@@ -456,32 +488,52 @@ function RiskPage() {
           {prevWeekData ? (
             <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Prev Week (Lag 1)</span>
-                <p className="text-sm font-semibold mt-0.5 text-primary">{prevWeekData.jassid_per_3_leaves} / 3 leaves</p>
-                <span className="text-[10px] text-muted-foreground">SMW {prevWeekData.smw} ({prevWeekData.report_year})</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Prev Week (Lag 1)
+                </span>
+                <p className="text-sm font-semibold mt-0.5 text-primary">
+                  {prevWeekData.jassid_per_3_leaves} / 3 leaves
+                </p>
+                <span className="text-[10px] text-muted-foreground">
+                  SMW {prevWeekData.smw} ({prevWeekData.report_year})
+                </span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">2 Weeks Ago (Lag 2)</span>
-                <p className="text-sm font-semibold mt-0.5">{prevWeekData.jassid_lag_1} / 3 leaves</p>
-                <span className="text-[10px] text-muted-foreground">SMW {prevWeekData.smw - 1}</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  2 Weeks Ago (Lag 2)
+                </span>
+                <p className="text-sm font-semibold mt-0.5">
+                  {prevWeekData.jassid_lag_1} / 3 leaves
+                </p>
+                <span className="text-[10px] text-muted-foreground">
+                  SMW {prevWeekData.smw - 1}
+                </span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Prev Max Temp</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Prev Max Temp
+                </span>
                 <p className="text-sm font-semibold mt-0.5">{prevWeekData.max_temp_c}°C</p>
                 <span className="text-[10px] text-muted-foreground">max_temp_c_lag_1</span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Prev Morning RH</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Prev Morning RH
+                </span>
                 <p className="text-sm font-semibold mt-0.5">{prevWeekData.rh_morning_pct}%</p>
                 <span className="text-[10px] text-muted-foreground">rh_morning_lag_1</span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Prev Rainfall</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Prev Rainfall
+                </span>
                 <p className="text-sm font-semibold mt-0.5">{prevWeekData.rainfall_mm} mm</p>
                 <span className="text-[10px] text-muted-foreground">rainfall_lag_1</span>
               </div>
               <div className="rounded-xl border border-border bg-background p-2.5">
-                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Data Source</span>
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">
+                  Data Source
+                </span>
                 <p className="truncate text-xs font-semibold mt-0.5" title={prevWeekData.source}>
                   {prevWeekData.source.split("(")[0]}
                 </p>
@@ -504,7 +556,9 @@ function RiskPage() {
           disabled={loading}
           className="rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-soft transition-all hover:bg-primary/90 hover:shadow-md disabled:opacity-50"
         >
-          {loading ? "Analyzing Image & Forecasting Risk..." : "⚡ Predict Next-Week Risk (Image Count + Weather API + Excel Lags)"}
+          {loading
+            ? "Analyzing Image & Forecasting Risk..."
+            : "⚡ Predict Next-Week Risk (Image Count + Weather API + Excel Lags)"}
         </button>
 
         <button
@@ -520,7 +574,11 @@ function RiskPage() {
       {/* STEP 4: PREDICTION OUTPUT (UNIFIED PIPELINE) */}
       {unifiedResult ? (
         <div className="mb-8 space-y-6">
-          <Panel title="Unified Prediction & Pest Risk Assessment" icon="bolt" className="border-primary/30">
+          <Panel
+            title="Unified Prediction & Pest Risk Assessment"
+            icon="bolt"
+            className="border-primary/30"
+          >
             {/* Header Result Card */}
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
               <div>
@@ -545,10 +603,12 @@ function RiskPage() {
                       : "bg-risk-low/15 text-risk-low border border-risk-low/30"
                   }`}
                 >
-                  {unifiedResult.prediction.risk} RISK (Threshold ≥ {unifiedResult.prediction.risk_threshold})
+                  {unifiedResult.prediction.risk} RISK (Threshold ≥{" "}
+                  {unifiedResult.prediction.risk_threshold})
                 </span>
                 <span className="text-[11px] text-muted-foreground">
-                  Recorded in DB: Table <code className="font-mono">predictions</code> (#ID {unifiedResult.db_record.id})
+                  Recorded in DB: Table <code className="font-mono">predictions</code> (#ID{" "}
+                  {unifiedResult.db_record.id})
                 </span>
               </div>
             </div>
@@ -556,41 +616,55 @@ function RiskPage() {
             {/* Vision + Model Inputs Review */}
             <div className="my-5 grid gap-4 sm:grid-cols-3">
               <div className="rounded-xl border border-border bg-surface p-3.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Vision Detected Leaf Count</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Vision Detected Leaf Count
+                </p>
                 <p className="text-2xl font-bold mt-1 text-primary">
                   {unifiedResult.vision_analysis.jassid_per_3_leaves}{" "}
                   <span className="text-xs font-normal text-muted-foreground">/ 3 leaves</span>
                 </p>
                 <p className="text-[11px] text-foreground/70 mt-1">
-                  {unifiedResult.vision_analysis.detected_spots_on_leaf} pest spots detected ({Math.round(unifiedResult.vision_analysis.confidence * 100)}% conf)
+                  {unifiedResult.vision_analysis.detected_spots_on_leaf} pest spots detected (
+                  {Math.round(unifiedResult.vision_analysis.confidence * 100)}% conf)
                 </p>
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-3.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Previous Week History (Excel)</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Previous Week History (Excel)
+                </p>
                 <p className="text-2xl font-bold mt-1">
                   {unifiedResult.previous_week_data.jassid_per_3_leaves}{" "}
-                  <span className="text-xs font-normal text-muted-foreground">/ 3 leaves (Lag 1)</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    / 3 leaves (Lag 1)
+                  </span>
                 </p>
                 <p className="text-[11px] text-foreground/70 mt-1">
-                  Lag 2: {unifiedResult.previous_week_data.jassid_lag_1} / 3 leaves (SMW {unifiedResult.previous_week_data.smw})
+                  Lag 2: {unifiedResult.previous_week_data.jassid_lag_1} / 3 leaves (SMW{" "}
+                  {unifiedResult.previous_week_data.smw})
                 </p>
               </div>
 
               <div className="rounded-xl border border-border bg-surface p-3.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Live Weather Parameters</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Live Weather Parameters
+                </p>
                 <p className="text-2xl font-bold mt-1">
                   {unifiedResult.live_weather.max_temp_c}°C{" "}
-                  <span className="text-xs font-normal text-muted-foreground">/ {unifiedResult.live_weather.rh_morning_pct}% RH</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    / {unifiedResult.live_weather.rh_morning_pct}% RH
+                  </span>
                 </p>
                 <p className="text-[11px] text-foreground/70 mt-1">
-                  Rain: {unifiedResult.live_weather.rainfall_mm}mm · Wind: {unifiedResult.live_weather.wind_speed_kmh}km/h
+                  Rain: {unifiedResult.live_weather.rainfall_mm}mm · Wind:{" "}
+                  {unifiedResult.live_weather.wind_speed_kmh}km/h
                 </p>
               </div>
             </div>
 
             {/* Canopy Symptoms Derived from Pest Count */}
-            {unifiedResult.vision_analysis.symptoms && unifiedResult.vision_analysis.symptoms.length > 0 ? (
+            {unifiedResult.vision_analysis.symptoms &&
+            unifiedResult.vision_analysis.symptoms.length > 0 ? (
               <div className="mb-5 rounded-xl border border-border bg-muted/30 p-4">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
                   Canopy Diagnostic & Symptoms ({unifiedResult.vision_analysis.severity} Severity)
@@ -607,7 +681,8 @@ function RiskPage() {
             ) : null}
 
             {/* Dynamic SHAP Explanations */}
-            {unifiedResult.prediction.explanation && unifiedResult.prediction.explanation.length > 0 ? (
+            {unifiedResult.prediction.explanation &&
+            unifiedResult.prediction.explanation.length > 0 ? (
               <div>
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Dynamic SHAP Feature Attributions (Factors Driving Next-Week Population)
@@ -615,7 +690,9 @@ function RiskPage() {
                 <div className="space-y-2">
                   {unifiedResult.prediction.explanation.map((item) => (
                     <div key={item.feature} className="flex items-center gap-3 text-xs">
-                      <span className="w-52 shrink-0 font-medium text-foreground/80">{item.feature}</span>
+                      <span className="w-52 shrink-0 font-medium text-foreground/80">
+                        {item.feature}
+                      </span>
                       <span className="w-16 shrink-0 text-muted-foreground">
                         {item.value !== undefined ? item.value : "-"}
                       </span>
@@ -654,12 +731,16 @@ function RiskPage() {
           </p>
           <div className="mt-2 flex items-baseline justify-between">
             <div className="flex items-baseline gap-3">
-              <span className="font-display text-4xl font-extrabold">{excelLatestResult.predicted_next_week_jassid}</span>
+              <span className="font-display text-4xl font-extrabold">
+                {excelLatestResult.predicted_next_week_jassid}
+              </span>
               <span className="text-xs text-foreground/70">Jassids / 3 leaves (Next-Week)</span>
             </div>
             <span
               className={`rounded-full px-4 py-1 text-xs font-bold ${
-                excelLatestResult.risk === "HIGH" ? "bg-risk-high/15 text-risk-high" : "bg-risk-low/15 text-risk-low"
+                excelLatestResult.risk === "HIGH"
+                  ? "bg-risk-high/15 text-risk-high"
+                  : "bg-risk-low/15 text-risk-low"
               }`}
             >
               {excelLatestResult.risk} RISK
@@ -671,7 +752,8 @@ function RiskPage() {
       {/* STEP 5: PREDICTIONS DATABASE TABLE (PERSISTENCE LOG) */}
       <Panel title="Step 4: Predictions Database Table (SQLite Persistent History)" icon="database">
         <p className="mb-4 text-xs text-muted-foreground">
-          Every prediction triggered from leaf photo analysis, live weather, and Excel lags is logged directly into the <code className="font-mono">predictions</code> database table.
+          Every prediction triggered from leaf photo analysis, live weather, and Excel lags is
+          logged directly into the <code className="font-mono">predictions</code> database table.
         </p>
 
         {recentPredictions.length > 0 ? (
@@ -710,7 +792,9 @@ function RiskPage() {
                     <td className="px-3 py-2">
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                          row.risk === "HIGH" ? "bg-risk-high/15 text-risk-high" : "bg-risk-low/15 text-risk-low"
+                          row.risk === "HIGH"
+                            ? "bg-risk-high/15 text-risk-high"
+                            : "bg-risk-low/15 text-risk-low"
                         }`}
                       >
                         {row.risk}

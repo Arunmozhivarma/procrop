@@ -141,8 +141,9 @@ export function LandingView() {
                 Prediction of Next-Week Cotton Jassid Risk
               </h1>
               <p className="mt-5 max-w-xl text-base text-foreground/75 sm:text-lg">
-                Predicting next-week Jassid activity per 3 leaves for Coimbatore cotton using weather
-                and historical pest records. Powered by XGBoost, Open-Meteo live telemetry, and SHAP explainability.
+                Predicting next-week Jassid activity per 3 leaves for Coimbatore cotton using
+                weather and historical pest records. Powered by XGBoost, Open-Meteo live telemetry,
+                and SHAP explainability.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -230,11 +231,13 @@ export function LandingView() {
         {/* Workflow Section */}
         <section id="how" className="border-b border-border py-20">
           <div className="mx-auto max-w-6xl px-6">
-            <h2 className="font-display text-3xl font-semibold">How the Jassid ML pipeline works</h2>
+            <h2 className="font-display text-3xl font-semibold">
+              How the Jassid ML pipeline works
+            </h2>
             <p className="mt-3 max-w-2xl text-foreground/70">
-              A time-series ML workflow: weather parameters and historical pest counts are aligned into
-              Standard Meteorological Weeks, evaluated with Random Forest and XGBoost, and explained
-              using SHAP attributions.
+              A time-series ML workflow: weather parameters and historical pest counts are aligned
+              into Standard Meteorological Weeks, evaluated with Random Forest and XGBoost, and
+              explained using SHAP attributions.
             </p>
             <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {workflow.map((s, i) => (
@@ -283,8 +286,8 @@ export function LandingView() {
               Predict next-week pest risk before crop damage occurs.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-foreground/70">
-              Open the ProCrop dashboard to inspect live Jassid predictions, compare Experiment A vs B
-              performance metrics, and analyze SHAP feature attributions.
+              Open the ProCrop dashboard to inspect live Jassid predictions, compare Experiment A vs
+              B performance metrics, and analyze SHAP feature attributions.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
@@ -307,7 +310,9 @@ export function LandingView() {
       {/* Clean Minimalist Footer */}
       <footer className="border-t border-border bg-surface py-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 text-xs text-muted-foreground">
-          <p>© 2026 ProCrop — Machine Learning Cotton Jassid Prediction (Coimbatore, Tamil Nadu).</p>
+          <p>
+            © 2026 ProCrop — Machine Learning Cotton Jassid Prediction (Coimbatore, Tamil Nadu).
+          </p>
           <div className="flex items-center gap-5">
             <Link to="/about" className="transition-colors hover:text-foreground">
               About

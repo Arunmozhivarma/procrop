@@ -1,10 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel } from "@/components/procrop/ui";
-import {
-  autoPredictFromPhotoAndWeather,
-  AutoPredictResponse,
-} from "@/services/api";
+import { autoPredictFromPhotoAndWeather, AutoPredictResponse } from "@/services/api";
 
 export const Route = createFileRoute("/_app/images")({
   head: () => ({
@@ -73,7 +70,7 @@ function ImagesPage() {
     }
   };
 
-  const handleSelectDemoSample = async (demo: typeof sampleDemos[0]) => {
+  const handleSelectDemoSample = async (demo: (typeof sampleDemos)[0]) => {
     setLoading(true);
     setErrorMsg(null);
     setAutoResult(null);
@@ -90,7 +87,7 @@ function ImagesPage() {
     } catch (err: any) {
       setErrorMsg(
         err.message ||
-          "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running."
+          "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running.",
       );
     } finally {
       setLoading(false);
@@ -107,7 +104,7 @@ function ImagesPage() {
     } catch (err: any) {
       setErrorMsg(
         err.message ||
-          "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running."
+          "Could not connect to FastAPI backend at http://localhost:8000. Ensure uvicorn server is running.",
       );
     } finally {
       setLoading(false);
@@ -127,7 +124,8 @@ function ImagesPage() {
         <div>
           <span className="font-bold text-primary">⚡ Unified Pipeline Available: </span>
           <span className="text-foreground/80">
-            Image pest counting, live Open-Meteo weather API, and historical Excel lags are now completely unified in one single command center with persistent database logging.
+            Image pest counting, live Open-Meteo weather API, and historical Excel lags are now
+            completely unified in one single command center with persistent database logging.
           </span>
         </div>
         <Link
@@ -141,7 +139,8 @@ function ImagesPage() {
       {/* Field Sample Photo Gallery (Count-neutral before prediction) */}
       <div className="mb-8">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Select any cotton leaf field photo below to test pest detection &amp; live weather prediction:
+          Select any cotton leaf field photo below to test pest detection &amp; live weather
+          prediction:
         </p>
         <div className="grid gap-4 sm:grid-cols-3">
           {sampleDemos.map((demo) => (
@@ -153,11 +152,7 @@ function ImagesPage() {
               className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all hover:shadow-soft hover:scale-[1.01] ${demo.tone}`}
             >
               <div className="relative mb-3 h-40 w-full overflow-hidden rounded-xl border border-border">
-                <img
-                  src={demo.src}
-                  alt={demo.title}
-                  className="h-full w-full object-cover"
-                />
+                <img src={demo.src} alt={demo.title} className="h-full w-full object-cover" />
                 <span className="absolute top-2 left-2 rounded-full bg-background/90 px-2.5 py-0.5 text-[10px] font-bold text-foreground shadow-sm">
                   {demo.badge}
                 </span>
@@ -174,9 +169,9 @@ function ImagesPage() {
 
       <Panel title="Custom Cotton Leaf Photo Upload" icon="add_a_photo" className="mb-8">
         <p className="mb-4 text-xs text-muted-foreground">
-          Upload any cotton leaf photo from your device.
-          Computer vision will detect Jassid nymphs/adults, compute <code className="font-mono">jassid_per_3_leaves</code>,
-          and query live Open-Meteo weather for Coimbatore.
+          Upload any cotton leaf photo from your device. Computer vision will detect Jassid
+          nymphs/adults, compute <code className="font-mono">jassid_per_3_leaves</code>, and query
+          live Open-Meteo weather for Coimbatore.
         </p>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -198,9 +193,7 @@ function ImagesPage() {
                 <p className="mt-3 text-sm font-semibold text-foreground">
                   Click to select cotton leaf photo
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Supports JPG, PNG formats
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">Supports JPG, PNG formats</p>
               </div>
             )}
 
@@ -230,13 +223,17 @@ function ImagesPage() {
             <p className="font-semibold text-foreground">How Automated Detection Works:</p>
             <ol className="list-decimal pl-4 space-y-2 text-xs text-foreground/80">
               <li>
-                <strong>Computer Vision Pest Count:</strong> Scans leaf surface for pale-green Jassid nymphs/adults and calculates <span className="font-mono">jassid_per_3_leaves</span>.
+                <strong>Computer Vision Pest Count:</strong> Scans leaf surface for pale-green
+                Jassid nymphs/adults and calculates{" "}
+                <span className="font-mono">jassid_per_3_leaves</span>.
               </li>
               <li>
-                <strong>Live Open-Meteo Weather API:</strong> Automatically fetches current max/min temperature, morning/evening humidity, rainfall, and sunshine hours for Coimbatore.
+                <strong>Live Open-Meteo Weather API:</strong> Automatically fetches current max/min
+                temperature, morning/evening humidity, rainfall, and sunshine hours for Coimbatore.
               </li>
               <li>
-                <strong>XGBoost Model Execution:</strong> Feeds detected pest count + live weather into Model B to predict next-week risk and calculate SHAP feature contributions.
+                <strong>XGBoost Model Execution:</strong> Feeds detected pest count + live weather
+                into Model B to predict next-week risk and calculate SHAP feature contributions.
               </li>
             </ol>
           </div>
@@ -255,7 +252,9 @@ function ImagesPage() {
           <Panel title="Computer Vision Pest Detection Output" icon="document_scanner">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-xl border border-border bg-background p-4">
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Detected Pest Spots</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">
+                  Detected Pest Spots
+                </p>
                 <p className="font-display text-3xl font-semibold mt-1">
                   {autoResult.vision_analysis.detected_spots_on_leaf}
                 </p>
@@ -265,17 +264,19 @@ function ImagesPage() {
               </div>
 
               <div className="rounded-xl border border-border bg-background p-4">
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Standardized Metric</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">
+                  Standardized Metric
+                </p>
                 <p className="font-display text-3xl font-semibold mt-1 text-primary">
                   {autoResult.vision_analysis.jassid_per_3_leaves}
                 </p>
-                <p className="text-xs text-foreground/70 mt-1">
-                  Calculated Jassids / 3 leaves
-                </p>
+                <p className="text-xs text-foreground/70 mt-1">Calculated Jassids / 3 leaves</p>
               </div>
 
               <div className="rounded-xl border border-border bg-background p-4">
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Detection Confidence</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">
+                  Detection Confidence
+                </p>
                 <p className="font-display text-3xl font-semibold mt-1">
                   {Math.round(autoResult.vision_analysis.confidence * 100)}%
                 </p>
@@ -304,19 +305,27 @@ function ImagesPage() {
             <div className="grid gap-3 sm:grid-cols-4 text-xs">
               <div className="rounded-xl border border-border p-3">
                 <p className="text-muted-foreground">Max Temp (°C)</p>
-                <p className="font-display text-xl font-semibold mt-1">{autoResult.live_weather.max_temp_c} °C</p>
+                <p className="font-display text-xl font-semibold mt-1">
+                  {autoResult.live_weather.max_temp_c} °C
+                </p>
               </div>
               <div className="rounded-xl border border-border p-3">
                 <p className="text-muted-foreground">Min Temp (°C)</p>
-                <p className="font-display text-xl font-semibold mt-1">{autoResult.live_weather.min_temp_c} °C</p>
+                <p className="font-display text-xl font-semibold mt-1">
+                  {autoResult.live_weather.min_temp_c} °C
+                </p>
               </div>
               <div className="rounded-xl border border-border p-3">
                 <p className="text-muted-foreground">RH Morning (%)</p>
-                <p className="font-display text-xl font-semibold mt-1">{autoResult.live_weather.rh_morning_pct}%</p>
+                <p className="font-display text-xl font-semibold mt-1">
+                  {autoResult.live_weather.rh_morning_pct}%
+                </p>
               </div>
               <div className="rounded-xl border border-border p-3">
                 <p className="text-muted-foreground">Rainfall (mm)</p>
-                <p className="font-display text-xl font-semibold mt-1">{autoResult.live_weather.rainfall_mm} mm</p>
+                <p className="font-display text-xl font-semibold mt-1">
+                  {autoResult.live_weather.rainfall_mm} mm
+                </p>
               </div>
             </div>
             <p className="mt-3 text-xs text-muted-foreground italic">
@@ -345,7 +354,8 @@ function ImagesPage() {
                       : "bg-risk-low/15 text-risk-low"
                   }`}
                 >
-                  {autoResult.prediction.risk} RISK (Threshold ≥ {autoResult.prediction.risk_threshold})
+                  {autoResult.prediction.risk} RISK (Threshold ≥{" "}
+                  {autoResult.prediction.risk_threshold})
                 </span>
               </div>
             </div>
