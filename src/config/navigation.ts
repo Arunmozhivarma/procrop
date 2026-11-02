@@ -25,14 +25,14 @@ export const navGroups = [
     label: "Predict & explain",
     items: [
       { to: "/risk", label: "Risk engine", icon: "readiness_score" },
-      { to: "/images", label: "Image analysis", icon: "document_scanner" },
       { to: "/explain", label: "Explainability", icon: "psychology" },
     ],
   },
   {
     label: "Act",
     items: [
-      { to: "/recommendations", label: "Recommendations", icon: "checklist" },
+      { to: "/recommendations", label: "Image Analysis", icon: "document_scanner" },
+      { to: "/recommendations-history", label: "Recommendations", icon: "checklist" },
       { to: "/alerts", label: "Alerts", icon: "notifications" },
     ],
   },

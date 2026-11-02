@@ -29,6 +29,7 @@ import { Route as AppHowItWorksRouteImport } from './routes/_app.how-it-works'
 import { Route as AppImagesRouteImport } from './routes/_app.images'
 import { Route as AppOverviewRouteImport } from './routes/_app.overview'
 import { Route as AppRecommendationsRouteImport } from './routes/_app.recommendations'
+import { Route as AppRecommendationsHistoryRouteImport } from './routes/_app.recommendations-history'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppRiskRouteImport } from './routes/_app.risk'
 import { Route as AppSoilRouteImport } from './routes/_app.soil'
@@ -133,6 +134,12 @@ const AppRecommendationsRoute = AppRecommendationsRouteImport.update({
   path: '/recommendations',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRecommendationsHistoryRoute =
+  AppRecommendationsHistoryRouteImport.update({
+    id: '/recommendations-history',
+    path: '/recommendations-history',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppReportsRoute = AppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -174,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/images': typeof AppImagesRoute
   '/overview': typeof AppOverviewRoute
   '/recommendations': typeof AppRecommendationsRoute
+  '/recommendations-history': typeof AppRecommendationsHistoryRoute
   '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
   '/soil': typeof AppSoilRoute
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/images': typeof AppImagesRoute
   '/overview': typeof AppOverviewRoute
   '/recommendations': typeof AppRecommendationsRoute
+  '/recommendations-history': typeof AppRecommendationsHistoryRoute
   '/reports': typeof AppReportsRoute
   '/risk': typeof AppRiskRoute
   '/soil': typeof AppSoilRoute
@@ -226,6 +235,7 @@ export interface FileRoutesById {
   '/_app/images': typeof AppImagesRoute
   '/_app/overview': typeof AppOverviewRoute
   '/_app/recommendations': typeof AppRecommendationsRoute
+  '/_app/recommendations-history': typeof AppRecommendationsHistoryRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/risk': typeof AppRiskRoute
   '/_app/soil': typeof AppSoilRoute
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/images'
     | '/overview'
     | '/recommendations'
+    | '/recommendations-history'
     | '/reports'
     | '/risk'
     | '/soil'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/images'
     | '/overview'
     | '/recommendations'
+    | '/recommendations-history'
     | '/reports'
     | '/risk'
     | '/soil'
@@ -304,6 +316,7 @@ export interface FileRouteTypes {
     | '/_app/images'
     | '/_app/overview'
     | '/_app/recommendations'
+    | '/_app/recommendations-history'
     | '/_app/reports'
     | '/_app/risk'
     | '/_app/soil'
@@ -458,6 +471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRecommendationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/recommendations-history': {
+      id: '/_app/recommendations-history'
+      path: '/recommendations-history'
+      fullPath: '/recommendations-history'
+      preLoaderRoute: typeof AppRecommendationsHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/reports': {
       id: '/_app/reports'
       path: '/reports'
@@ -507,6 +527,7 @@ interface AppRouteChildren {
   AppImagesRoute: typeof AppImagesRoute
   AppOverviewRoute: typeof AppOverviewRoute
   AppRecommendationsRoute: typeof AppRecommendationsRoute
+  AppRecommendationsHistoryRoute: typeof AppRecommendationsHistoryRoute
   AppReportsRoute: typeof AppReportsRoute
   AppRiskRoute: typeof AppRiskRoute
   AppSoilRoute: typeof AppSoilRoute
@@ -531,6 +552,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppImagesRoute: AppImagesRoute,
   AppOverviewRoute: AppOverviewRoute,
   AppRecommendationsRoute: AppRecommendationsRoute,
+  AppRecommendationsHistoryRoute: AppRecommendationsHistoryRoute,
   AppReportsRoute: AppReportsRoute,
   AppRiskRoute: AppRiskRoute,
   AppSoilRoute: AppSoilRoute,
