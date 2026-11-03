@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageHeader, Panel } from "@/components/procrop/ui";
 import { DataRow } from "@/components/procrop/ui";
@@ -110,15 +110,27 @@ function SettingsProfilePage() {
               </div>
 
               <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  disabled={!account}
-                  className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-sm hover:bg-muted transition-colors"
-                >
-                  <Icon name="edit" className="text-[16px] text-primary" />
-                  Edit Profile Details
-                </button>
+                {account ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditName(account.name);
+                      setIsEditing(true);
+                    }}
+                    className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-sm hover:bg-muted transition-colors"
+                  >
+                    <Icon name="edit" className="text-[16px] text-primary" />
+                    Edit Profile Details
+                  </button>
+                ) : (
+                  <Link
+                    to="/auth"
+                    className="flex w-fit items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground shadow-sm hover:bg-muted transition-colors"
+                  >
+                    <Icon name="login" className="text-[16px] text-primary" />
+                    Sign in to edit profile
+                  </Link>
+                )}
               </div>
             </div>
           ) : (

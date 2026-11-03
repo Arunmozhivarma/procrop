@@ -266,7 +266,7 @@ function DashboardPage() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="border-b border-border bg-muted/40 text-xs font-semibold uppercase text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-3 py-3">
@@ -283,9 +283,6 @@ function DashboardPage() {
                   </th>
                   <th scope="col" className="px-3 py-3">
                     Risk
-                  </th>
-                  <th scope="col" className="px-3 py-3">
-                    Model
                   </th>
                 </tr>
               </thead>
@@ -315,7 +312,6 @@ function DashboardPage() {
                         size="sm"
                       />
                     </td>
-                    <td className="px-3 py-3">{prediction.model_used}</td>
                   </tr>
                 ))}
               </tbody>

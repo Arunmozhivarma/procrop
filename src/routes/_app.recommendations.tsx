@@ -169,7 +169,6 @@ export default function RecommendationsPage() {
       <PageHeader
         eyebrow={`Field Risk Report${field_name ? ` · ${field_name}` : ""}`}
         title="Jassid Risk Assessment"
-        description={`Check recorded: ${formatDate(created_at)} · ProCrop v2 ML Risk Engine`}
         actions={
           <div className="flex items-center gap-2">
             <Link
@@ -211,11 +210,6 @@ export default function RecommendationsPage() {
             <span className={`text-sm font-bold ${confidenceColor(confidence)}`}>
               {confidence} Confidence
             </span>
-            <div className="flex items-center gap-2 text-xs opacity-75">
-              <span>ETL: 6.0 / 3 leaves</span>
-              <span>·</span>
-              <span>{etlPct}% of threshold</span>
-            </div>
             {/* ETL progress bar */}
             <div className="w-32 sm:w-44 h-2 rounded-full bg-white/40 dark:bg-black/20 overflow-hidden mt-1">
               <div
@@ -246,7 +240,6 @@ export default function RecommendationsPage() {
       <Panel
         title="Risk Score Breakdown"
         icon="analytics"
-        subtitle="SHAP feature contributions and management modifiers"
       >
         <div className="grid gap-6 lg:grid-cols-2">
           {/* SHAP Drivers */}
@@ -588,26 +581,6 @@ export default function RecommendationsPage() {
         </Panel>
       )}
 
-      {/* ==================== 6. ADVISORY DISCLAIMER ==================== */}
-      <div className="rounded-2xl border border-border bg-muted/30 p-5">
-        <div className="flex items-start gap-3">
-          <Icon name="gavel" className="text-muted-foreground text-xl shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
-              Advisory Disclaimer
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {recommendation?.disclaimer ||
-                "Advisory only. Model outputs are decision-support estimates and do not replace an agronomist's field assessment. Verify local regulations and label directions before applying any crop protection product."}
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Management modifiers (variety trait, spray history, nitrogen, alternate hosts) are
-              expert-rule priors to be validated with an agronomist. Risk model trained on AICRP
-              Coimbatore data (40 rows, 4 seasons); check field context before acting.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Navigation */}
       <div className="flex items-center justify-between pt-2">

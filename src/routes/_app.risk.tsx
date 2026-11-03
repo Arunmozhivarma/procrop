@@ -59,7 +59,7 @@ export function RiskAssessmentWizard() {
   const navigate = useNavigate();
 
   // Wizard Step State
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [currentStep, setCurrentStep] = useState<2 | 3>(2);
 
   // Step 1: Field & Crop Form State
   const [fields, setFields] = useState<FieldRecord[]>([]);
@@ -83,13 +83,12 @@ export function RiskAssessmentWizard() {
   const [irrigation, setIrrigation] = useState("rainfed");
   const [alternateHosts, setAlternateHosts] = useState("none");
 
-  // Step 2: Photos State
+  // Step 1: Photos State
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [isCompressing, setIsCompressing] = useState(false);
-  const [showExamples, setShowExamples] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Step 3: Submission State
+  // Step 2: Submission State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionProgress, setSubmissionProgress] = useState("");
 
@@ -343,32 +342,7 @@ export function RiskAssessmentWizard() {
       />
 
       {/* 3-Step Wizard Navigation Stepper */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 border-b border-border pb-4">
-        <button
-          type="button"
-          onClick={() => {
-            saveDraftToStorage();
-            setCurrentStep(1);
-          }}
-          className={`flex items-center gap-2 sm:gap-3 rounded-xl p-3 text-left transition cursor-pointer ${
-            currentStep === 1
-              ? "bg-primary/10 border-2 border-primary text-primary"
-              : "bg-surface border border-border text-muted-foreground hover:bg-muted"
-          }`}
-        >
-          <span
-            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-              currentStep === 1 ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-            }`}
-          >
-            1
-          </span>
-          <div>
-            <p className="text-xs sm:text-sm font-semibold">Field & Crop</p>
-            <p className="hidden sm:block text-[11px] opacity-70">Agronomy & spray</p>
-          </div>
-        </button>
-
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 border-b border-border pb-4">
         <button
           type="button"
           onClick={() => {
@@ -386,7 +360,7 @@ export function RiskAssessmentWizard() {
               currentStep === 2 ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
             }`}
           >
-            2
+            1
           </span>
           <div>
             <p className="text-xs sm:text-sm font-semibold">15 Leaf Photos</p>
@@ -415,7 +389,7 @@ export function RiskAssessmentWizard() {
               currentStep === 3 ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
             }`}
           >
-            3
+            2
           </span>
           <div>
             <p className="text-xs sm:text-sm font-semibold">Review & Risk</p>
@@ -424,286 +398,9 @@ export function RiskAssessmentWizard() {
         </button>
       </div>
 
-      {/* ==================== STEP 1: FIELD AND CROP INPUTS ==================== */}
-      {currentStep === 1 && (
-        <Panel title="Step 1: Field & Crop Characteristics" icon="agriculture">
-          <p className="text-sm text-muted-foreground mb-6">
-            Enter field details. These inputs calibrate management multipliers and are stored in
-            your database history to enable predicted vs. actual tracking.
-          </p>
-
-          <div className="space-y-5">
-            {/* Field Selection */}
-            {fields.length > 0 && (
-              <div className="grid gap-2 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                    Select Field
-                  </label>
-                  <select
-                    value={selectedFieldId}
-                    onChange={(e) => handleFieldSelect(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
-                  >
-                    <option value="new">+ Add New Field</option>
-                    {fields.map((f) => (
-                      <option key={f.id} value={f.id.toString()}>
-                        {f.name} ({f.district || "Coimbatore"})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                    Field Name
-                  </label>
-                  <input
-                    type="text"
-                    value={fieldName}
-                    onChange={(e) => setFieldName(e.target.value)}
-                    placeholder="e.g. South Block 4"
-                    className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Location & Sowing Date */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  District
-                </label>
-                <input
-                  type="text"
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Coordinates (Open-Meteo Weather Station)
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={lat}
-                    onChange={(e) => setLat(parseFloat(e.target.value))}
-                    className="w-1/2 rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={lon}
-                    onChange={(e) => setLon(parseFloat(e.target.value))}
-                    className="w-1/2 rounded-xl border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleUseMyLocation}
-                    className="shrink-0 flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/20 cursor-pointer"
-                  >
-                    <Icon name="my_location" className="text-sm" />
-                    <span>My GPS</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Sowing Date & Variety */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Sowing Date
-                </label>
-                <input
-                  type="date"
-                  value={sowingDate}
-                  onChange={(e) => setSowingDate(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Cotton Variety
-                </label>
-                <input
-                  type="text"
-                  value={variety}
-                  onChange={(e) => setVariety(e.target.value)}
-                  placeholder="e.g. RCH 659 / Suraj"
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Variety Trait (Pubescence)
-                </label>
-                <select
-                  value={varietyTrait}
-                  onChange={(e) => setVarietyTrait(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
-                >
-                  <option value="tolerant_hairy">Hairy / Tolerant (-12% jassid prior)</option>
-                  <option value="susceptible">Smooth / Glabrous / Susceptible (+15% prior)</option>
-                  <option value="unknown">Unknown / Mixed (Neutral)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Bt & Spray History */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Bt Status
-                </label>
-                <select
-                  value={btStatus}
-                  onChange={(e) => setBtStatus(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
-                >
-                  <option value="Bt">
-                    Bt Cotton (Endotoxin targets bollworms; sucking neutral)
-                  </option>
-                  <option value="Non-Bt">Non-Bt Conventional Cotton</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Last Spray Date
-                </label>
-                <input
-                  type="date"
-                  disabled={noSprayYet}
-                  value={lastSprayDate}
-                  onChange={(e) => setLastSprayDate(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary disabled:opacity-50"
-                />
-                <label className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={noSprayYet}
-                    onChange={(e) => {
-                      setNoSprayYet(e.target.checked);
-                      if (e.target.checked) setLastSprayDate("");
-                    }}
-                  />
-                  <span>No spray applied yet this season</span>
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Spray Product Class
-                </label>
-                <select
-                  disabled={noSprayYet}
-                  value={sprayProductClass}
-                  onChange={(e) => setSprayProductClass(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary disabled:opacity-50"
-                >
-                  <option value="none">None / No recent spray</option>
-                  <option value="botanical_neem">
-                    Botanical / Neem (Azadirachtin ~5d residual)
-                  </option>
-                  <option value="neonicotinoid">
-                    Neonicotinoid (Imidacloprid/Acetamiprid ~14d)
-                  </option>
-                  <option value="organophosphate">
-                    Organophosphate (Acephate/Dimethoate ~10d)
-                  </option>
-                  <option value="pyrethroid">Synthetic Pyrethroid (Cypermethrin ~7d)</option>
-                  <option value="other">Other Insecticide (~10d)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Optional Collapsible Agronomy Section */}
-            <div className="border-t border-border/80 pt-3">
-              <button
-                type="button"
-                onClick={() => setShowOptional(!showOptional)}
-                className="flex items-center gap-2 text-xs font-semibold text-primary hover:underline cursor-pointer"
-              >
-                <Icon name={showOptional ? "expand_less" : "expand_more"} />
-                <span>
-                  {showOptional ? "Hide" : "Show"} Optional Agronomy Parameters (Nitrogen,
-                  Irrigation, Alternate Hosts)
-                </span>
-              </button>
-
-              {showOptional && (
-                <div className="mt-4 grid gap-4 sm:grid-cols-3 rounded-2xl bg-muted/30 p-4 border border-border">
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                      Nitrogen Status
-                    </label>
-                    <select
-                      value={nitrogenLevel}
-                      onChange={(e) => setNitrogenLevel(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs outline-none focus:border-primary"
-                    >
-                      <option value="low">Low (-5% pest prior)</option>
-                      <option value="medium">Balanced / Recommended</option>
-                      <option value="high">Excess / Lush growth (+12% prior)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                      Irrigation Type
-                    </label>
-                    <select
-                      value={irrigation}
-                      onChange={(e) => setIrrigation(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs outline-none focus:border-primary"
-                    >
-                      <option value="rainfed">Rainfed</option>
-                      <option value="drip">Drip Irrigation</option>
-                      <option value="flood">Flood / Furrow</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                      Adjacent Alternate Hosts
-                    </label>
-                    <select
-                      value={alternateHosts}
-                      onChange={(e) => setAlternateHosts(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs outline-none focus:border-primary"
-                    >
-                      <option value="none">None / No solanaceous border</option>
-                      <option value="okra">Okra / Bhendi (+15% prior)</option>
-                      <option value="brinjal">Brinjal / Eggplant (+10% prior)</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  saveDraftToStorage();
-                  setCurrentStep(2);
-                }}
-                className="flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 cursor-pointer"
-              >
-                <span>Continue to Leaf Photos →</span>
-              </button>
-            </div>
-          </div>
-        </Panel>
-      )}
-
-      {/* ==================== STEP 2: GUIDED 15-PHOTO CAPTURE ==================== */}
+      {/* ==================== STEP 1: GUIDED 15-PHOTO CAPTURE ==================== */}
       {currentStep === 2 && (
-        <Panel title="Step 2: Guided 15-Photo Leaf Capture" icon="photo_camera">
+        <Panel title="Step 1: Guided 15-Photo Leaf Capture" icon="photo_camera">
           <p className="text-sm text-muted-foreground mb-4">
             Sampling protocol: <strong>5 plants × 3 leaves (top, middle, bottom)</strong>, underside
             orientation.
@@ -770,83 +467,6 @@ export function RiskAssessmentWizard() {
               <div className="flex items-start gap-3 rounded-2xl border border-critical/40 bg-critical/15 p-4 text-xs sm:text-sm text-critical">
                 <Icon name="error" className="text-base shrink-0 mt-0.5" />
                 <p>Maximum 30 photos. Remove {photoCount - 30} to continue.</p>
-              </div>
-            )}
-          </div>
-
-          {/* Collapsible Example Images Reference Panel */}
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => setShowExamples(!showExamples)}
-              className="flex items-center gap-2 text-xs font-semibold text-primary hover:underline cursor-pointer"
-            >
-              <Icon name={showExamples ? "expand_less" : "expand_more"} />
-              <span>
-                {showExamples ? "Hide" : "Show"} Visual Quality & Hopper Burn Reference Strip
-                (Grades 0-4)
-              </span>
-            </button>
-
-            {showExamples && (
-              <div className="mt-3 rounded-2xl border border-border bg-surface p-4 space-y-4 text-xs">
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-                  <p className="font-semibold text-primary">ProCrop Photography Tips:</p>
-                  <p className="mt-1 text-muted-foreground">
-                    Hold the phone about <strong>15–20 cm from the leaf</strong>, steady, in good
-                    natural light. Jassid nymphs sit predominantly on the underside of the foliage
-                    along the veins.
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl border border-border p-2 bg-background">
-                    <img
-                      src="/examples/good_underside_nymphs.jpg"
-                      alt="Good underside nymph shot"
-                      className="h-28 w-full object-cover rounded-lg"
-                    />
-                    <p className="mt-1.5 font-semibold text-foreground">Good: Underside Veins</p>
-                    <p className="text-[11px] text-muted-foreground">Sharp focus, clear nymphs</p>
-                  </div>
-                  <div className="rounded-xl border border-border p-2 bg-background">
-                    <img
-                      src="/examples/good_adult_closeup.jpg"
-                      alt="Adult jassid closeup"
-                      className="h-28 w-full object-cover rounded-lg"
-                    />
-                    <p className="mt-1.5 font-semibold text-foreground">Good: Adult Close-Up</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      Distinct wedge-shaped hopper
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-border p-2 bg-background">
-                    <img
-                      src="/examples/bad_blurry.jpg"
-                      alt="Blurry rejection sample"
-                      className="h-28 w-full object-cover rounded-lg"
-                    />
-                    <p className="mt-1.5 font-semibold text-critical">Bad: Motion Blur</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      Laplacian score &lt; 45 rejected
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="font-semibold text-foreground mb-1.5">
-                    Hopper Burn Damage Scale Reference (ICCC Grades 0 to 4):
-                  </p>
-                  <img
-                    src="/examples/hopperburn_grades_0_to_4.jpg"
-                    alt="Hopper burn reference strip"
-                    className="w-full rounded-xl border border-border object-cover max-h-48"
-                  />
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    Images sourced from CC BY 4.0 Roboflow datasets. Attributions listed in
-                    CREDITS.md and About page.
-                  </p>
-                </div>
               </div>
             )}
           </div>
@@ -936,14 +556,8 @@ export function RiskAssessmentWizard() {
           )}
 
           {/* Stepper Navigation Buttons */}
-          <div className="mt-8 flex items-center justify-between border-t border-border pt-4">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(1)}
-              className="text-sm font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
-            >
-              ← Back to Field Info
-            </button>
+          <div className="mt-8 flex justify-end border-t border-border pt-4">
+
 
             <button
               type="button"
@@ -960,9 +574,9 @@ export function RiskAssessmentWizard() {
         </Panel>
       )}
 
-      {/* ==================== STEP 3: REVIEW & GET RISK ==================== */}
+      {/* ==================== STEP 2: REVIEW & GET RISK ==================== */}
       {currentStep === 3 && (
-        <Panel title="Step 3: Review Field Check & Submit" icon="fact_check">
+        <Panel title="Step 2: Review Field Check & Submit" icon="fact_check">
           <p className="text-sm text-muted-foreground mb-6">
             Review your agronomic settings and leaf photo portfolio. When you submit, our backend
             will run quality filtering, pest object detection, hopper burn margin analysis, and the
